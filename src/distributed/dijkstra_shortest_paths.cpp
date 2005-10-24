@@ -23,7 +23,7 @@ void export_dijkstra_shortest_paths()
   typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
   typedef vector_property_map<vertex_descriptor, VertexIndexMap>
     VertexPredecessorMap;
-  typedef vector_property_map<double, VertexIndexMap>
+  typedef vector_property_map<float, VertexIndexMap>
     VertexDistanceMap;
   typedef vector_property_map<default_color_type, VertexIndexMap>
     VertexColorMap;

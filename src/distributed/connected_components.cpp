@@ -19,7 +19,7 @@ void export_connected_components()
   using boost::python::def;
 
   typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
-  typedef vector_property_map<std::size_t, VertexIndexMap>
+  typedef vector_property_map<int, VertexIndexMap>
     VertexColorMap;
 
   def("connected_components",

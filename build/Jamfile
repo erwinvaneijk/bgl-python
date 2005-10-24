@@ -26,7 +26,7 @@ extension _support
 :   # Sources 
     ../src/support.cpp
     # Depend on the Boost Python library
-#    <template>@boost/libs/python/build/extension
+    <template>@boost/libs/python/build/extension
     : # Default build
     <include>../
     <debug-symbols>off
@@ -37,7 +37,7 @@ install _support pyd
           <dll>@boost/libs/python/build/boost_python
         ;
 
-stage ../../python/boost/graph : <pyd>_support
+stage ../python/boost/graph : <pyd>_support
     :
      # add this target to the "stage" and "all" pseudo-targets:
        <target>stage

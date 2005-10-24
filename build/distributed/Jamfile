@@ -36,9 +36,9 @@ extension _distributed
     ../../src/distributed/dijkstra_shortest_paths.cpp
     ../../src/distributed/fruchterman_reingold.cpp
     # Process groups (TBD: Should have a library for this)
-    ../../../parallel/src/mpi/bsp_process_group.cpp
+    $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
     # Depend on the Boost Python library
-    # <template>@boost/libs/python/build/extension
+    <template>@boost/libs/python/build/extension
     : # Default build
     <include>../../ <include>$(PBGL_ROOT)
     <debug-symbols>off

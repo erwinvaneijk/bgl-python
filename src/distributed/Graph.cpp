@@ -52,6 +52,10 @@ object vertex_property_map(const Graph& g, const std::string type)
   else if (type == "point2d")
     return object(vector_property_map<point2d, IndexMap>
                   (num_vertices(g), get(vertex_index, g)));
+  else if (type == "color")
+    return object(vector_property_map<default_color_type, 
+                                      IndexMap>(num_vertices(g),
+                                                get(vertex_index, g)));
   else if (type == "owner")
     return object(owner_property_map<Vertex, process_id_type>());
   else
@@ -149,13 +153,6 @@ void export_Graph()
     typedef graph_traits<Graph>::edge_descriptor      Edge;
     typedef process_group_type::process_id_type process_id_type;
 
-    typedef boost::parallel::owner_property_map<Vertex, process_id_type>
-      VertexOwnerMap;
-    if (!type_already_registered<VertexOwnerMap>()) {
-      class_<VertexOwnerMap> pm("VertexOwnerMap", no_init);
-      readable_property_map<VertexOwnerMap> rpm(pm);
-    }
-
     typedef vector_property_map<int, VertexIndexMap> VertexIntMap;
     if (!type_already_registered<VertexIntMap>()) {
       class_<VertexIntMap> pm("VertexIntMap", no_init);
@@ -175,6 +172,21 @@ void export_Graph()
       class_<VertexVertexMap> pm("VertexVertexMap", no_init);
       read_write_property_map<VertexVertexMap> rwpm(pm);
       pm.def("synchronize", &VertexVertexMap::do_synchronize);
+    }
+
+    typedef vector_property_map<default_color_type, VertexIndexMap>
+      VertexColorMap;
+    if (!type_already_registered<VertexColorMap>()) {
+      class_<VertexColorMap> pm("VertexColorMap", no_init);
+      read_write_property_map<VertexColorMap> rwpm(pm);
+      pm.def("synchronize", &VertexColorMap::do_synchronize);
+    }
+
+    typedef boost::parallel::owner_property_map<Vertex, process_id_type>
+      VertexOwnerMap;
+    if (!type_already_registered<VertexOwnerMap>()) {
+      class_<VertexOwnerMap> pm("VertexOwnerMap", no_init);
+      readable_property_map<VertexOwnerMap> rpm(pm);
     }
 
     typedef boost::parallel::owner_property_map<Edge, process_id_type>

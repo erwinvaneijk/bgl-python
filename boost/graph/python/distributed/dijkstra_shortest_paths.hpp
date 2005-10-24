@@ -23,21 +23,21 @@ dijkstra_shortest_paths
      typename graph_traits<Graph>::vertex_descriptor,
      typename property_map<Graph, vertex_index_t>::type>* in_predecessor,
    vector_property_map<
-     double,
+     float,
      typename property_map<Graph, vertex_index_t>::type>* in_distance,
    vector_property_map<
-     double,
+     float,
      typename property_map<Graph, edge_index_t>::type> weight,
    boost::python::object in_visitor,
    vector_property_map<
      default_color_type, 
      typename property_map<Graph, vertex_index_t>::type>* in_color,
-   double lookahead)
+   float lookahead)
 {
   typedef typename property_map<Graph, vertex_index_t>::type VertexIndexMap;
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
   typedef vector_property_map<Vertex, VertexIndexMap> PredecessorMap;
-  typedef vector_property_map<double, VertexIndexMap> DistanceMap;
+  typedef vector_property_map<float, VertexIndexMap> DistanceMap;
   typedef vector_property_map<default_color_type, VertexIndexMap> ColorMap;
 
   PredecessorMap predecessor = 

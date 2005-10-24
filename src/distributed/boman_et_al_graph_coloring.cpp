@@ -19,7 +19,7 @@ void export_boman_et_al_graph_coloring()
   using boost::python::def;
 
   typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
-  typedef vector_property_map<std::size_t, VertexIndexMap>
+  typedef vector_property_map<int, VertexIndexMap>
     VertexColorMap;
 
   def("boman_et_al_graph_coloring",

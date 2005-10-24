@@ -1,0 +1,58 @@
+# Copyright 2005 The Trustees of Indiana University.
+
+# Use, modification and distribution is subject to the Boost Software
+# License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+#  Authors: Douglas Gregor
+#           Andrew Lumsdaine
+
+# This file builds the Python bindings for the Parallel BGL. Because
+# we currently have no support for MPI in Boost.Build (for now), one
+# needs to perform some serious hackery to get things to build. For
+# GCC builds, we need to replace the name of the GCC C and C++
+# compilers with the MPI versions, e.g.,
+#
+#   bjam -sGCC=mpicc -sGXX=mpic++
+#
+# In the future, we hope to do real detection of the underlying MPI so
+# just linking against the Boost MPI library will pull in the
+# appropriate linking commands.
+
+subproject distributed ;
+import python ;
+
+extension _distributed          
+:   # Sources 
+    ../../src/distributed/module.cpp
+    # Graph types
+    ../../src/distributed/Graph.cpp 
+    ../../src/distributed/subgraph.cpp
+    # Algorithms
+    ../../src/distributed/boman_et_al_graph_coloring.cpp
+    ../../src/distributed/breadth_first_search.cpp
+    ../../src/distributed/connected_components.cpp
+    ../../src/distributed/dehne_gotz_min_spanning_tree.cpp
+    ../../src/distributed/dijkstra_shortest_paths.cpp
+    ../../src/distributed/fruchterman_reingold.cpp
+    # Process groups (TBD: Should have a library for this)
+    ../../../parallel/src/mpi/bsp_process_group.cpp
+    # Depend on the Boost Python library
+    # <template>@boost/libs/python/build/extension
+    : # Default build
+    <include>../../ <include>$(PBGL_ROOT)
+    <debug-symbols>off
+    ;
+
+install _distributed pyd 
+        : <pyd>_distributed
+          <dll>@boost/libs/python/build/boost_python
+        ;
+
+stage ../../python/boost/graph/distributed : <pyd>_distributed
+    :
+     # add this target to the "stage" and "all" pseudo-targets:
+       <target>stage
+       <target>all
+    ;
+

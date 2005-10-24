@@ -22,13 +22,62 @@ dense_boruvka_minimum_spanning_tree
   (const Graph& g, 
    vector_property_map<
      double, 
-     typename property_map<Graph, edge_index_t>::type> weight)
+     typename property_map<Graph, edge_index_t>::type> weight_map)
 {
   using boost::graph::make_vertex_list_adaptor;
 
   list result;
   boost::graph::distributed::dense_boruvka_minimum_spanning_tree
-    (make_vertex_list_adaptor(g), weight, list_append_iterator(result));
+    (make_vertex_list_adaptor(g), weight_map, list_append_iterator(result));
+  return result;
+}
+
+template<typename Graph>
+list
+merge_local_minimum_spanning_trees
+  (const Graph& g, 
+   vector_property_map<
+     double, 
+     typename property_map<Graph, edge_index_t>::type> weight_map)
+{
+  using boost::graph::make_vertex_list_adaptor;
+
+  list result;
+  boost::graph::distributed::merge_local_minimum_spanning_trees
+    (make_vertex_list_adaptor(g), weight_map, list_append_iterator(result));
+  return result;
+}
+
+
+template<typename Graph>
+list
+boruvka_then_merge
+  (const Graph& g, 
+   vector_property_map<
+     double, 
+     typename property_map<Graph, edge_index_t>::type> weight_map)
+{
+  using boost::graph::make_vertex_list_adaptor;
+
+  list result;
+  boost::graph::distributed::boruvka_then_merge
+    (make_vertex_list_adaptor(g), weight_map, list_append_iterator(result));
+  return result;
+}
+
+template<typename Graph>
+list
+boruvka_mixed_merge
+  (const Graph& g, 
+   vector_property_map<
+     double, 
+     typename property_map<Graph, edge_index_t>::type> weight_map)
+{
+  using boost::graph::make_vertex_list_adaptor;
+
+  list result;
+  boost::graph::distributed::boruvka_mixed_merge
+    (make_vertex_list_adaptor(g), weight_map, list_append_iterator(result));
   return result;
 }
 

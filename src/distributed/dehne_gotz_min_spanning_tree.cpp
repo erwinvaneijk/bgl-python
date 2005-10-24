@@ -18,13 +18,25 @@ void export_dehne_gotz_min_spanning_tree()
   using boost::python::arg;
   using boost::python::def;
 
-  typedef property_map<Graph, edge_index_t>::type EdgeIndexMap;
-  typedef vector_property_map<double, EdgeIndexMap> EdgeWeightMap;
-
   using boost::graph::python::distributed::dense_boruvka_minimum_spanning_tree;
   def("dense_boruvka_minimum_spanning_tree",
       &dense_boruvka_minimum_spanning_tree<Graph>,
       (arg("graph"), arg("weight_map"))); 
+
+  using boost::graph::python::distributed::merge_local_minimum_spanning_trees;
+  def("merge_local_minimum_spanning_trees",
+      &merge_local_minimum_spanning_trees<Graph>,
+      (arg("graph"), arg("weight_map")));
+
+  using boost::graph::python::distributed::boruvka_then_merge;
+  def("boruvka_then_merge",
+      &boruvka_then_merge<Graph>,
+      (arg("graph"), arg("weight_map")));
+
+  using boost::graph::python::distributed::boruvka_mixed_merge;
+  def("boruvka_mixed_merge",
+      &boruvka_mixed_merge<Graph>,
+      (arg("graph"), arg("weight_map")));
 }
 
 } } } } // end namespace boost::graph::distributed::python

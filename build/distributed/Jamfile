@@ -15,52 +15,64 @@ import python ;
 # Pull in the MPI linking code
 import ./mpi.jam ;
 
-# Find the Python executable. We need this when linking on Darwin.
-local python_executable = $(PYTHON:G=) ;
-if ! [ MATCH "^(/)" : $(python_executable) ] {
-   local found = [ GLOB $(PATH) : $(python_executable) ] ;
-   if $(found) {
-     python_executable = $(found[1]) ;
-   }
+if ! $(PBGL_ROOT) {
+  if ! $(gPBGL_INITIALIZED) {
+    ECHO "WARNING: Not building the Python bindings for the Parallel BGL." ;
+    ECHO "To build these buildings, set PBGL_ROOT to the directory containing" ;
+    ECHO "the Parallel BGL, e.g., " ;
+    ECHO "" ;
+    ECHO "    bjam -sPBGL_ROOT=/path/to/pbgl" ;
+    ECHO "" ;
+    ECHO "The Parallel BGL is available at http://www.osl.iu.edu/research/pbgl" ;
+    gPBGL_INITIALIZED = yes ; 
+  }
+} else {
+  # Find the Python executable. We need this when linking on Darwin.
+  local python_executable = $(PYTHON:G=) ;
+  if ! [ MATCH "^(/)" : $(python_executable) ] {
+     local found = [ GLOB $(PATH) : $(python_executable) ] ;
+     if $(found) {
+       python_executable = $(found[1]) ;
+     }
+  }
+
+  # Build the Python extension model
+  extension _distributed          
+  :   # Sources 
+      ../../src/distributed/module.cpp
+      # Graph types
+      ../../src/distributed/Graph.cpp 
+      ../../src/distributed/subgraph.cpp
+      # Algorithms
+      ../../src/distributed/boman_et_al_graph_coloring.cpp
+      ../../src/distributed/breadth_first_search.cpp
+      ../../src/distributed/connected_components.cpp
+      ../../src/distributed/dehne_gotz_min_spanning_tree.cpp
+      ../../src/distributed/dijkstra_shortest_paths.cpp
+      ../../src/distributed/fruchterman_reingold.cpp
+      # Process groups (TBD: Should have a library for this)
+      $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
+      # Depend on the Boost Python library
+      <template>@boost/libs/python/build/extension
+      # Pick up all of the arguments needed to link against MPI
+      <template>mpi
+      : # Default build
+      <include>../../ <include>$(PBGL_ROOT)
+      <debug-symbols>off
+      # Extra options we need to get building and linking to work
+      <darwin><*><linkflags>"-bundle_loader $(python_executable)"
+      <gcc-3_3-darwin><*><linkflags>"-bundle_loader $(python_executable)"
+      ;
+
+  install _distributed pyd 
+          : <pyd>_distributed
+            <dll>@boost/libs/python/build/boost_python
+          ;
+
+  stage ../../python/boost/graph/distributed : <pyd>_distributed
+      :
+       # add this target to the "stage" and "all" pseudo-targets:
+         <target>stage
+         <target>all
+      ;
 }
-
-# Build the Python extension model
-extension _distributed          
-:   # Sources 
-    ../../src/distributed/module.cpp
-    # Graph types
-    ../../src/distributed/Graph.cpp 
-    ../../src/distributed/subgraph.cpp
-    # Algorithms
-    ../../src/distributed/boman_et_al_graph_coloring.cpp
-    ../../src/distributed/breadth_first_search.cpp
-    ../../src/distributed/connected_components.cpp
-    ../../src/distributed/dehne_gotz_min_spanning_tree.cpp
-    ../../src/distributed/dijkstra_shortest_paths.cpp
-    ../../src/distributed/fruchterman_reingold.cpp
-    # Process groups (TBD: Should have a library for this)
-    $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
-    # Depend on the Boost Python library
-    <template>@boost/libs/python/build/extension
-    # Pick up all of the arguments needed to link against MPI
-    <template>mpi
-    : # Default build
-    <include>../../ <include>$(PBGL_ROOT)
-    <debug-symbols>off
-    # Extra options we need to get building and linking to work
-    <darwin><*><linkflags>"-bundle_loader $(python_executable)"
-    <gcc-3_3-darwin><*><linkflags>"-bundle_loader $(python_executable)"
-    ;
-
-install _distributed pyd 
-        : <pyd>_distributed
-          <dll>@boost/libs/python/build/boost_python
-        ;
-
-stage ../../python/boost/graph/distributed : <pyd>_distributed
-    :
-     # add this target to the "stage" and "all" pseudo-targets:
-       <target>stage
-       <target>all
-    ;
-

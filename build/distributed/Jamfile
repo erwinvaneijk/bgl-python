@@ -7,21 +7,24 @@
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
 
-# This file builds the Python bindings for the Parallel BGL. Because
-# we currently have no support for MPI in Boost.Build (for now), one
-# needs to perform some serious hackery to get things to build. For
-# GCC builds, we need to replace the name of the GCC C and C++
-# compilers with the MPI versions, e.g.,
-#
-#   bjam -sGCC=mpicc -sGXX=mpic++
-#
-# In the future, we hope to do real detection of the underlying MPI so
-# just linking against the Boost MPI library will pull in the
-# appropriate linking commands.
+# This file builds the Python bindings for the Parallel BGL.
 
 subproject distributed ;
 import python ;
 
+# Pull in the MPI linking code
+import ./mpi.jam ;
+
+# Find the Python executable. We need this when linking on Darwin.
+local python_executable = $(PYTHON:G=) ;
+if ! [ MATCH "^(/)" : $(python_executable) ] {
+   local found = [ GLOB $(PATH) : $(python_executable) ] ;
+   if $(found) {
+     python_executable = $(found[1]) ;
+   }
+}
+
+# Build the Python extension model
 extension _distributed          
 :   # Sources 
     ../../src/distributed/module.cpp
@@ -39,9 +42,14 @@ extension _distributed
     $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
     # Depend on the Boost Python library
     <template>@boost/libs/python/build/extension
+    # Pick up all of the arguments needed to link against MPI
+    <template>mpi
     : # Default build
     <include>../../ <include>$(PBGL_ROOT)
     <debug-symbols>off
+    # Extra options we need to get building and linking to work
+    <darwin><*><linkflags>"-bundle_loader $(python_executable)"
+    <gcc-3_3-darwin><*><linkflags>"-bundle_loader $(python_executable)"
     ;
 
 install _distributed pyd 

@@ -1,0 +1,124 @@
+# Parallel Boost Graph Library - MPI support
+
+# (C) Copyright 2005 Trustees of Indiana University
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying 
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt.)
+#
+# Authors: Douglas Gregor
+#          Andrew Lumsdaine
+
+# If the user has not specified an MPICXX, use the standard mpic++
+MPICXX ?= mpic++ ;
+
+# Assuming the first part of the command line is the given prefix
+# followed by some non-empty value, remove the first argument. Returns
+# either nothing (if there was no prefix or no value) or a pair
+#
+#   <name>value rest-of-cmdline
+#
+# This is a subroutine of cmdline_to_features
+rule add_feature ( prefix name cmdline ) 
+{
+    local match = [ MATCH "^$(prefix)([^\" ]+|\"[^\"]+\") +(.*)$" : $(cmdline) ] ;
+
+    # If there was no value associated with the prefix, abort
+    if ! $(match) {
+      return ;
+    }
+
+    local value = $(match[1]) ;
+
+    if [ MATCH " +" : $(value) ] {
+      value = "\"$(value)\"" ;
+    }
+
+    return "<$(name)>$(value)" $(match[2]) ;
+}
+
+#  Split a command-line into a set of features. Certain kinds of
+#  compiler flags are recognized (e.g., -I, -D, -L, -l) and replaced
+#  with their Boost.Build equivalents (e.g., <include>, <define>,
+#  <library-path>, <find-library>). All other arguments are introduced
+#  using <cxxflags> and <linkflags>, because we don't know which is
+#  correct. The incoming command line should be a string starting with
+#  an executable (e.g., g++ -I/include/path") and may contain any
+#  number of command-line arguments thereafter. The result is a list of
+#  features corresponding to the given command line, ignoring the
+#  executable.
+rule cmdline_to_features ( cmdline )
+{
+    local executable ;
+    local features ;
+    local otherflags ;
+    local result ;
+
+    # Pull the executable out of the command line. At this point, the
+    # executable is just thrown away.
+    local match = [ MATCH "^([^\" ]+|\"[^\"]+\") *(.*)$" : $(cmdline) ] ;
+    executable = $(match[1]) ;
+    cmdline = $(match[2]) ;
+
+    # List the prefix/feature pairs that we will be able to transform. 
+    # Every kind of parameter not mentioned here will be placed in both
+    # cxxflags and linkflags, because we don't know where they should go.
+    local feature_kinds-D = "define" ;
+    local feature_kinds-I = "include" ;
+    local feature_kinds-L = "library-path" ;
+    local feature_kinds-l = "find-library" ;
+
+    while $(cmdline) {
+
+        # Check for one of the feature prefixes we know about. If we
+        # find one (and the associated value is nonempty), convert it
+        # into a feature.
+        local match = [ MATCH "^(-.)(.*)" : $(cmdline) ] ;
+        local matched ;
+        if $(match) && $(match[2]) {
+           local prefix = $(match[1]) ;
+           if $(feature_kinds$(prefix)) {
+               local name = $(feature_kinds$(prefix)) ;
+               local add = [ add_feature $(prefix) $(name) $(cmdline) ] ;
+
+               if $(add) {
+                  result += $(add[1]) ;
+                  cmdline = $(add[2]) ;
+                  matched = yes ;
+               }
+           }
+        }
+
+        # If we haved matched a feature prefix, just grab the command-line
+        # argument and add it to the list of "other" flags that we don't
+        # understand.
+        if ! $(matched) {
+           match = [ MATCH "^([^\" ]+|\"[^\"]+\") *(.*)$" : $(cmdline) ] ;
+           local value = $(match[1]) ;
+           cmdline = $(match[2]) ;
+
+           if [ MATCH "(.*[a-zA-Z0-9<>?-].*)" : $(value) ] {
+              otherflags += $(value) ;
+           }
+        }
+    }
+
+    # If there are other flags that we don't understand, add them to the
+    # result as both <cxxflags> and <linkflags>
+    if $(otherflags) {
+       result += "<cxxflags>$(otherflags)" ;
+       result += "<linkflags>$(otherflags)" ;
+    }
+
+    return $(result) ;
+}
+
+# Compute the set of MPI features using "-showme" on the MPICXX
+# compiler. Note that is only actually works for LAM-MPI. We'll need
+# to test a few other MPI implementations to see how to get the flags.
+local showme_result = [ SHELL "$(MPICXX) -showme" ] ;
+local mpi_features = [ cmdline_to_features $(showme_result) ] ;
+
+template mpi
+  : 
+  : $(mpi_features)
+  ;

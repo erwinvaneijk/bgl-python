@@ -21,6 +21,13 @@ typedef adjacency_list<vecS,
                        property<edge_index_t, std::size_t> >
   Graph; 
 
+typedef adjacency_list<vecS, 
+                       distributedS<process_group_type, vecS>,
+                       bidirectionalS,
+                       no_property,
+                       property<edge_index_t, std::size_t> >
+  Digraph; 
+
 } } } } // end namespace boost::graph::distributed::python
 
 #endif // BOOST_PARALLEL_GRAPH_PYTHON_GRAPH_TYPES_HPP

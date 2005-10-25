@@ -32,7 +32,8 @@ nth_vertex(const Graph& g, typename graph_traits<Graph>::vertices_size_type n)
   return vertex(n, g);
 }
 
-void export_Graph()
+template<typename Graph>
+void export_graph(const char* name, const char* directedness)
 {
   using boost::python::arg;
   using boost::python::def;
@@ -43,7 +44,7 @@ void export_Graph()
 
   {
     scope s;
-    class_<Graph, noncopyable> graph("Graph");
+    class_<Graph, noncopyable> graph(name);
 
     // Graph concepts
     boost::graph::python::graph<Graph> g(graph);
@@ -68,7 +69,11 @@ void export_Graph()
               (arg("graph"), arg("type")));
   }
 
-  export_generators<Graph>("undirected");
+  export_generators<Graph>(directedness);
 }
+
+#define UNDIRECTED_GRAPH(Name,Type) \
+  template void export_graph< Type >(const char*, const char*);
+#include "graphs.hpp"
 
 } } } } // end namespace boost::graph::distributed::python

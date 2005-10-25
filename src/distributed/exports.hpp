@@ -14,8 +14,9 @@
 
 namespace boost { namespace graph { namespace distributed { namespace python {
 
-void export_Graph();
-void export_Digraph();
+template<typename Graph> 
+void export_graph(const char* name, const char* directedness);
+
 void export_boman_et_al_graph_coloring();
 void export_breadth_first_search();
 void export_connected_components();

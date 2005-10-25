@@ -41,6 +41,8 @@ void export_generators(const std::string& directedness)
        arg("allow_self_loops") = false, arg("random_seed") = 1));
 }
 
-template void export_generators<Graph>(const std::string& directedness);
+#define UNDIRECTED_GRAPH(Name,Type) \
+  template void export_generators<Type>(const std::string&);
+#include "graphs.hpp"
 
 } } } } // end namespace boost::graph::distributed::python

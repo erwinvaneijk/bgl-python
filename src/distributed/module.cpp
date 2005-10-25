@@ -8,12 +8,16 @@
 //           Andrew Lumsdaine
 #include <boost/python.hpp>
 #include "exports.hpp"
+#include "config.hpp"
+#include "graph_types.hpp"
 
 namespace boost { namespace graph { namespace distributed { namespace python {
 
 BOOST_PYTHON_MODULE(_distributed)
 {
-  export_Graph();
+#define UNDIRECTED_GRAPH(Name,Type) export_graph< Type >(#Name, "undirected");
+#define DIRECTED_GRAPH(Name,Type) export_graph< Type >(#Name, "directed");
+#include "graphs.hpp"
   export_boman_et_al_graph_coloring();
   export_breadth_first_search();
   export_connected_components();

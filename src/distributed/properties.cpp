@@ -134,9 +134,12 @@ void export_property_maps()
 }
 
 // Explicit instantiations for the graph types we're interested in
-template void export_property_maps<Graph>();
-template object vertex_property_map<Graph>(const Graph& g, 
-                                           const std::string type);
-template object edge_property_map<Graph>(const Graph& g, 
-                                         const std::string type);
+#define UNDIRECTED_GRAPH(Name,Type)                                     \
+  template void export_property_maps< Type >();                         \
+  template object vertex_property_map< Type >(const Type & g,           \
+                                              const std::string type);  \
+  template object edge_property_map< Type >(const Type & g,             \
+                                            const std::string type);
+#include "graphs.hpp"
+
 } } } } // end namespace boost::graph::distributed::python

@@ -41,8 +41,10 @@ plod_graph(typename graph_traits<Graph>::vertices_size_type n,
 {
   typedef plod_iterator<minstd_rand, Graph> iterator;
   minstd_rand gen(seed);
-  return new Graph(iterator(gen, n, alpha, beta, allow_self_loops), iterator(),
-                   n);
+  Graph* g = 
+    new Graph(iterator(gen, n, alpha, beta, allow_self_loops), iterator(), n);
+  boost::graph::python::detail::maybe_reindex_edges(*g, mpl::true_());
+  return g;
 }
 
 template<typename Graph> 
@@ -53,7 +55,10 @@ small_world_graph(typename graph_traits<Graph>::vertices_size_type n,
 {
   typedef small_world_iterator<minstd_rand, Graph> iterator;
   minstd_rand gen(seed);
-  return new Graph(iterator(gen, n, k, prob, allow_self_loops), iterator(), n);
+  Graph* g = 
+    new Graph(iterator(gen, n, k, prob, allow_self_loops), iterator(), n);
+  boost::graph::python::detail::maybe_reindex_edges(*g, mpl::true_());
+  return g;
 }
 
 } } } // end namespace boost::graph::python

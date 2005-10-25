@@ -18,14 +18,19 @@ void export_connected_components()
   using boost::python::arg;
   using boost::python::def;
 
-  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
-  typedef vector_property_map<int, VertexIndexMap>
-    VertexColorMap;
-
-  def("connected_components",
-      &boost::graph::python::distributed::connected_components<Graph>,
-      (arg("graph"), 
-       arg("color_map") = static_cast<VertexColorMap*>(0)));
+#define UNDIRECTED_GRAPH(Name,Type)                                     \
+  {                                                                     \
+    typedef property_map<Type, vertex_index_t>::const_type VertexIndexMap; \
+    typedef vector_property_map<int, VertexIndexMap>                    \
+      VertexColorMap;                                                   \
+                                                                        \
+    def("connected_components",                                         \
+        &boost::graph::python::distributed::connected_components<Type>, \
+        (arg("graph"),                                                  \
+         arg("color_map") = static_cast<VertexColorMap*>(0)));          \
+  }
+#define DIRECTED_GRAPH(Name,Type)
+#include "graphs.hpp"
 }
 
 } } } } // end namespace boost::graph::distributed::python

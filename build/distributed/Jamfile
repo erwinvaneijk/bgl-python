@@ -41,7 +41,7 @@ if ! $(PBGL_ROOT) {
   :   # Sources 
       ../../src/distributed/module.cpp
       # Graph types
-      ../../src/distributed/Graph.cpp 
+      ../../src/distributed/graphs.cpp 
       # Property maps
       ../../src/distributed/properties.cpp
       # Algorithms

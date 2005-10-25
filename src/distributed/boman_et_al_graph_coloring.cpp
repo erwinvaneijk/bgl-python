@@ -18,15 +18,20 @@ void export_boman_et_al_graph_coloring()
   using boost::python::arg;
   using boost::python::def;
 
-  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
-  typedef vector_property_map<int, VertexIndexMap>
-    VertexColorMap;
-
-  def("boman_et_al_graph_coloring",
-      &boost::graph::python::distributed::boman_et_al_graph_coloring<Graph>,
-      (arg("graph"), 
-       arg("color_map") = static_cast<VertexColorMap*>(0),
-       arg("chunk_size") = 100));
+#define UNDIRECTED_GRAPH(Name,Type)                                     \
+  {                                                                     \
+    typedef property_map<Type, vertex_index_t>::const_type VertexIndexMap; \
+    typedef vector_property_map<int, VertexIndexMap>                    \
+      VertexColorMap;                                                   \
+                                                                        \
+    def("boman_et_al_graph_coloring",                                   \
+        &boost::graph::python::distributed::boman_et_al_graph_coloring<Type>, \
+        (arg("graph"),                                                  \
+         arg("color_map") = static_cast<VertexColorMap*>(0),            \
+         arg("chunk_size") = 100));                                     \
+  }
+#define DIRECTED_GRAPH(Name,Type)
+#include "graphs.hpp"
 }
 
 } } } } // end namespace boost::graph::distributed::python

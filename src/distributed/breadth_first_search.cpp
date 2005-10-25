@@ -19,16 +19,20 @@ void export_breadth_first_search()
   using boost::python::def;
   using boost::python::object;
 
-  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
-  typedef vector_property_map<default_color_type, VertexIndexMap>
-    VertexColorMap;
-
-  def("breadth_first_search", 
-      &boost::graph::python::distributed::breadth_first_search<Graph>,
-      (arg("graph"), 
-       arg("root_vertex"),
-       arg("visitor") = object(),
-       arg("color_map") = static_cast<VertexColorMap*>(0)));
+#define UNDIRECTED_GRAPH(Name,Type)                                     \
+  {                                                                     \
+    typedef property_map< Type , vertex_index_t>::const_type VertexIndexMap; \
+    typedef vector_property_map<default_color_type, VertexIndexMap>     \
+      VertexColorMap;                                                   \
+                                                                        \
+    def("breadth_first_search",                                         \
+        &boost::graph::python::distributed::breadth_first_search< Type >, \
+        (arg("graph"),                                                  \
+         arg("root_vertex"),                                            \
+         arg("visitor") = object(),                                     \
+         arg("color_map") = static_cast<VertexColorMap*>(0)));          \
+  }
+#include "graphs.hpp"
 }
 
 

@@ -169,18 +169,20 @@ void export_fruchterman_reingold_force_directed_layout()
   class_<simple_tiling>("Tiling", no_init)
     .def(init<int, int, bool>());
 
-  def("fruchterman_reingold_force_directed_layout", 
-      &fruchterman_reingold_force_directed_layout<Graph>,
-      (arg("graph"), 
-       arg("position"),
-       arg("origin") = point2d(),
-       arg("extent") = point2d(500, 500),
-       arg("attractive_force") = object(),
-       arg("repulsive_force") = object(),
-       arg("force_pairs") = object(),
-       arg("cooling") = object(),
-       arg("progressive") = false,
+#define UNDIRECTED_GRAPH(Name,Type)                             \
+  def("fruchterman_reingold_force_directed_layout",             \
+      &fruchterman_reingold_force_directed_layout<Type>,        \
+      (arg("graph"),                                            \
+       arg("position"),                                         \
+       arg("origin") = point2d(),                               \
+       arg("extent") = point2d(500, 500),                       \
+       arg("attractive_force") = object(),                      \
+       arg("repulsive_force") = object(),                       \
+       arg("force_pairs") = object(),                           \
+       arg("cooling") = object(),                               \
+       arg("progressive") = false,                              \
        arg("tiling") = simple_tiling(1, 1)));
+#include "graphs.hpp"
 }
 
 } } } } // end namespace boost::graph::distributed::python

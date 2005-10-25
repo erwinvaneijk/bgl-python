@@ -13,12 +13,13 @@ sys.path.append("../../python")
 
 import boost.graph.distributed as pbgl
 
+def run(g):
+    # Run FR layout
+    position = g.vertex_property_map('point2d')
+    pbgl.fruchterman_reingold_force_directed_layout(g, position)
+
 # Build an Erdos-Renyi graph
-g = pbgl.undirected_erdos_renyi_graph(100, 0.1)
+run(pbgl.undirected_erdos_renyi_graph(100, 0.02))
+run(pbgl.directed_erdos_renyi_graph(100, 0.02))
 
-# Get the first vertex in the graph
-s = g.vertex(0)
 
-# Run FR layout
-position = g.vertex_property_map('point2d')
-pbgl.fruchterman_reingold_force_directed_layout(g, position)

@@ -7,19 +7,9 @@
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
 
-# This file builds the Python bindings for the Parallel BGL. Because
-# we currently have no support for MPI in Boost.Build (for now), one
-# needs to perform some serious hackery to get things to build. For
-# GCC builds, we need to replace the name of the GCC C and C++
-# compilers with the MPI versions, e.g.,
-#
-#   bjam -sGCC=mpicc -sGXX=mpic++
-#
-# In the future, we hope to do real detection of the underlying MPI so
-# just linking against the Boost MPI library will pull in the
-# appropriate linking commands.
+# This file builds the Python bindings for the Boost Graph Library.
 
-project-root ;
+subproject build ;
 import python ;
 
 extension _support 
@@ -27,8 +17,8 @@ extension _support
     ../src/support.cpp
     # Depend on the Boost Python library
     <template>@boost/libs/python/build/extension
-    : # Default build
-    <include>../
+    : # Requirements
+    <include>$(BGL_PYTHON_ROOT)
     <debug-symbols>off
     ;
 

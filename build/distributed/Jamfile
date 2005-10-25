@@ -9,7 +9,7 @@
 
 # This file builds the Python bindings for the Parallel BGL.
 
-subproject distributed ;
+subproject build/distributed ;
 import python ;
 
 # Pull in the MPI linking code
@@ -57,7 +57,7 @@ if ! $(PBGL_ROOT) {
       # Pick up all of the arguments needed to link against MPI
       <template>mpi
       : # Default build
-      <include>../../ <include>$(PBGL_ROOT)
+      <include>$(BGL_PYTHON_ROOT) <include>$(PBGL_ROOT)
       <debug-symbols>off
       # Extra options we need to get building and linking to work
       <darwin><*><linkflags>"-bundle_loader $(python_executable)"

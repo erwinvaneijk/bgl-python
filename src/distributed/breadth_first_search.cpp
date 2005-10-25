@@ -9,7 +9,7 @@
 #include "config.hpp"
 #include "graph_types.hpp"
 #include <boost/parallel/property_map.hpp>
-#include <boost/graph/python/breadth_first_search.hpp>
+#include <boost/graph/python/distributed/breadth_first_search.hpp>
 
 namespace boost { namespace graph { namespace distributed { namespace python {
 
@@ -24,10 +24,9 @@ void export_breadth_first_search()
     VertexColorMap;
 
   def("breadth_first_search", 
-      &boost::graph::python::breadth_first_search<Graph>,
+      &boost::graph::python::distributed::breadth_first_search<Graph>,
       (arg("graph"), 
        arg("root_vertex"),
-       arg("buffer") = object(),
        arg("visitor") = object(),
        arg("color_map") = static_cast<VertexColorMap*>(0)));
 }

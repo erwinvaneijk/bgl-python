@@ -115,57 +115,6 @@ fruchterman_reingold_force_directed_layout
    boost::python::object repulsive_force,
    boost::python::object force_pairs,
    boost::python::object cooling,
-   bool progressive)
-{
-  using boost::python::object;
-
-  typedef typename property_map<Graph, vertex_index_t>::type VertexIndexMap;
-  typedef vector_property_map<point2d, VertexIndexMap> PositionMap;
-
-  if (!progressive) {
-    minstd_rand gen(std::time(0));
-    random_graph_layout(g, pos, origin, extent, gen);
-  }
-  
-  python_or_functor<linear_cooling<float> > cool(cooling, 100);
-
-  if (attractive_force != object() || repulsive_force != object()
-      || force_pairs != object()) {
-    python_or_functor<square_distance_attractive_force, float>
-      fa(attractive_force);
-    python_or_functor<square_distance_repulsive_force, float>
-      fr(repulsive_force);
-    python_or_functor<grid_force_pairs<PositionMap>, void>
-      fp(force_pairs, make_grid_force_pairs(origin, extent, pos, g));
-
-    boost::fruchterman_reingold_force_directed_layout
-      (g, pos, origin, extent,
-       boost::attractive_force(fa).repulsive_force(fr).force_pairs(fp).
-       cooling(cool));
-  } else {
-    if (cooling != object()) {
-      boost::fruchterman_reingold_force_directed_layout
-        (g, pos, origin, extent,
-         boost::cooling(cool));
-    } else {
-      boost::fruchterman_reingold_force_directed_layout
-        (g, pos, origin, extent);
-    }
-  }
-}
-
-template<typename Graph>
-void 
-fruchterman_reingold_force_directed_layout_distributed
-  (Graph& g,
-   vector_property_map
-     <point2d, typename property_map<Graph, vertex_index_t>::type>& pos,
-   const point2d& origin,
-   const point2d& extent,
-   boost::python::object attractive_force,
-   boost::python::object repulsive_force,
-   boost::python::object force_pairs,
-   boost::python::object cooling,
    bool progressive,
    const simple_tiling& tiling)
 {
@@ -220,19 +169,7 @@ void export_fruchterman_reingold_force_directed_layout()
     .def(init<int, int, bool>());
 
   def("fruchterman_reingold_force_directed_layout", 
-      &fruchterman_reingold_force_directed_layout<GraphLocalSubgraph>,
-      (arg("graph"), 
-       arg("position"),
-       arg("origin") = point2d(),
-       arg("extent") = point2d(500, 500),
-       arg("attractive_force") = object(),
-       arg("repulsive_force") = object(),
-       arg("force_pairs") = object(),
-       arg("cooling") = object(),
-       arg("progressive") = false));
-
-  def("fruchterman_reingold_force_directed_layout", 
-      &fruchterman_reingold_force_directed_layout_distributed<Graph>,
+      &fruchterman_reingold_force_directed_layout<Graph>,
       (arg("graph"), 
        arg("position"),
        arg("origin") = point2d(),

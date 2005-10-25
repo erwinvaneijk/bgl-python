@@ -1,12 +1,12 @@
 # Copyright David Abrahams 2003. See accompanying LICENSE for terms
 # and conditions of use.
-
-# If you move this example from its place in the Boost tree, edit this
-# path to point at the root directory of your Boost installation (the
-# one containing a subdirectory called "boost/" and a sub-subdirectory
-# "boost/python/" full of .hpp files).  Absolute paths work, too.
+# Copyright 2005 Trustees of Indiana University
+# 
+# Authors: David Abrahams
+#          Douglas Gregor
+#          Andrew Lumsdaine
 #
-# path-global BOOST_ROOT : ../../../.. ;
+path-global BGL_PYTHON_ROOT : [ PWD ] ;
 
 # Boost.Python configuration variables, as described in
 # http://www.boost.org/libs/python/doc/building.html#configuration.
@@ -25,10 +25,14 @@
 # http://www.boost.org/more/getting_started.html#Configuring for
 # details.  
 
-# Makes a project id for boost so that other Boost.Build projects can
-# refer to it by name.
-#
+# Makes a project id for the Boost library so that other Boost.Build
+# projects c an refer to it by name.
 project boost : $(BOOST_ROOT) ;
+
+# Makes a project id for the BGL-Python bindings so that other
+# Boost.Build projects can refer to it by name.
+#
+project bgl-python : $(BGL_PYTHON_ROOT) ;
 
 # Change this setting to have all your built products placed under a
 # single directory:

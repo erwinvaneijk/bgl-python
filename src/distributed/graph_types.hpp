@@ -11,7 +11,6 @@
 
 #include "config.hpp"
 #include <boost/graph/distributed/adjacency_list.hpp>
-#include <boost/graph/distributed/local_subgraph.hpp>
 
 namespace boost { namespace graph { namespace distributed {namespace python {
 
@@ -21,8 +20,6 @@ typedef adjacency_list<vecS,
                        no_property,
                        property<edge_index_t, std::size_t> >
   Graph; 
-
-typedef local_subgraph<Graph> GraphLocalSubgraph;
 
 } } } } // end namespace boost::graph::distributed::python
 

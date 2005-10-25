@@ -36,7 +36,7 @@ BOOST_PYTHON_MODULE(_support)
     ;
   class_<point3d>("Point3D")
     .def(init<float, float, float>())
-    .def("__getitem__", &get_subscript_key_value<point2d, std::size_t, float>)
+    .def("__getitem__", &get_subscript_key_value<point3d, std::size_t, float>)
     .def("__setitem__", &set_subscript_key_value<point3d, std::size_t, float>)
     ;
 }

@@ -42,7 +42,8 @@ if ! $(PBGL_ROOT) {
       ../../src/distributed/module.cpp
       # Graph types
       ../../src/distributed/Graph.cpp 
-      ../../src/distributed/subgraph.cpp
+      # Property maps
+      ../../src/distributed/properties.cpp
       # Algorithms
       ../../src/distributed/boman_et_al_graph_coloring.cpp
       ../../src/distributed/breadth_first_search.cpp
@@ -50,6 +51,8 @@ if ! $(PBGL_ROOT) {
       ../../src/distributed/dehne_gotz_min_spanning_tree.cpp
       ../../src/distributed/dijkstra_shortest_paths.cpp
       ../../src/distributed/fruchterman_reingold.cpp
+      # Graph generators
+      ../../src/distributed/generators.cpp
       # Process groups (TBD: Should have a library for this)
       $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
       # Depend on the Boost Python library

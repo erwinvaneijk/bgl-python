@@ -27,7 +27,7 @@ class readable_property_map
 
  public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
-  readable_property_map(class_<T, Basis, HeldType, NonCopyable>& pm)
+  readable_property_map(boost::python::class_<T, Basis, HeldType, NonCopyable>& pm)
   {
     pm.def("__getitem__", &getitem);
   }
@@ -48,7 +48,7 @@ class read_write_property_map
 
  public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
-  read_write_property_map(class_<T, Basis, HeldType, NonCopyable>& pm)
+  read_write_property_map(boost::python::class_<T, Basis, HeldType, NonCopyable>& pm)
   {
     pm.def("__getitem__", &getitem)
       .def("__setitem__", &setitem)
@@ -72,7 +72,7 @@ class lvalue_property_map
 
 public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
-  lvalue_property_map(class_<T, Basis, HeldType, NonCopyable>& pm)
+  lvalue_property_map(boost::python::class_<T, Basis, HeldType, NonCopyable>& pm)
   {
     using boost::python::class_;
     using boost::python::no_init;

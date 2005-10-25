@@ -21,8 +21,8 @@ list
 dense_boruvka_minimum_spanning_tree
   (const Graph& g, 
    vector_property_map<
-     double, 
-     typename property_map<Graph, edge_index_t>::type> weight_map)
+     float, 
+     typename property_map<Graph, edge_index_t>::const_type>& weight_map)
 {
   using boost::graph::make_vertex_list_adaptor;
 
@@ -37,8 +37,8 @@ list
 merge_local_minimum_spanning_trees
   (const Graph& g, 
    vector_property_map<
-     double, 
-     typename property_map<Graph, edge_index_t>::type> weight_map)
+     float, 
+     typename property_map<Graph, edge_index_t>::const_type>& weight_map)
 {
   using boost::graph::make_vertex_list_adaptor;
 
@@ -54,8 +54,8 @@ list
 boruvka_then_merge
   (const Graph& g, 
    vector_property_map<
-     double, 
-     typename property_map<Graph, edge_index_t>::type> weight_map)
+     float, 
+     typename property_map<Graph, edge_index_t>::const_type> weight_map)
 {
   using boost::graph::make_vertex_list_adaptor;
 
@@ -70,8 +70,8 @@ list
 boruvka_mixed_merge
   (const Graph& g, 
    vector_property_map<
-     double, 
-     typename property_map<Graph, edge_index_t>::type> weight_map)
+     float, 
+     typename property_map<Graph, edge_index_t>::const_type> weight_map)
 {
   using boost::graph::make_vertex_list_adaptor;
 

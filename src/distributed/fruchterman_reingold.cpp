@@ -108,7 +108,7 @@ void
 fruchterman_reingold_force_directed_layout
   (Graph& g,
    vector_property_map
-     <point2d, typename property_map<Graph, vertex_index_t>::type>& pos,
+     <point2d, typename property_map<Graph, vertex_index_t>::const_type>& pos,
    const point2d& origin,
    const point2d& extent,
    boost::python::object attractive_force,
@@ -120,7 +120,8 @@ fruchterman_reingold_force_directed_layout
 {
   using boost::python::object;
 
-  typedef typename property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
   typedef vector_property_map<point2d, VertexIndexMap> PositionMap;
 
   // Build the displacement map.

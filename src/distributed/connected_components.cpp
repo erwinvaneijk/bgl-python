@@ -18,7 +18,7 @@ void export_connected_components()
   using boost::python::arg;
   using boost::python::def;
 
-  typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
   typedef vector_property_map<int, VertexIndexMap>
     VertexColorMap;
 

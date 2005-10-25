@@ -7,4 +7,4 @@
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
 from _distributed import *
-from boost.graph import bfs_visitor
+from boost.graph import bfs_visitor, dijkstra_visitor

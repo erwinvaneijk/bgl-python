@@ -8,3 +8,4 @@
 #           Andrew Lumsdaine
 from _support import *
 from bfs_visitor import bfs_visitor
+from dijkstra_visitor import dijkstra_visitor

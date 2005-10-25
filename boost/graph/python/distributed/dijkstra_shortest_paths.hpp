@@ -21,20 +21,21 @@ dijkstra_shortest_paths
    typename graph_traits<Graph>::vertex_descriptor s,
    vector_property_map<
      typename graph_traits<Graph>::vertex_descriptor,
-     typename property_map<Graph, vertex_index_t>::type>* in_predecessor,
+     typename property_map<Graph, vertex_index_t>::const_type>* in_predecessor,
    vector_property_map<
      float,
-     typename property_map<Graph, vertex_index_t>::type>* in_distance,
+     typename property_map<Graph, vertex_index_t>::const_type>* in_distance,
    vector_property_map<
      float,
-     typename property_map<Graph, edge_index_t>::type> weight,
+     typename property_map<Graph, edge_index_t>::const_type>& weight,
    boost::python::object in_visitor,
    vector_property_map<
      default_color_type, 
-     typename property_map<Graph, vertex_index_t>::type>* in_color,
+     typename property_map<Graph, vertex_index_t>::const_type>* in_color,
    float lookahead)
 {
-  typedef typename property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
   typedef vector_property_map<Vertex, VertexIndexMap> PredecessorMap;
   typedef vector_property_map<float, VertexIndexMap> DistanceMap;
@@ -60,8 +61,7 @@ dijkstra_shortest_paths
          distance_map(distance).
          weight_map(weight).
          color_map(color).
-         lookahead(lookahead).
-         vertex_index_map(get(vertex_index, g)));
+         lookahead(lookahead));
     } else {
       boost::dijkstra_shortest_paths
         (g, s, 
@@ -69,8 +69,7 @@ dijkstra_shortest_paths
          distance_map(distance).
          weight_map(weight).
          color_map(color).
-         lookahead(lookahead).
-         vertex_index_map(get(vertex_index, g)));
+         lookahead(lookahead));
     }
   } else {
     if (in_visitor != object()) {
@@ -79,16 +78,14 @@ dijkstra_shortest_paths
          predecessor_map(predecessor).
          distance_map(distance).
          weight_map(weight).
-         color_map(color).
-         vertex_index_map(get(vertex_index, g)));
+         color_map(color));
     } else {
       boost::dijkstra_shortest_paths
         (g, s, 
          predecessor_map(predecessor).
          distance_map(distance).
          weight_map(weight).
-         color_map(color).
-         vertex_index_map(get(vertex_index, g)));
+         color_map(color));
     }
   }
 }

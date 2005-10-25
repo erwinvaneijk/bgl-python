@@ -9,6 +9,7 @@
 #include <boost/python.hpp>
 #include <boost/graph/python/point2d.hpp>
 #include <boost/graph/python/point3d.hpp>
+#include <boost/graph/properties.hpp>
 
 namespace boost { namespace graph { namespace python {
 
@@ -27,6 +28,7 @@ void set_subscript_key_value(T& t, const Key& key, const Value& value)
 BOOST_PYTHON_MODULE(_support)
 {
   using boost::python::class_;
+  using boost::python::enum_;
   using boost::python::init;
 
   class_<point2d>("Point2D")
@@ -38,6 +40,12 @@ BOOST_PYTHON_MODULE(_support)
     .def(init<float, float, float>())
     .def("__getitem__", &get_subscript_key_value<point3d, std::size_t, float>)
     .def("__setitem__", &set_subscript_key_value<point3d, std::size_t, float>)
+    ;
+
+  enum_<default_color_type>("Color")
+    .value("white", color_traits<default_color_type>::white())
+    .value("gray", color_traits<default_color_type>::gray())
+    .value("black", color_traits<default_color_type>::black())
     ;
 }
 

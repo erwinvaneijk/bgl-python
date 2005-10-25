@@ -18,7 +18,7 @@ void export_boman_et_al_graph_coloring()
   using boost::python::arg;
   using boost::python::def;
 
-  typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
   typedef vector_property_map<int, VertexIndexMap>
     VertexColorMap;
 

@@ -19,9 +19,10 @@ connected_components
   (const Graph& g, 
    vector_property_map<
      int, 
-     typename property_map<Graph, vertex_index_t>::type>* in_color)
+     typename property_map<Graph, vertex_index_t>::const_type>* in_color)
 {
-  typedef typename property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
   typedef vector_property_map<int, VertexIndexMap> ColorMap;
 
   ColorMap color = 

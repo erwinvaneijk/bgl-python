@@ -29,13 +29,13 @@ breadth_first_search
    object in_visitor,
    vector_property_map<
      default_color_type, 
-     typename property_map<Graph, vertex_index_t>::type>* in_color)
+     typename property_map<Graph, vertex_index_t>::const_type>* in_color)
 {
   typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
 
-  typedef 
-    vector_property_map<default_color_type, 
-                        typename property_map<Graph, vertex_index_t>::type>
+  typedef vector_property_map<
+            default_color_type, 
+            typename property_map<Graph, vertex_index_t>::const_type>
     ColorMap;
 
   ColorMap color(in_color? *in_color 

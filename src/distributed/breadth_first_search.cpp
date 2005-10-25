@@ -19,7 +19,7 @@ void export_breadth_first_search()
   using boost::python::def;
   using boost::python::object;
 
-  typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
   typedef vector_property_map<default_color_type, VertexIndexMap>
     VertexColorMap;
 

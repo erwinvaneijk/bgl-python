@@ -16,21 +16,16 @@ import boost.graph.distributed as pbgl
 # Build an Erdos-Renyi graph
 g = pbgl.undirected_erdos_renyi_graph(100, 0.02)
 
-# Get the first vertex in the graph
-s = g.vertex(0)
+# Initialize edge weights randomly
+import random
+weight = g.edge_property_map('float')
+for e in g.edges:
+    weight[e] = random.uniform(0.,1.)
 
-# Run a simple BFS
-pbgl.breadth_first_search(g, s)
 
-# Run a simple BFS with an empty visitor
-pbgl.breadth_first_search(g, s, visitor = pbgl.bfs_visitor())
+# Compute the MST with the four different routines
+pbgl.dense_boruvka_minimum_spanning_tree(g, weight)
+pbgl.merge_local_minimum_spanning_trees(g, weight)
+pbgl.boruvka_then_merge(g, weight)
+pbgl.boruvka_mixed_merge(g, weight)
 
-# Run a BFS with a tree-printing visitor
-class vis(pbgl.bfs_visitor):
-    def __init__(self):
-        self.edges = list()
-        
-    def tree_edge(self, e, g):
-        self.edges.append(e)
-        
-pbgl.breadth_first_search(g, s, visitor = vis())

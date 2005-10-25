@@ -20,7 +20,7 @@ void export_dijkstra_shortest_paths()
   using boost::python::object;
 
   typedef graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-  typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef property_map<Graph, vertex_index_t>::const_type VertexIndexMap;
   typedef vector_property_map<vertex_descriptor, VertexIndexMap>
     VertexPredecessorMap;
   typedef vector_property_map<float, VertexIndexMap>
@@ -36,7 +36,8 @@ void export_dijkstra_shortest_paths()
        arg("distance_map") = static_cast<VertexDistanceMap*>(0),
        arg("weight_map"),
        arg("visitor") = object(),
-       arg("color_map") = static_cast<VertexColorMap*>(0)));
+       arg("color_map") = static_cast<VertexColorMap*>(0),
+       arg("lookahead") = -1.0));
 }
 
 

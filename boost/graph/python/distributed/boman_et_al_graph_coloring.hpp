@@ -19,10 +19,11 @@ boman_et_al_graph_coloring
   (const Graph& g, 
    vector_property_map<
      int, 
-     typename property_map<Graph, vertex_index_t>::type>* in_color,
+     typename property_map<Graph, vertex_index_t>::const_type>* in_color,
    typename graph_traits<Graph>::vertices_size_type chunk_size = 100)
 {
-  typedef typename property_map<Graph, vertex_index_t>::type VertexIndexMap;
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
   typedef vector_property_map<int, VertexIndexMap> ColorMap;
 
   ColorMap color = 

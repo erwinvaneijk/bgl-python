@@ -12,6 +12,7 @@
 #include <memory>
 #include <boost/python.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <boost/graph/python/graph.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/graph/erdos_renyi_generator.hpp>
 #include <boost/graph/plod_generator.hpp>
@@ -26,7 +27,10 @@ erdos_renyi_graph(typename graph_traits<Graph>::vertices_size_type n,
 {
   typedef erdos_renyi_iterator<minstd_rand, Graph> iterator;
   minstd_rand gen(seed);
-  return new Graph(iterator(gen, n, prob, allow_self_loops), iterator(), n);
+  Graph* g = 
+    new Graph(iterator(gen, n, prob, allow_self_loops), iterator(), n);
+  boost::graph::python::detail::maybe_reindex_edges(*g, mpl::true_());
+  return g;
 }
 
 template<typename Graph> 

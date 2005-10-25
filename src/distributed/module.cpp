@@ -17,6 +17,7 @@ BOOST_PYTHON_MODULE(_distributed)
   export_boman_et_al_graph_coloring();
   export_breadth_first_search();
   export_connected_components();
+  export_dehne_gotz_min_spanning_tree();
   export_dijkstra_shortest_paths();
   export_fruchterman_reingold_force_directed_layout();
 }

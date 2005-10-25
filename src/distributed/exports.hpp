@@ -20,6 +20,7 @@ void export_boman_et_al_graph_coloring();
 void export_breadth_first_search();
 void export_connected_components();
 void export_dijkstra_shortest_paths();
+void export_dehne_gotz_min_spanning_tree();
 void export_fruchterman_reingold_force_directed_layout();
 
 template<typename Graph>

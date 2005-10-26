@@ -15,6 +15,7 @@ namespace boost { namespace graph { namespace distributed { namespace python {
 
 BOOST_PYTHON_MODULE(_distributed)
 {
+  export_mpi();
 #define UNDIRECTED_GRAPH(Name,Type) export_graph< Type >(#Name, "undirected");
 #define DIRECTED_GRAPH(Name,Type) export_graph< Type >(#Name, "directed");
 #include "graphs.hpp"

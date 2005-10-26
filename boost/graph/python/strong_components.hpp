@@ -6,7 +6,7 @@
 
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
-#include <boost/graph/connected_components.hpp>
+#include <boost/graph/strong_components.hpp>
 #include <boost/python.hpp>
 
 namespace boost { namespace graph { namespace python { namespace distributed {
@@ -15,7 +15,7 @@ using boost::python::object;
 
 template<typename Graph>
 int
-connected_components
+strong_components
   (const Graph& g, 
    vector_property_map<
      int, 
@@ -29,7 +29,7 @@ connected_components
     in_color? *in_color
     : ColorMap(num_vertices(g), get(vertex_index, g));
 
-  return boost::graph::connected_components(g, color);
+  return boost::strong_components(g, color);
 }
 
 } } } } // end namespace boost::graph::python::distributed

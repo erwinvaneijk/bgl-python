@@ -14,6 +14,8 @@
 
 namespace boost { namespace graph { namespace distributed { namespace python {
 
+void export_mpi();
+
 template<typename Graph> 
 void export_graph(const char* name, const char* directedness);
 

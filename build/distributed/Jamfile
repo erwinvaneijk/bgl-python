@@ -61,6 +61,7 @@ if ! $(PBGL_ROOT) {
       ../../src/distributed/metis.cpp
       # Process groups (TBD: Should have a library for this)
       $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
+      ../../src/distributed/mpi.cpp
       # Depend on the Boost Python library
       <template>@boost/libs/python/build/extension
       # Pick up all of the arguments needed to link against MPI

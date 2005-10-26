@@ -56,6 +56,8 @@ if ! $(PBGL_ROOT) {
       ../../src/distributed/strong_components.cpp
       # Graph generators
       ../../src/distributed/generators.cpp
+      # Graph I/O
+      ../../src/distributed/metis.cpp
       # Process groups (TBD: Should have a library for this)
       $(PBGL_ROOT)/libs/parallel/src/mpi/bsp_process_group.cpp
       # Depend on the Boost Python library

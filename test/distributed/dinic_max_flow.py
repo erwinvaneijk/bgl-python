@@ -22,7 +22,7 @@ def run(g):
         
     # Get the first vertex in the graph
     s = g.vertex(0)
-    t = g.vertex(57)
+    t = g.vertex(1)
     flow = g.edge_property_map('integer')
     pbgl.dinic_max_flow(g, s, t, capacity, flow)
 

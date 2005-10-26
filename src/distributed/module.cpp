@@ -23,7 +23,10 @@ BOOST_PYTHON_MODULE(_distributed)
   export_connected_components();
   export_dehne_gotz_min_spanning_tree();
   export_dijkstra_shortest_paths();
+  export_dinic_max_flow();
   export_fruchterman_reingold_force_directed_layout();
+  export_page_rank();
+  export_strong_components();
 }
 
 } } } } // end namespace boost::graph::distributed::python

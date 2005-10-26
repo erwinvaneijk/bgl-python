@@ -50,7 +50,10 @@ if ! $(PBGL_ROOT) {
       ../../src/distributed/connected_components.cpp
       ../../src/distributed/dehne_gotz_min_spanning_tree.cpp
       ../../src/distributed/dijkstra_shortest_paths.cpp
+      ../../src/distributed/dinic_max_flow.cpp
       ../../src/distributed/fruchterman_reingold.cpp
+      ../../src/distributed/page_rank.cpp
+      ../../src/distributed/strong_components.cpp
       # Graph generators
       ../../src/distributed/generators.cpp
       # Process groups (TBD: Should have a library for this)

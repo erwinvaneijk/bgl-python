@@ -70,6 +70,7 @@ void export_graph(const char* name, const char* directedness)
   }
 
   export_generators<Graph>(directedness);
+  export_metis<Graph>(directedness);
 }
 
 #define UNDIRECTED_GRAPH(Name,Type) \

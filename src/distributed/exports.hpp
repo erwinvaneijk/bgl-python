@@ -39,6 +39,8 @@ template<typename Graph> void export_property_maps();
 
 template<typename Graph> void export_generators(const std::string& directness);
 
+template<typename Graph> void export_metis(const std::string& directedness);
+
 } } } } // end namespace boost::graph::distributed::python
 
 #endif // BOOST_GRAPH_PYTHON_DISTRIBUTED_EXPORTS_HPP

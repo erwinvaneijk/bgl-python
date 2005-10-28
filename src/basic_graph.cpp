@@ -410,9 +410,9 @@ void export_basic_graph(const char* name)
         .def("read_graphviz", &Graph::read_graphviz)
         .def("write_graphviz", &Graph::write_graphviz)
         .def("write_graphviz", &Graph::write_graphviz_def)
+#endif
         // Pickling
         .def_pickle(graph_pickle_suite<DirectedS>())
-#endif
       ;
 
     boost::graph::python::graph<Graph> g(graph);

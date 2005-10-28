@@ -10,6 +10,7 @@
 # This file builds the Python bindings for the Boost Graph Library.
 
 subproject build ;
+
 import python ;
 
 extension _support 
@@ -22,12 +23,37 @@ extension _support
     <debug-symbols>off
     ;
 
+extension _graph
+        : # Sources
+        ../src/module.cpp
+        # Graph types
+        ../src/basic_graph.cpp
+        ../src/properties.cpp
+        # Depend on the Boost Python library
+        <template>@boost/libs/python/build/extension
+        : # Requirements
+        <include>$(BGL_PYTHON_ROOT)
+        <debug-symbols>off
+        ;
+
 install _support pyd 
         : <pyd>_support
           <dll>@boost/libs/python/build/boost_python
         ;
 
+install _graph pyd 
+        : <pyd>_graph
+          <dll>@boost/libs/python/build/boost_python
+        ;
+
 stage ../python/boost/graph : <pyd>_support
+    :
+     # add this target to the "stage" and "all" pseudo-targets:
+       <target>stage
+       <target>all
+    ;
+
+stage ../python/boost/graph : <pyd>_graph
     :
      # add this target to the "stage" and "all" pseudo-targets:
        <target>stage

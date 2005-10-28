@@ -10,6 +10,7 @@
 # This file builds the Python bindings for the Parallel BGL.
 
 subproject build/distributed ;
+
 import python ;
 
 # Pull in the MPI linking code

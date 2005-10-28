@@ -135,6 +135,15 @@ class basic_graph
               const std::string& name_map = std::string());
   basic_graph(const std::string& filename, graph_file_kind kind); 
 
+  template<typename InputIterator>
+  basic_graph(InputIterator first, InputIterator last,
+              vertices_size_type n)
+    : inherited(first, last, n)
+  {
+    renumber_vertices();
+    renumber_edges();
+  }
+
   bool is_directed() const
   { return is_convertible<directed_category, directed_tag>::value; }
 
@@ -509,7 +518,8 @@ namespace boost {
 
     typedef typename mpl::if_<is_same<Tag, edge_index_t>,
                               edge_index_type,
-                              no_property>::type edge_or_none;
+                              detail::error_property_not_found>::type
+      edge_or_none;
 
   public:
     typedef typename mpl::if_<is_same<Tag, vertex_index_t>,

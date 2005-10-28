@@ -6,13 +6,10 @@
 
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
-
 BGL_PYTHON_EVENT(initialize_vertex, vertex)
-BGL_PYTHON_EVENT(start_vertex, vertex)
-BGL_PYTHON_EVENT(discover_vertex, vertex)
-BGL_PYTHON_EVENT(examine_vertex, vertex)
 BGL_PYTHON_EVENT(examine_edge, edge)
-BGL_PYTHON_EVENT(tree_edge, edge)
-BGL_PYTHON_EVENT(back_edge, edge)
-BGL_PYTHON_EVENT(forward_or_cross_edge, edge)
-BGL_PYTHON_EVENT(finish_vertex, vertex)
+BGL_PYTHON_EVENT(edge_relaxed, edge)
+BGL_PYTHON_EVENT(edge_not_relaxed, edge)
+BGL_PYTHON_EVENT(edge_minimized, edge)
+BGL_PYTHON_EVENT(edge_not_minimized, edge)
+

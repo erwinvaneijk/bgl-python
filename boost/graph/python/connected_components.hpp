@@ -6,10 +6,13 @@
 
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
+#ifndef BOOST_GRAPH_PYTHON_CONNECTED_COMPONENTS_HPP
+#define BOOST_GRAPH_PYTHON_CONNECTED_COMPONENTS_HPP
+
 #include <boost/graph/connected_components.hpp>
 #include <boost/python.hpp>
 
-namespace boost { namespace graph { namespace python { namespace distributed {
+namespace boost { namespace graph { namespace python {
 
 using boost::python::object;
 
@@ -29,7 +32,9 @@ connected_components
     in_color? *in_color
     : ColorMap(num_vertices(g), get(vertex_index, g));
 
-  return boost::graph::connected_components(g, color);
+  return boost::connected_components(g, color);
 }
 
-} } } } // end namespace boost::graph::python::distributed
+} } } // end namespace boost::graph::python
+
+#endif // BOOST_GRAPH_PYTHON_CONNECTED_COMPONENTS_HPP

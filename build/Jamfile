@@ -29,6 +29,31 @@ extension _graph
         # Graph types
         ../src/basic_graph.cpp
         ../src/properties.cpp
+        # Algorithms
+        ../src/bellman_ford_shortest_paths.cpp
+        ../src/betweenness_centrality.cpp
+        ../src/biconnected_components.cpp
+        ../src/breadth_first_search.cpp
+        ../src/circle_layout.cpp
+        ../src/connected_components.cpp
+        ../src/cuthill_mckee_ordering.cpp
+        ../src/dag_shortest_paths.cpp
+        ../src/depth_first_search.cpp
+        ../src/dijkstra_shortest_paths.cpp
+        ../src/fruchterman_reingold.cpp
+        ../src/isomorphism.cpp
+        ../src/kamada_kawai_spring_layout.cpp
+        ../src/king_ordering.cpp
+        ../src/kruskal_min_spanning_tree.cpp
+        ../src/minimum_degree_ordering.cpp
+        ../src/page_rank.cpp
+        ../src/prim_minimum_spanning_tree.cpp
+        ../src/sequential_vertex_coloring.cpp
+        ../src/strong_components.cpp
+        ../src/topological_sort.cpp
+        ../src/transitive_closure.cpp
+        # Graph generators
+        ../src/generators.cpp
         # Depend on the Boost Python library
         <template>@boost/libs/python/build/extension
         : # Requirements

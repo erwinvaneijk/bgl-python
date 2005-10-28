@@ -422,6 +422,8 @@ void export_basic_graph(const char* name)
     boost::graph::python::bidirectional_graph<Graph> bg(graph);
     boost::graph::python::adjacency_graph<Graph> ag(graph);
     boost::graph::python::mutable_graph<Graph, false, false> mg(graph);
+
+    export_generators<Graph>(graph);
   }
 
   export_property_maps<Graph>();
@@ -432,5 +434,10 @@ void export_graphs()
   export_basic_graph<undirectedS>("Graph");
   export_basic_graph<bidirectionalS>("Digraph");
 }
+
+template void basic_graph<undirectedS>::renumber_vertices();
+template void basic_graph<undirectedS>::renumber_edges();
+template void basic_graph<bidirectionalS>::renumber_vertices();
+template void basic_graph<bidirectionalS>::renumber_edges();
 
 } } } // end namespace boost::graph::python

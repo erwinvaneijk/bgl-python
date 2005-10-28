@@ -25,8 +25,8 @@ void export_strong_components()
     typedef vector_property_map<int, VertexIndexMap>                    \
       VertexColorMap;                                                   \
                                                                         \
-    def("strong_components",                                         \
-        &boost::graph::python::distributed::strong_components<Type>, \
+    def("strong_components",                                            \
+        &boost::graph::python::strong_components<Type>,                 \
         (arg("graph"),                                                  \
          arg("color_map") = static_cast<VertexColorMap*>(0)));          \
   }

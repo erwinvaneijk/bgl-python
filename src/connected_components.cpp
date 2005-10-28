@@ -6,12 +6,10 @@
 
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
-#include "config.hpp"
 #include "graph_types.hpp"
-#include <boost/parallel/property_map.hpp>
 #include <boost/graph/python/connected_components.hpp>
 
-namespace boost { namespace graph { namespace distributed { namespace python {
+namespace boost { namespace graph { namespace python {
 
 void export_connected_components()
 {
@@ -33,4 +31,4 @@ void export_connected_components()
 #include "graphs.hpp"
 }
 
-} } } } // end namespace boost::graph::distributed::python
+} } } // end namespace boost::graph::python

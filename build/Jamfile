@@ -54,6 +54,8 @@ extension _graph
         ../src/transitive_closure.cpp
         # Graph generators
         ../src/generators.cpp
+        # Graph I/O
+        ../src/pickle.cpp
         # Depend on the Boost Python library
         <template>@boost/libs/python/build/extension
         : # Requirements

@@ -73,6 +73,7 @@ if ! $(PBGL_ROOT) {
       # Extra options we need to get building and linking to work
       <darwin><*><linkflags>"-bundle_loader $(python_executable)"
       <gcc-3_3-darwin><*><linkflags>"-bundle_loader $(python_executable)"
+      <define>BOOST_GRAPH_IS_PARALLEL
       ;
 
   install _distributed pyd 

@@ -6,31 +6,33 @@
 
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
-#include "config.hpp"
 #include "graph_types.hpp"
-#include <boost/parallel/property_map.hpp>
-#include <boost/graph/python/connected_components.hpp>
+#include <boost/graph/python/breadth_first_search.hpp>
 
-namespace boost { namespace graph { namespace distributed { namespace python {
+namespace boost { namespace graph { namespace python {
 
-void export_connected_components()
+void export_breadth_first_search()
 {
   using boost::python::arg;
   using boost::python::def;
+  using boost::python::object;
 
 #define UNDIRECTED_GRAPH(Name,Type)                                     \
   {                                                                     \
-    typedef property_map<Type, vertex_index_t>::const_type VertexIndexMap; \
-    typedef vector_property_map<int, VertexIndexMap>                    \
+    typedef property_map< Type , vertex_index_t>::const_type VertexIndexMap; \
+    typedef vector_property_map<default_color_type, VertexIndexMap>     \
       VertexColorMap;                                                   \
                                                                         \
-    def("connected_components",                                         \
-        &boost::graph::python::connected_components<Type>,              \
+    def("breadth_first_search",                                         \
+        &boost::graph::python::breadth_first_search< Type >,            \
         (arg("graph"),                                                  \
+         arg("root_vertex"),                                            \
+         arg("buffer") = object(),                                      \
+         arg("visitor") = object(),                                     \
          arg("color_map") = static_cast<VertexColorMap*>(0)));          \
   }
-#define DIRECTED_GRAPH(Name,Type)
 #include "graphs.hpp"
 }
 
-} } } } // end namespace boost::graph::distributed::python
+
+} } } // end namespace boost::graph::python

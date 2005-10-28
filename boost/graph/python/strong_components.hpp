@@ -9,7 +9,7 @@
 #include <boost/graph/strong_components.hpp>
 #include <boost/python.hpp>
 
-namespace boost { namespace graph { namespace python { namespace distributed {
+namespace boost { namespace graph { namespace python { 
 
 using boost::python::object;
 
@@ -32,4 +32,4 @@ strong_components
   return boost::strong_components(g, color);
 }
 
-} } } } // end namespace boost::graph::python::distributed
+} } } // end namespace boost::graph::python

@@ -6,31 +6,29 @@
 
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
-#include "config.hpp"
 #include "graph_types.hpp"
-#include <boost/parallel/property_map.hpp>
-#include <boost/graph/python/connected_components.hpp>
+#include <boost/graph/python/strong_components.hpp>
 
-namespace boost { namespace graph { namespace distributed { namespace python {
+namespace boost { namespace graph { namespace python {
 
-void export_connected_components()
+void export_strong_components()
 {
   using boost::python::arg;
   using boost::python::def;
 
-#define UNDIRECTED_GRAPH(Name,Type)                                     \
+#define UNDIRECTED_GRAPH(Name,Type)
+#define DIRECTED_GRAPH(Name,Type)                                       \
   {                                                                     \
     typedef property_map<Type, vertex_index_t>::const_type VertexIndexMap; \
     typedef vector_property_map<int, VertexIndexMap>                    \
       VertexColorMap;                                                   \
                                                                         \
-    def("connected_components",                                         \
-        &boost::graph::python::connected_components<Type>,              \
+    def("strong_components",                                            \
+        &boost::graph::python::strong_components<Type>,                 \
         (arg("graph"),                                                  \
          arg("color_map") = static_cast<VertexColorMap*>(0)));          \
   }
-#define DIRECTED_GRAPH(Name,Type)
 #include "graphs.hpp"
 }
 
-} } } } // end namespace boost::graph::distributed::python
+} } } // end namespace boost::graph::python

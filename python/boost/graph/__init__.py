@@ -9,4 +9,6 @@
 from _support import *
 from _graph import *
 from bfs_visitor import bfs_visitor
+from bellman_ford_visitor import bellman_ford_visitor
+from dfs_visitor import dfs_visitor
 from dijkstra_visitor import dijkstra_visitor

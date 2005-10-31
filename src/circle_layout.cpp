@@ -21,7 +21,7 @@ circle_graph_layout
      typename property_map<Graph, vertex_index_t>::const_type>& position,
    float radius)
 {
-  circle_graph_layout(g, position, radius);
+  boost::circle_graph_layout(g, position, radius);
 }
 
 void export_circle_graph_layout()

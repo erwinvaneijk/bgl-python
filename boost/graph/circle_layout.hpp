@@ -28,7 +28,7 @@ namespace boost {
   circle_graph_layout(const VertexListGraph& g, PositionMap position,
                       Radius radius)
   {
-    const double pi = 3.14159;
+    const float pi = 3.14159f;
 
 #ifndef BOOST_NO_STDC_NAMESPACE
     using std::sin;
@@ -46,6 +46,7 @@ namespace boost {
     vertices_size_type i = 0;
     for(std::pair<vertex_iterator, vertex_iterator> v = vertices(g); 
         v.first != v.second; ++v.first, ++i) {
+      
       position[*v.first][0] = radius * cos(i * 2 * pi / n);
       position[*v.first][1] = radius * sin(i * 2 * pi / n);
     }

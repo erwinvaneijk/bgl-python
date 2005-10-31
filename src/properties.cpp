@@ -78,14 +78,6 @@ void export_property_maps()
     VertexIndexMap;
   typedef typename property_map<Graph, edge_index_t>::const_type EdgeIndexMap;
 
-  {                                                                 
-    typedef vector_property_map<int, VertexIndexMap> VertexMap;
-    if (!type_already_registered<VertexMap>()) {                    
-      class_<VertexMap> pm("VertexintMap", no_init);          
-      read_write_property_map<VertexMap> reflect_pm(pm);     
-    }                                                               
-  }
-
 #define VERTEX_PROPERTY(Name,Type,Kind)                                 \
   {                                                                     \
     typedef vector_property_map<Type, VertexIndexMap> VertexMap;        \

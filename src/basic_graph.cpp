@@ -10,6 +10,7 @@
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/python/graph.hpp>
 #include "exports.hpp"
+#include "graph_types.hpp"
 
 namespace boost { 
 
@@ -383,25 +384,11 @@ void export_basic_graph(const char* name)
         // Constructors
         .def(init<object>())
         .def(init<object, std::string>())
-      //        .def(init<std::string, graph_file_kind>())
         .def("is_directed", &Graph::is_directed)
         // Vertex property maps
         .def("has_vertex_map", &Graph::has_vertex_map)
-        .def("get_vertex_index_map", &Graph::get_vertex_index_map)
-        .def("get_vertex_color_map", &Graph::get_vertex_color_map)
-        .def("get_vertex_double_map", &Graph::get_vertex_double_map)
-        .def("get_vertex_int_map", &Graph::get_vertex_int_map)
-        .def("get_vertex_string_map", &Graph::get_vertex_string_map)
-        .def("get_vertex_object_map", &Graph::get_vertex_object_map)
-        .def("get_vertex_point2d_map", &Graph::get_vertex_point2d_map)
         // Edge property maps
         .def("has_edge_map", &Graph::has_edge_map)
-        .def("get_edge_index_map", &Graph::get_edge_index_map)
-        .def("get_edge_color_map", &Graph::get_edge_color_map)
-        .def("get_edge_double_map", &Graph::get_edge_double_map)
-        .def("get_edge_int_map", &Graph::get_edge_int_map)
-        .def("get_edge_string_map", &Graph::get_edge_string_map)
-        .def("get_edge_object_map", &Graph::get_edge_object_map)
 #if 0
         // Graph I/O
         .def("read_adjlist", &Graph::read_adjlist)
@@ -435,9 +422,19 @@ void export_graphs()
   export_basic_graph<bidirectionalS>("Digraph");
 }
 
+using boost::python::object;
+
 template void basic_graph<undirectedS>::renumber_vertices();
 template void basic_graph<undirectedS>::renumber_edges();
 template void basic_graph<bidirectionalS>::renumber_vertices();
 template void basic_graph<bidirectionalS>::renumber_edges();
+
+template 
+  vector_property_map<object, property_map<Graph, edge_index_t>::const_type>
+  basic_graph<undirectedS>::get_edge_map<object>(const std::string&);
+
+template 
+  vector_property_map<object, property_map<Digraph, edge_index_t>::const_type>
+  basic_graph<bidirectionalS>::get_edge_map<object>(const std::string&);
 
 } } } // end namespace boost::graph::python

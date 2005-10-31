@@ -194,51 +194,6 @@ class basic_graph
   void write_graphviz_def(const std::string& filename)
   { write_graphviz(filename); }
   
-  // Simple functions for Visual C++ 7.1 :(
-  vector_property_map<default_color_type, VertexIndexMap>
-  get_vertex_color_map(const std::string& name)
-  { return get_vertex_map<default_color_type>(name); }
-
-  vector_property_map<double, VertexIndexMap>
-  get_vertex_double_map(const std::string& name)
-  { return get_vertex_map<double>(name); }
-  
-  vector_property_map<int, VertexIndexMap>
-  get_vertex_int_map(const std::string& name)
-  { return get_vertex_map<int>(name); }
-  
-  vector_property_map<std::string, VertexIndexMap>
-  get_vertex_string_map(const std::string& name)
-  { return get_vertex_map<std::string>(name); }
-  
-  vector_property_map<boost::python::object, VertexIndexMap>
-  get_vertex_object_map(const std::string& name)
-  { return get_vertex_map<boost::python::object>(name); }
-  
-  vector_property_map<point2d, VertexIndexMap>
-  get_vertex_point2d_map(const std::string& name)
-  { return get_vertex_map<point2d>(name); }
-  
-  vector_property_map<default_color_type, EdgeIndexMap>
-  get_edge_color_map(const std::string& name)
-  { return get_edge_map<default_color_type>(name); }
-
-  vector_property_map<double, EdgeIndexMap>
-  get_edge_double_map(const std::string& name)
-  { return get_edge_map<double>(name); }
-  
-  vector_property_map<int, EdgeIndexMap>
-  get_edge_int_map(const std::string& name)
-  { return get_edge_map<int>(name); }
-  
-  vector_property_map<std::string, EdgeIndexMap>
-  get_edge_string_map(const std::string& name)
-  { return get_edge_map<std::string>(name); }
-  
-  vector_property_map<boost::python::object, EdgeIndexMap>
-  get_edge_object_map(const std::string& name)
-  { return get_edge_map<boost::python::object>(name); }
-  
   inherited&       base()       { return *this; }
   const inherited& base() const { return *this; }
   

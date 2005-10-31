@@ -127,7 +127,7 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
     object name_obj = vertex_map_names.pop(0);
     const char* name = extract<const char*>(name_obj);
     vector_property_map<object, VertexIndexMap> pmap = 
-      g.get_vertex_object_map(name);
+      g.template get_vertex_map<object>(name);
     tuple values = extract<tuple>(vertex_properties[name_obj]);
     for (vertices_size_type i = 0; i < num_vertices(g); ++i)
       put(pmap, vertices[i], values[i]);
@@ -141,7 +141,7 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
     object name_obj = edge_map_names.pop(0);
     const char* name = extract<const char*>(name_obj);
     vector_property_map<object, EdgeIndexMap> pmap = 
-      g.get_edge_object_map(name);
+      g.template get_edge_map<object>(name);
     tuple values = extract<tuple>(edge_properties[name_obj]);
     for (edges_size_type i = 0; i < num_edges(g); ++i)
       put(pmap, the_edges[i], values[i]);

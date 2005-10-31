@@ -411,9 +411,14 @@ void export_basic_graph(const char* name)
     boost::graph::python::mutable_graph<Graph, false, false> mg(graph);
 
     export_generators<Graph>(graph);
-  }
 
-  export_property_maps<Graph>();
+    // Properties
+    export_property_maps<Graph>();
+    graph.def("vertex_property_map", &vertex_property_map<Graph>,
+              (arg("graph"), arg("type")));
+    graph.def("edge_property_map", &edge_property_map<Graph>,
+              (arg("graph"), arg("type")));
+  }
 }
 
 void export_graphs()

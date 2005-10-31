@@ -17,6 +17,14 @@ template<typename Graph> void export_property_maps();
 template<typename Graph>
  void export_generators(boost::python::class_<Graph>& graph);
 
+template<typename Graph>
+boost::python::object 
+vertex_property_map(const Graph& g, const std::string type);
+
+template<typename Graph>
+boost::python::object 
+edge_property_map(const Graph& g, const std::string type);
+
 } } } // end namespace boost::graph::python
 
 #endif // BOOST_GRAPH_PYTHON_EXPORTS_HPP

@@ -33,8 +33,8 @@ object vertex_property_map(const Graph& g, const std::string type)
                                                       g.get_vertex_index_map()));
 #define EDGE_PROPERTY(Name,Type,Kind)
 #  include <boost/graph/python/properties.hpp>
-#undef EDGE_PROPERTY_MAP
-#undef VERTEX_PROPERTY_MAP
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
   else
     return object();
 }
@@ -54,8 +54,8 @@ object edge_property_map(const Graph& g, const std::string type)
     return object(vector_property_map<Type, IndexMap>(num_edges(g),     \
                                                       g.get_edge_index_map()));
 #  include <boost/graph/python/properties.hpp>
-#undef EDGE_PROPERTY_MAP
-#undef VERTEX_PROPERTY_MAP
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
   else
     return object();
 }

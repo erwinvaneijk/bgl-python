@@ -67,7 +67,7 @@ if ! $(PBGL_ROOT) {
       <template>@boost/libs/python/build/extension
       # Pick up all of the arguments needed to link against MPI
       <template>mpi
-      : # Default build
+      : # Requirements
       <include>$(BGL_PYTHON_ROOT) <include>$(PBGL_ROOT)
       <debug-symbols>off
       # Extra options we need to get building and linking to work
@@ -86,5 +86,7 @@ if ! $(PBGL_ROOT) {
        # add this target to the "stage" and "all" pseudo-targets:
          <target>stage
          <target>all
+      :
+         release
       ;
 }

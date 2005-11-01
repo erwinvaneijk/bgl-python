@@ -15,7 +15,7 @@
 namespace boost { namespace graph { namespace python {
 
 template<typename Graph>
-std::auto_ptr<Graph>
+Graph*
 transitive_closure
   (const Graph& g,
    vector_property_map<
@@ -27,13 +27,15 @@ transitive_closure
     boost::transitive_closure(g, *tc, *g_to_tc_map, get(vertex_index, g));
   else
     boost::transitive_closure(g, *tc);
-  return tc;
+  return tc.release();
 }
 
 void export_transitive_closure()
 {
   using boost::python::arg;
   using boost::python::def;
+  using boost::python::manage_new_object;
+  using boost::python::return_value_policy;
 
 #define UNDIRECTED_GRAPH(Name,Type)
 #define DIRECTED_GRAPH(Name,Type)                                       \
@@ -44,6 +46,7 @@ void export_transitive_closure()
       OrigToCopyMap;                                                    \
                                                                         \
     def("transitive_closure", &transitive_closure<Type>,                \
+        return_value_policy<manage_new_object>(),                       \
         (arg("graph"), arg("orig_to_copy") = static_cast<OrigToCopyMap*>(0))); \
   }
 #include "graphs.hpp"

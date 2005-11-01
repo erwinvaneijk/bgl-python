@@ -12,6 +12,10 @@
 
 project-root ;
 
+# Only build release-mode binaries, unless the user explicitly
+# requests otherwise
+BUILD ?= release ;
+
 subinclude build ;
 subinclude build/distributed ;
 

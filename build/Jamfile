@@ -20,7 +20,6 @@ extension _support
     <template>@boost/libs/python/build/extension
     : # Requirements
     <include>$(BGL_PYTHON_ROOT)
-    <debug-symbols>off
     ;
 
 extension _graph
@@ -55,12 +54,14 @@ extension _graph
         # Graph generators
         ../src/generators.cpp
         # Graph I/O
+        ../src/graphviz.cpp
         ../src/pickle.cpp
         # Depend on the Boost Python library
         <template>@boost/libs/python/build/extension
+        # Depend on the bgl-viz library for GraphViz support
+        <lib>@boost/libs/graph/build/bgl-viz
         : # Requirements
         <include>$(BGL_PYTHON_ROOT)
-        <debug-symbols>off
         ;
 
 install _support pyd 

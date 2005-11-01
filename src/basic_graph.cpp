@@ -395,8 +395,6 @@ void export_basic_graph(const char* name)
         .def("write_adjlist", &Graph::write_adjlist)
         .def("write_adjlist", &Graph::write_adjlist_def)
         .def("read_graphviz", &Graph::read_graphviz)
-        .def("write_graphviz", &Graph::write_graphviz)
-        .def("write_graphviz", &Graph::write_graphviz_def)
 #endif
         // Pickling
         .def_pickle(graph_pickle_suite<DirectedS>())
@@ -410,7 +408,8 @@ void export_basic_graph(const char* name)
     boost::graph::python::adjacency_graph<Graph> ag(graph);
     boost::graph::python::mutable_graph<Graph, false, false> mg(graph);
 
-    export_generators<Graph>(graph);
+    export_generators(graph);
+    export_graphviz(graph);
 
     // Properties
     export_property_maps<Graph>();

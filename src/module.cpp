@@ -35,6 +35,7 @@ extern void export_sequential_vertex_coloring();
 extern void export_strong_components();
 extern void export_topological_sort();
 extern void export_transitive_closure();
+extern void export_graphviz_exceptions();
 
 BOOST_PYTHON_MODULE(_graph)
 {
@@ -61,6 +62,7 @@ BOOST_PYTHON_MODULE(_graph)
   export_strong_components();
   export_topological_sort();
   export_transitive_closure();
+  export_graphviz_exceptions();
 }
 
 } } } // end namespace boost::graph::python

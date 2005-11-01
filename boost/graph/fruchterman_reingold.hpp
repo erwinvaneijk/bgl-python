@@ -90,99 +90,6 @@ struct all_force_pairs
   }
 };
 
-template<typename PositionMap>
-struct grid_force_pairs
-{
-  typedef typename property_traits<PositionMap>::value_type Point;
-  typedef typename point_traits<Point>::component_type Dim;
-
-  template<typename Graph>
-  explicit
-  grid_force_pairs(const Point& origin, const Point& extent, 
-                   PositionMap position, const Graph& g)
-    : width(extent[0]), height(extent[1]), position(position)
-  {
-#ifndef BOOST_NO_STDC_NAMESPACE
-    using std::sqrt;
-#endif // BOOST_NO_STDC_NAMESPACE
-    two_k = Dim(2) * sqrt(width * height / num_vertices(g));
-  }
-
-  template<typename Graph, typename ApplyForce >
-  void operator()(const Graph& g, ApplyForce apply_force)
-  {
-    typedef typename graph_traits<Graph>::vertex_iterator vertex_iterator;
-    typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-    typedef std::list<vertex_descriptor> bucket_t;
-    typedef std::vector<bucket_t> buckets_t;
-
-#ifndef BOOST_NO_STDC_NAMESPACE
-    using std::sqrt;
-#endif // BOOST_NO_STDC_NAMESPACE
-
-    std::size_t columns = std::size_t(width / two_k + Dim(1));
-    std::size_t rows = std::size_t(height / two_k + Dim(1));
-    buckets_t buckets(rows * columns);
-    vertex_iterator v, v_end;
-    for (tie(v, v_end) = vertices(g); v != v_end; ++v) {
-      std::size_t column = std::size_t((position[*v][0] + width  / 2) / two_k);
-      std::size_t row    = std::size_t((position[*v][1] + height / 2) / two_k);
-
-      if (column >= columns) column = columns - 1;
-      if (row >= rows) row = rows - 1;
-      buckets[row * columns + column].push_back(*v);
-    }
-
-    for (std::size_t row = 0; row < rows; ++row)
-      for (std::size_t column = 0; column < columns; ++column) {
-        bucket_t& bucket = buckets[row * columns + column];
-        typedef typename bucket_t::iterator bucket_iterator;
-        for (bucket_iterator u = bucket.begin(); u != bucket.end(); ++u) {
-          // Repulse vertices in this bucket
-          bucket_iterator v = u;
-          for (++v; v != bucket.end(); ++v) {
-            apply_force(*u, *v);
-            apply_force(*v, *u);
-          }
-
-          std::size_t adj_start_row = row == 0? 0 : row - 1;
-          std::size_t adj_end_row = row == rows - 1? row : row + 1;
-          std::size_t adj_start_column = column == 0? 0 : column - 1;
-          std::size_t adj_end_column = column == columns - 1? column : column + 1;
-          for (std::size_t other_row = adj_start_row; other_row <= adj_end_row;
-               ++other_row)
-            for (std::size_t other_column = adj_start_column; 
-                 other_column <= adj_end_column; ++other_column)
-              if (other_row != row || other_column != column) {
-                // Repulse vertices in this bucket
-                bucket_t& other_bucket 
-                  = buckets[other_row * columns + other_column];
-                for (v = other_bucket.begin(); v != other_bucket.end(); ++v) {
-                  Dim delta_x = position[*u][0] - position[*v][0]; 
-                  Dim delta_y = position[*u][1] - position[*v][1]; 
-                  Dim dist = sqrt(delta_x*delta_x + delta_y*delta_y);
-                  if (dist < two_k) apply_force(*u, *v);
-                }
-              }
-        }
-      }
-  }
-
- private:
-  Dim width;
-  Dim height;
-  PositionMap position;
-  Dim two_k;
-};
-
-template<typename PositionMap, typename Graph>
-inline grid_force_pairs<PositionMap>
-make_grid_force_pairs
-  (typename property_traits<PositionMap>::value_type const& origin,
-   typename property_traits<PositionMap>::value_type const& extent,
-   const PositionMap& position, const Graph& g)
-{ return grid_force_pairs<PositionMap>(origin, extent, position, g); }
-
 namespace detail {
   template<typename Point>
   Point point_difference(const Point& p1, const Point& p2)
@@ -286,6 +193,159 @@ namespace detail {
   };
 
 } // end namespace detail
+
+template<typename PositionMap>
+struct grid_force_pairs
+{
+  typedef typename property_traits<PositionMap>::value_type Point;
+  typedef typename point_traits<Point>::component_type Dim;
+
+  template<typename Graph>
+  explicit
+  grid_force_pairs(const Point& origin, const Point& extent, 
+                   PositionMap position, const Graph& g)
+    : origin(origin), extent(extent), position(position)
+  {
+#ifndef BOOST_NO_STDC_NAMESPACE
+    using std::sqrt;
+#endif // BOOST_NO_STDC_NAMESPACE
+    std::size_t dims = point_traits<Point>::dimensions(origin);
+    two_k = Dim(2) * sqrt(std::accumulate(&extent[0], &extent[0] + dims,
+                                          Dim(1), std::multiplies<Dim>()));
+
+    num_buckets.resize(dims);
+    for (std::size_t i = 0; i < dims; ++i)
+      num_buckets[i] = std::size_t(extent[i] / two_k + Dim(1));
+  }
+
+  template<typename Graph, typename ApplyForce >
+  void operator()(const Graph& g, ApplyForce apply_force)
+  {
+    typedef typename graph_traits<Graph>::vertex_iterator vertex_iterator;
+    typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
+    typedef std::list<vertex_descriptor> bucket_t;
+    typedef std::vector<bucket_t> buckets_t;
+
+#ifndef BOOST_NO_STDC_NAMESPACE
+    using std::sqrt;
+#endif // BOOST_NO_STDC_NAMESPACE
+    std::size_t dims = point_traits<Point>::dimensions(origin);
+
+    buckets_t buckets(std::accumulate(&num_buckets[0], &num_buckets[0] + dims,
+                                      std::size_t(1), 
+                                      std::multiplies<std::size_t>()));
+    vertex_iterator v, v_end;
+    for (tie(v, v_end) = vertices(g); v != v_end; ++v) {
+      std::vector<std::size_t> bucket(dims);
+      for (std::size_t i = 0; i < dims; ++i) {
+        bucket[i] = std::size_t((position[*v][i] + origin[i]) / two_k);
+        if (bucket[i] >= num_buckets[i]) bucket[i] = num_buckets[i] - 1;
+      }
+      buckets[bucket_to_index(bucket)].push_back(*v);
+    }
+
+    std::vector<std::size_t> cell(2);
+    do {
+      bucket_t& bucket = buckets[bucket_to_index(cell)];
+
+      typedef typename bucket_t::iterator bucket_iterator;
+      for (bucket_iterator u = bucket.begin(); u != bucket.end(); ++u) {
+        // Repulse vertices in this bucket
+        bucket_iterator v = u;
+        for (++v; v != bucket.end(); ++v) {
+          apply_force(*u, *v);
+          apply_force(*v, *u);
+        }
+
+        std::vector<std::size_t> start_cell(dims);
+        std::vector<std::size_t> end_cell(dims);
+
+        for (std::size_t i = 0; i < dims; ++i) {
+          start_cell[i] = cell[i] == 0? 0 : cell[i] - 1;
+          end_cell[i] = cell[i] == num_buckets[i] - 1? cell[i] : cell[i] + 1;
+        }
+
+        std::vector<std::size_t> adj_cell = start_cell;
+        do {
+          if (adj_cell != cell) {
+            // Repulse vertices in this bucket
+            bucket_t& other_bucket = buckets[bucket_to_index(adj_cell)];
+            for (v = other_bucket.begin(); v != other_bucket.end(); ++v) {
+              Point delta = detail::point_difference(position[*u],
+                                                     position[*v]);
+              Dim dist = detail::point_norm(delta);
+              if (dist < two_k) apply_force(*u, *v);
+            }
+          }
+        } while (next_bucket_in_subgrid(adj_cell, start_cell, end_cell));
+      }
+    } while (next_bucket(cell));
+  }
+  
+private:
+  bool next_bucket_in_subgrid(std::vector<std::size_t>& bucket,
+                              const std::vector<std::size_t>& start,
+                              const std::vector<std::size_t>& end)
+  {
+    // Find the next bucket 
+    std::size_t index = bucket.size() - 1;
+    do {
+      if (bucket[index]++ == end[index]) {
+        bucket[index] = start[index];
+        
+        if (index == 0)
+          return false;
+        --index;
+      } else {
+        return true;
+      }
+    } while (true);
+  }
+
+  bool next_bucket(std::vector<std::size_t>& bucket)
+  {
+    // Find the next bucket 
+    std::size_t index = bucket.size() - 1;
+    do {
+      if (++bucket[index] == num_buckets[index]) {
+        bucket[index] = 0;
+        
+        if (index == 0)
+          return false;
+        --index;
+      } else {
+        return true;
+      }
+    } while (true);
+  }
+
+  std::size_t bucket_to_index(const std::vector<std::size_t>& bucket)
+  {
+    std::size_t multiplier = 1;
+    std::size_t result = 0;
+
+    std::size_t dims = num_buckets.size();
+    for (std::size_t i = 0; i < dims; ++i) {
+      result += bucket[i] * multiplier;
+      multiplier *= num_buckets[i];
+    }
+    return result;
+  }
+
+  Point origin;
+  Point extent;
+  PositionMap position;
+  Dim two_k;
+  std::vector<std::size_t> num_buckets;
+};
+
+template<typename PositionMap, typename Graph>
+inline grid_force_pairs<PositionMap>
+make_grid_force_pairs
+  (typename property_traits<PositionMap>::value_type const& origin,
+   typename property_traits<PositionMap>::value_type const& extent,
+   const PositionMap& position, const Graph& g)
+{ return grid_force_pairs<PositionMap>(origin, extent, position, g); }
 
 template<typename Graph, typename PositionMap, 
          typename AttractiveForce, typename RepulsiveForce,

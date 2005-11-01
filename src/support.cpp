@@ -41,7 +41,7 @@ BOOST_PYTHON_MODULE(_support)
     .def(init<float, float, float>())
     .def("__getitem__", &get_subscript_key_value<point3d, std::size_t, float>)
     .def("__setitem__", &set_subscript_key_value<point3d, std::size_t, float>)
-    .def("__len__", &point_traits<point2d>::dimensions)
+    .def("__len__", &point_traits<point3d>::dimensions)
     ;
 
   enum_<default_color_type>("Color")

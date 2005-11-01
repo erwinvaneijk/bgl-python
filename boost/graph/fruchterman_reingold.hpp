@@ -25,8 +25,6 @@ namespace boost {
 
 using boost::graph::point_traits;
 
-  bool vertex_migration = false;
-
 struct square_distance_attractive_force {
   template<typename Graph, typename T>
   T
@@ -185,43 +183,31 @@ make_grid_force_pairs
    const PositionMap& position, const Graph& g)
 { return grid_force_pairs<PositionMap>(origin, extent, position, g); }
 
-template<typename Graph, typename PositionMap, typename Dim>
-void
-scale_graph(const Graph& g, PositionMap position,
-            Dim left, Dim top, Dim right, Dim bottom)
-{
-  if (num_vertices(g) == 0) return;
-
-  if (bottom > top) {
-    using std::swap;
-    swap(bottom, top);
-  }
-
-  typedef typename graph_traits<Graph>::vertex_iterator vertex_iterator;
-
-  // Find min/max ranges
-  Dim minX = position[*vertices(g).first][0], maxX = minX;
-  Dim minY = position[*vertices(g).first][1], maxY = minY;
-  vertex_iterator vi, vi_end;
-  for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-    BOOST_USING_STD_MIN();
-    BOOST_USING_STD_MAX();
-    minX = (min)(minX, position[*vi][0]);
-    maxX = (max)(maxX, position[*vi][0]);
-    minY = (min)(minY, position[*vi][1]);
-    maxY = (max)(maxY, position[*vi][1]);
-  }
-
-  // Scale to bounding box provided
-  for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-    position[*vi][0] = ((position[*vi][0] - minX) / (maxX - minX))
-                    * (right - left) + left;
-    position[*vi][1] = ((position[*vi][1] - minY) / (maxY - minY))
-                    * (top - bottom) + bottom;
-  }
-}
-
 namespace detail {
+  template<typename Point>
+  Point point_difference(const Point& p1, const Point& p2)
+  {
+    Point result;
+    std::size_t dims = point_traits<Point>::dimensions(p1);
+    for (std::size_t i = 0; i < dims; ++i)
+      result[i] = p1[i] - p2[i];
+    return result;
+  }
+
+  template<typename Point>
+  typename point_traits<Point>::component_type 
+  point_norm(const Point& p)
+  {
+#ifndef BOOST_NO_STDC_NAMESPACE
+    using std::sqrt;
+#endif
+    typename point_traits<Point>::component_type result(0);
+    std::size_t dims = point_traits<Point>::dimensions(p);
+    for (std::size_t i = 0; i < dims; ++i)
+      result += p[i] * p[i];
+    return sqrt(result);
+  }
+
   template<typename Point>
   void 
   maybe_jitter_point(Point& p1, const Point& p2, Point origin, Point extent)
@@ -229,6 +215,7 @@ namespace detail {
 #ifndef BOOST_NO_STDC_NAMESPACE
     using std::sqrt;
     using std::fabs;
+    using std::rand;
 #endif // BOOST_NO_STDC_NAMESPACE
     typedef typename point_traits<Point>::component_type Dim;
     std::size_t dims = point_traits<Point>::dimensions(p1);
@@ -237,9 +224,9 @@ namespace detail {
       if (fabs(p1[i] - p2[i]) < too_close) {
         Dim dist_to_move = sqrt(extent[i]) / Dim(200);
         if (p1[i] - origin[i] < origin[i] + extent[i] - p1[i])
-          p1[i] += dist_to_move * drand48();
+          p1[i] += dist_to_move * Dim(rand() % 100) / Dim(100);
         else
-          p1[i] -= dist_to_move * drand48();
+          p1[i] -= dist_to_move * Dim(rand() % 100) / Dim(100);
       }
     }
   }
@@ -258,7 +245,9 @@ namespace detail {
                    RepulsiveForce repulsive_force, Dim k, const Graph& g)
       : position(position), displacement(displacement), origin(origin),
         extent(extent), repulsive_force(repulsive_force), k(k), g(g)
-    { }
+    { 
+      dims = point_traits<Point>::dimensions(origin);
+    }
 
     void operator()(vertex_descriptor u, vertex_descriptor v)
     {
@@ -272,16 +261,15 @@ namespace detail {
 
         // DPG TBD: Can we use the Topology concept's
         // distance/move_position_toward to handle this?
-        Dim delta_x = position[v][0] - position[u][0];
-        Dim delta_y = position[v][1] - position[u][1];
-        Dim dist = sqrt(delta_x * delta_x + delta_y * delta_y);
+        Point delta = detail::point_difference(position[v], position[u]);
+        Dim dist = detail::point_norm(delta);
         if (dist == Dim(0)) {
-          displacement[v][0] += 0.01;
-          displacement[v][1] += 0.01;
+          for (std::size_t i = 0; i < dims; ++i)
+            displacement[v][i] += 0.01;
         } else {
           Dim fr = repulsive_force(u, v, k, dist, g);
-          displacement[v][0] += delta_x / dist * fr;
-          displacement[v][1] += delta_y / dist * fr;
+          for (std::size_t i = 0; i < dims; ++i)
+            displacement[v][i] += delta[i] / dist * fr;
         }
       }
     }
@@ -294,6 +282,7 @@ namespace detail {
     RepulsiveForce repulsive_force;
     Dim k;
     const Graph& g;
+    std::size_t dims;
   };
 
 } // end namespace detail
@@ -354,15 +343,14 @@ fruchterman_reingold_force_directed_layout
 
       // DPG TBD: Can we use the Topology concept's
       // distance/move_position_toward to handle this?
-      Dim delta_x = position[v][0] - position[u][0];
-      Dim delta_y = position[v][1] - position[u][1];
-      Dim dist = sqrt(delta_x * delta_x + delta_y * delta_y);
+      Point delta = detail::point_difference(position[v], position[u]);
+      Dim dist = detail::point_norm(delta);
       Dim fa = attractive_force(*e, k, dist, g);
 
-      displacement[v][0] -= delta_x / dist * fa;
-      displacement[v][1] -= delta_y / dist * fa;
-      displacement[u][0] += delta_x / dist * fa;
-      displacement[u][1] += delta_y / dist * fa;
+      for (std::size_t dim = 0; dim < num_dimensions; ++dim) {
+        displacement[v][dim] -= delta[dim] / dist * fa;
+        displacement[u][dim] += delta[dim] / dist * fa;
+      }
     }
 
     if (Dim temp = cool()) {
@@ -370,24 +358,12 @@ fruchterman_reingold_force_directed_layout
       for (tie(v, v_end) = vertices(g); v != v_end; ++v) {
         BOOST_USING_STD_MIN();
         BOOST_USING_STD_MAX();
-        Dim disp_size = sqrt(displacement[*v][0] * displacement[*v][0]
-                             + displacement[*v][1] * displacement[*v][1]);
+        Dim disp_size = detail::point_norm(displacement[*v]);
         for (std::size_t dim = 0; dim < num_dimensions; ++dim) {
           position[*v][dim] += displacement[*v][dim] / disp_size 
                              * (min)(disp_size, temp);
-          if (vertex_migration) {
-            position[*v][dim] = (min)(1.0f, 
-                                      (max)(-1.0f, position[*v][dim]));
-          } else {
-            position[*v][dim] = (min)(origin[dim] + extent[dim], 
-                                      (max)(origin[dim], position[*v][dim]));
-          }
-          
-          // CEM HACK: Jitter if we're on the edges
-          if(position[*v][dim] == 1.0f) // origin[dim] + extent[dim])
-            position[*v][dim] -= drand48() * .1 * extent[dim];
-          else if(position[*v][dim] == -1.0f) // origin[dim])
-            position[*v][dim] += drand48() * .1 * extent[dim];
+          position[*v][dim] = (min)(origin[dim] + extent[dim], 
+                                    (max)(origin[dim], position[*v][dim]));
         }
       }
     } else {

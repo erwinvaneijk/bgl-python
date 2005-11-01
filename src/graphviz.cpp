@@ -106,7 +106,7 @@ void export_graphviz(boost::python::class_<Graph>& graph)
     .staticmethod("read_graphviz");
   
   graph.def("write_graphviz", &write_graphviz<Graph>,
-            arg("graph"), arg("filename"), arg("node_id") = "node_id");
+            (arg("graph"), arg("filename"), arg("node_id") = "node_id"));
 }
 
 // Explicit instantiations

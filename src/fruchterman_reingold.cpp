@@ -10,6 +10,7 @@
 #include <boost/graph/fruchterman_reingold.hpp>
 #include <boost/graph/random_layout.hpp>
 #include <boost/graph/python/point2d.hpp>
+#include <boost/graph/python/point3d.hpp>
 #include <boost/graph/python/iterator.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <ctime>
@@ -99,14 +100,14 @@ private:
   bool registered_apply_force;
 };
 
-template<typename Graph>
+template<typename Graph, typename Point>
 void 
 fruchterman_reingold_force_directed_layout
   (Graph& g,
    vector_property_map
-     <point2d, typename property_map<Graph, vertex_index_t>::const_type>& pos,
-   const point2d& origin,
-   const point2d& extent,
+     <Point, typename property_map<Graph, vertex_index_t>::const_type>& pos,
+   const Point& origin,
+   const Point& extent,
    boost::python::object attractive_force,
    boost::python::object repulsive_force,
    boost::python::object force_pairs,
@@ -117,10 +118,10 @@ fruchterman_reingold_force_directed_layout
 
   typedef typename property_map<Graph, vertex_index_t>::const_type
     VertexIndexMap;
-  typedef vector_property_map<point2d, VertexIndexMap> PositionMap;
+  typedef vector_property_map<Point, VertexIndexMap> PositionMap;
 
   // Build the displacement map.
-  typedef vector_property_map<point2d, VertexIndexMap> DisplacementMap;
+  typedef vector_property_map<Point, VertexIndexMap> DisplacementMap;
   DisplacementMap displacement(num_vertices(g), get(vertex_index, g));
 
   if (!progressive) {
@@ -151,7 +152,6 @@ fruchterman_reingold_force_directed_layout
   }
 }
 
-
 void export_fruchterman_reingold_force_directed_layout()
 {
   using boost::python::arg;
@@ -163,11 +163,22 @@ void export_fruchterman_reingold_force_directed_layout()
 
 #define UNDIRECTED_GRAPH(Name,Type)                             \
   def("fruchterman_reingold_force_directed_layout",             \
-      &fruchterman_reingold_force_directed_layout<Type>,        \
+      &fruchterman_reingold_force_directed_layout<Type, point2d>, \
       (arg("graph"),                                            \
        arg("position"),                                         \
        arg("origin") = point2d(),                               \
        arg("extent") = point2d(500, 500),                       \
+       arg("attractive_force") = object(),                      \
+       arg("repulsive_force") = object(),                       \
+       arg("force_pairs") = object(),                           \
+       arg("cooling") = object(),                               \
+       arg("progressive") = false));                            \
+  def("fruchterman_reingold_force_directed_layout",             \
+      &fruchterman_reingold_force_directed_layout<Type, point3d>, \
+      (arg("graph"),                                            \
+       arg("position"),                                         \
+       arg("origin") = point3d(),                               \
+       arg("extent") = point3d(500, 500, 500),                  \
        arg("attractive_force") = object(),                      \
        arg("repulsive_force") = object(),                       \
        arg("force_pairs") = object(),                           \

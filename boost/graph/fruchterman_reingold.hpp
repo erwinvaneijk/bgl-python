@@ -170,11 +170,13 @@ namespace detail {
         // distance/move_position_toward to handle this?
         Point delta = detail::point_difference(position[v], position[u]);
         Dim dist = detail::point_norm(delta);
+
         if (dist == Dim(0)) {
           for (std::size_t i = 0; i < dims; ++i)
             displacement[v][i] += 0.01;
         } else {
           Dim fr = repulsive_force(u, v, k, dist, g);
+
           for (std::size_t i = 0; i < dims; ++i)
             displacement[v][i] += delta[i] / dist * fr;
         }
@@ -248,37 +250,30 @@ struct grid_force_pairs
     do {
       bucket_t& bucket = buckets[bucket_to_index(cell)];
 
-      typedef typename bucket_t::iterator bucket_iterator;
-      for (bucket_iterator u = bucket.begin(); u != bucket.end(); ++u) {
-        // Repulse vertices in this bucket
-        bucket_iterator v = u;
-        for (++v; v != bucket.end(); ++v) {
-          apply_force(*u, *v);
-          apply_force(*v, *u);
-        }
-
-        std::vector<std::size_t> start_cell(dims);
-        std::vector<std::size_t> end_cell(dims);
-
-        for (std::size_t i = 0; i < dims; ++i) {
-          start_cell[i] = cell[i] == 0? 0 : cell[i] - 1;
-          end_cell[i] = cell[i] == num_buckets[i] - 1? cell[i] : cell[i] + 1;
-        }
-
-        std::vector<std::size_t> adj_cell = start_cell;
-        do {
-          if (adj_cell != cell) {
-            // Repulse vertices in this bucket
-            bucket_t& other_bucket = buckets[bucket_to_index(adj_cell)];
-            for (v = other_bucket.begin(); v != other_bucket.end(); ++v) {
-              Point delta = detail::point_difference(position[*u],
-                                                     position[*v]);
-              Dim dist = detail::point_norm(delta);
-              if (dist < two_k) apply_force(*u, *v);
-            }
-          }
-        } while (next_bucket_in_subgrid(adj_cell, start_cell, end_cell));
+      std::vector<std::size_t> start_cell(dims);
+      std::vector<std::size_t> end_cell(dims);
+      
+      for (std::size_t i = 0; i < dims; ++i) {
+        start_cell[i] = cell[i] == 0? 0 : cell[i] - 1;
+        end_cell[i] = cell[i] == num_buckets[i] - 1? cell[i] : cell[i] + 1;
       }
+
+      // Repulse vertices in this bucket
+      typedef typename bucket_t::iterator bucket_iterator;
+      
+      std::vector<std::size_t> adj_cell = start_cell;
+      do {
+        for (bucket_iterator u = bucket.begin(); u != bucket.end(); ++u) {
+          // Repulse vertices in this bucket
+          bucket_t& other_bucket = buckets[bucket_to_index(adj_cell)];
+          for (bucket_iterator v = other_bucket.begin(); v != other_bucket.end(); ++v) {
+            Point delta = detail::point_difference(position[*u],
+                                                   position[*v]);
+            Dim dist = detail::point_norm(delta);
+            if (dist < two_k) apply_force(*u, *v);
+          }
+        } 
+      } while (next_bucket_in_subgrid(adj_cell, start_cell, end_cell));
     } while (next_bucket(cell));
   }
   
@@ -290,7 +285,7 @@ private:
     // Find the next bucket 
     std::size_t index = bucket.size() - 1;
     do {
-      if (bucket[index]++ == end[index]) {
+      if (bucket[index]++ >= end[index]) {
         bucket[index] = start[index];
         
         if (index == 0)
@@ -307,7 +302,7 @@ private:
     // Find the next bucket 
     std::size_t index = bucket.size() - 1;
     do {
-      if (++bucket[index] == num_buckets[index]) {
+      if (++bucket[index] >= num_buckets[index]) {
         bucket[index] = 0;
         
         if (index == 0)
@@ -396,20 +391,22 @@ fruchterman_reingold_force_directed_layout
       vertex_descriptor v = source(*e, g);
       vertex_descriptor u = target(*e, g);
 
-      // When the vertices land on top of each other, move the
-      // first vertex away from the boundaries.
-      ::boost::detail::maybe_jitter_point(position[u], position[v], 
-                                          origin, extent);
+      if (u != v) {
+        // When the vertices land on top of each other, move the
+        // first vertex away from the boundaries.
+        ::boost::detail::maybe_jitter_point(position[u], position[v], 
+                                            origin, extent);
 
-      // DPG TBD: Can we use the Topology concept's
-      // distance/move_position_toward to handle this?
-      Point delta = detail::point_difference(position[v], position[u]);
-      Dim dist = detail::point_norm(delta);
-      Dim fa = attractive_force(*e, k, dist, g);
+        // DPG TBD: Can we use the Topology concept's
+        // distance/move_position_toward to handle this?
+        Point delta = detail::point_difference(position[v], position[u]);
+        Dim dist = detail::point_norm(delta);
+        Dim fa = attractive_force(*e, k, dist, g);
 
-      for (std::size_t dim = 0; dim < num_dimensions; ++dim) {
-        displacement[v][dim] -= delta[dim] / dist * fa;
-        displacement[u][dim] += delta[dim] / dist * fa;
+        for (std::size_t dim = 0; dim < num_dimensions; ++dim) {
+          displacement[v][dim] -= delta[dim] / dist * fa;
+          displacement[u][dim] += delta[dim] / dist * fa;
+        }
       }
     }
 
@@ -419,6 +416,7 @@ fruchterman_reingold_force_directed_layout
         BOOST_USING_STD_MIN();
         BOOST_USING_STD_MAX();
         Dim disp_size = detail::point_norm(displacement[*v]);
+
         for (std::size_t dim = 0; dim < num_dimensions; ++dim) {
           position[*v][dim] += displacement[*v][dim] / disp_size 
                              * (min)(disp_size, temp);

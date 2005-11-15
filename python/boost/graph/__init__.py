@@ -172,6 +172,7 @@ depth_first_search.__doc__ = documentor.function('depth_first_search') \
     .see_also('breadth_first_search') \
     .see_also('dfs_visitor') \
     .see_also('depth_first_visit') \
+    .see_also('undirected_dfs') \
     .__str__()
 
 depth_first_visit.__doc__ = documentor.function('depth_first_visit') \
@@ -304,6 +305,14 @@ minimum_degree_ordering.__doc__ = documentor.function('minimum_degree_ordering')
     .see_also('king_ordering') \
     .__str__()
 
+page_rank.__doc__ = documentor.function('page_rank') \
+    .parameter('graph', 'the directed graph whose vertices will be ranked.') \
+    .parameter('rank_map', 
+               'a vertex -> float that will contain the ranks of each vertex in the graph') \
+    .parameter('done_or_iterations', 'this can either be an integer number of iterations to run or a Python function (or callable object) that accepts the rank map and the graph as arguments and returns True when the algorithm should terminate', '20') \
+    .paragraph('Computes the PageRank of each vertex in a directed graph. For optimal results, the graph should be strongly connected.') \
+    .__str__()
+
 prim_minimum_spanning_tree.__doc__ = documentor.function('prim_minimum_spanning_tree') \
     .parameter('graph', 
                'the graph for which the minimum spanning tree will be computed.') \
@@ -338,6 +347,15 @@ relative_betweenness_centrality.__doc__ = documentor.function('relative_betweenn
     .cpp_docs('betweenness_centrality.html') \
     .__str__()
 
+sequential_vertex_coloring.__doc__ = documentor.function('sequential_vertex_coloring') \
+    .parameter('graph', 'the graph whose vertices will be colored') \
+    .parameter('color_map', 
+               'a vertex -> int map that will contain the color of each vertex',
+               'None') \
+    .result('int') \
+    .paragraph('Colors the vertices of the graph using a simple but relatively efficient algorithm. Returns the number "n" of colors used, and the color_map will contain colors for each vertex in the range [0, n).') \
+    .__str__()
+
 strong_components.__doc__ = documentor.function('strong_components') \
     .parameter('graph', 
                'the graph on which to compute strongly connected components. The graph must be directed.') \
@@ -347,3 +365,32 @@ strong_components.__doc__ = documentor.function('strong_components') \
     .result('int') \
     .paragraph('Computes the strongly connected components in a directed graph, assigning component numbers in the range [0, n) (where n is the number of strongly connected components) to the vertices in the graph. Returns the number of strongly connected components.') \
     .__str__()
+
+topological_sort.__doc__ = documentor.function('topological_sort') \
+    .parameter('graph', 
+               'the graph to be ordered.') \
+    .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
+    .result('list') \
+    .paragraph('Computes a reverse topological ordering of the vertices in the graph. Returns the list of vertices in their new order.') \
+    .__str__()
+
+transitive_closure.__doc__ = documentor.function('transitive_closure') \
+    .parameter('graph', 
+               'the directed graph from which the transition closure will be computed.') \
+    .parameter('orig_to_copy', 'a vertex -> vertex map that maps from the vertices of the input graph to the vertices of the resulting graph.', 'None') \
+    .result('Digraph') \
+    .paragraph('Computes the transitive closure of a directed graph and returns the resulting graph. The input graph is not modified.') \
+    .__str__()
+
+undirected_dfs.__doc__ = documentor.function('undirected_dfs') \
+    .parameter('graph', 
+               'the undirected graph on which the depth-first search will run.') \
+    .parameter('visitor', 'a visitor that will receive events as the depth-first search progresses. Typically this visitor should be derived from boost.graph.dfs_visitor.', 'None') \
+    .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
+    .parameter('edge_color_map', 'an edge property map that stores the "color" of each edge, allowing the algorithm to distinguish between tree and back edges in an undirected graph', 'None') \
+    .paragraph('Performs an undirected depth-first search on the given graph.') \
+    .see_also('dfs_visitor') \
+    .see_also('depth_first_search') \
+    .see_also('depth_first_visit') \
+    .__str__()
+

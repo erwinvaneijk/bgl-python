@@ -196,7 +196,7 @@ See also:"""
         if self._cppdocs != None:
             docstring += """
 
-Complete C++ documentation available at:
+Complete C++ documentation is available at:
   http://www.boost.org/libs/graph/doc/""" + self._cppdocs
 
         return docstring

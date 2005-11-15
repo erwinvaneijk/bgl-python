@@ -161,8 +161,9 @@ Parameters:
             for line in doc.split('\n'):
                 docstring += padding + line + '\n'
                 padding = str('').ljust(maxlen + 4)
-                    
-        return docstring        
+        
+        # Pull off the final '\n'
+        return docstring[0:len(docstring)-1]
 
     def __str__(self):
         # Start with the signature

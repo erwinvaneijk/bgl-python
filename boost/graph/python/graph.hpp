@@ -117,13 +117,18 @@ class graph
     using boost::python::class_;
     using boost::python::self;
 
+#ifdef BOOST_MSVC
+#define BGL_PYTHON_HACK graph<Graph>::
+#else
+#define BGL_PYTHON_HACK
+#endif
     if (!detail::type_already_registered<vertex_descriptor>())
       class_<vertex_descriptor>("Vertex")
         .def(self == self)
         .def(self != self)
         .enable_pickling()
-        .def("__getstate__", &graph<Graph>::pod_getstate<vertex_descriptor>)
-        .def("__setstate__", &graph<Graph>::pod_setstate<vertex_descriptor>)
+        .def("__getstate__", &BGL_PYTHON_HACK pod_getstate<vertex_descriptor>)
+        .def("__setstate__", &BGL_PYTHON_HACK pod_setstate<vertex_descriptor>)
         ;
     
     if (!detail::type_already_registered<edge_descriptor>())
@@ -131,9 +136,10 @@ class graph
         .def(self == self)
         .def(self != self)
         .enable_pickling()
-        .def("__getstate__", &graph<Graph>::pod_getstate<edge_descriptor>)
-        .def("__setstate__", &graph<Graph>::pod_setstate<edge_descriptor>)
+        .def("__getstate__", &BGL_PYTHON_HACK pod_getstate<edge_descriptor>)
+        .def("__setstate__", &BGL_PYTHON_HACK pod_setstate<edge_descriptor>)
         ;
+#undef BGL_PYTHON_HACK
   }
 };
 

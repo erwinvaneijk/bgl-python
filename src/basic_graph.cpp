@@ -83,10 +83,17 @@ private:
 // ----------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------
+#ifdef BOOST_MSVC
+#  pragma warning (push)
+#  pragma warning (disable: 4355)
+#endif
 template<typename DirectedS>
 basic_graph<DirectedS>::basic_graph() 
   : inherited(), dp(build_string_property_maps<DirectedS>(this))
 { }
+#ifdef BOOST_MSVC
+#  pragma warning (pop)
+#endif
 
 template<typename DirectedS>
 basic_graph<DirectedS>::basic_graph(boost::python::object l,

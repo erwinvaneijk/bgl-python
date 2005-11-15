@@ -122,16 +122,18 @@ class graph
         .def(self == self)
         .def(self != self)
         .enable_pickling()
-        .def("__getstate__", &pod_getstate<vertex_descriptor>)
-        .def("__setstate__", &pod_setstate<vertex_descriptor>);
+        .def("__getstate__", &graph<Graph>::pod_getstate<vertex_descriptor>)
+        .def("__setstate__", &graph<Graph>::pod_setstate<vertex_descriptor>)
+        ;
     
     if (!detail::type_already_registered<edge_descriptor>())
       class_<edge_descriptor>("Edge")
         .def(self == self)
         .def(self != self)
         .enable_pickling()
-        .def("__getstate__", &pod_getstate<edge_descriptor>)
-        .def("__setstate__", &pod_setstate<edge_descriptor>);
+        .def("__getstate__", &graph<Graph>::pod_getstate<edge_descriptor>)
+        .def("__setstate__", &graph<Graph>::pod_setstate<edge_descriptor>)
+        ;
   }
 };
 

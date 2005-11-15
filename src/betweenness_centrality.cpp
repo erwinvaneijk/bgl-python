@@ -138,7 +138,7 @@ void export_betweenness_centrality()
         (arg("graph"),                                                  \
          arg("vertex_centrality_map") = static_cast<VertexCentralityMap*>(0), \
          arg("edge_centrality_map") = static_cast<EdgeCentralityMap*>(0), \
-         arg("weight_map")));                                           \
+         arg("weight_map") = static_cast<EdgeCentralityMap*>(0)));      \
     def("relative_betweenness_centrality",                              \
         &relative_betweenness_centrality<Type>,                         \
         (arg("graph"), arg("vertex_centrality_map")));                  \

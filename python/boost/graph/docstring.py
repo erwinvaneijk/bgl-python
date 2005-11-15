@@ -33,6 +33,7 @@ class function_documentor:
         self._paragraphs = list()
         self._example = None
         self._see_also = list()
+        self._cppdocs = name + ".html"
 
     def parameter(self, name, doc, default = None):
         """ 
@@ -70,6 +71,19 @@ class function_documentor:
         to.
         """
         self._see_also.append(other)
+        return self
+
+    def cpp_docs(self, html):
+        """
+        Set the file name for the C++ documentation of this routine
+        within the online Boost Graph Library documentation. This
+        should be a full file name, e.g.,
+        "bellman_ford_shortest.html", but is only required to be
+        specified when the default (name + ".html") is incorrect. Note
+        that "html" may be None to indicate that no link to the C++
+        documentation should be provided.
+        """
+        self._cppdocs = html
         return self
 
     def __signature_string(self):
@@ -178,10 +192,11 @@ See also:"""
                 docstring += other
 
         # Add the "Complete C++ documentation" section
-        docstring += """
+        if self._cppdocs != None:
+            docstring += """
 
-Complete documentation:
-  http://www.boost.org/libs/graph/doc/""" + self._name + ".html"
+Complete C++ documentation available at:
+  http://www.boost.org/libs/graph/doc/""" + self._cppdocs
 
         return docstring
 

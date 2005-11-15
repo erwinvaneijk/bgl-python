@@ -12,14 +12,16 @@
 
 namespace boost { namespace graph { namespace python {
 
-template<typename Vertex>
+template<typename Graph>
 struct py_vertex_invariant
 {
+  typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+
   explicit py_vertex_invariant(boost::python::object invariant)
     : invariant(invariant) { }
 
-  int operator()(const Vertex& v1, const Vertex& v2)
-  { return boost::python::extract<int>(invariant(v1, v2)); }
+  int operator()(const Vertex& v, const Graph& g)
+  { return boost::python::extract<int>(invariant(v, ref(g))); }
 
 private:
   boost::python::object invariant;
@@ -48,7 +50,7 @@ isomorphism
     return boost::isomorphism
       (g1, g2, 
        isomorphism_map(iso).
-       vertex_invariant(py_vertex_invariant<vertex_descriptor>(invariant)));
+       vertex_invariant(py_vertex_invariant<Graph>(invariant)));
   else
     return boost::isomorphism(g1, g2, isomorphism_map(iso));
 }

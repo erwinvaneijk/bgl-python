@@ -16,19 +16,27 @@ from dijkstra_visitor import dijkstra_visitor
 __doc__ = """Python Bindings for the Boost Graph Library
 
 This package provides Python access to the components of the Boost
-Graph Library (written in C++). Here are some links to more
-information about the Boost Graph Library:
+Graph Library (written in C++). The primary classes are Graph and
+Digraph, which are adjacency list data structures used to represent
+graphs (or networks).
+
+More information about the Boost Graph Library is available on several
+web pages:
 
   The Boost Library Collection - http://www.boost.org
   The Boost Graph Library - http://www.boost.org/libs/graph/doc
   The Parallel Boost Graph Library - http://www.osl.iu.edu/research/pbgl
   The BGL-Python Package - http://www.osl.iu.edu/~dgregor/bgl-python
 
-Copyright 2005 The Trustees of Indiana University.
+Copyright (C) 2005 The Trustees of Indiana University.
 
 Use, modification and distribution is subject to the Boost Software
 License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 http:#www.boost.org/LICENSE_1_0.txt)
+
+Authors: Douglas Gregor
+         Ben Martin
+         Andrew Lumsdaine
 """
 
 __license__ = 'Boost Software License, Version 1.0'
@@ -40,12 +48,60 @@ __version__ = '0.9'
 # have the option to do fancier things within the Python code to make
 # our lives easier.
 import docstring
-documentor = docstring.docstring()
+_documentor = docstring.docstring()
 
 # Data structure documentation
+Graph.__doc__ = """
+An undirected graph data structure.
+
+An undirected graph (also called a network) is a data structure that
+contains a set of vertices and relationships between pairs of vertices,
+called edges. Given two vertices u and v, an edge (u, v) indicates a
+relationship between them. What vertices and edges mean depends on how
+the data structure is used. For instance, vertices may be cities and
+edges are the roads that connect them. Or, edges may represent direct
+network connections between two routers or two computers. Since the
+graph is undirected, the order of the vertices in the edge does not
+matter: the relationship is mutual. For graphs where the edge direction
+does matter, use the Digraph class.
+
+Vertices and edges provide the structure of the graph, but most of the
+interesting domain-specific information of graphs is actually stored on
+the vertices and edges of the graph. For this reason, one can create
+properties via the vertex_property_map and edge_property_map methods
+to represent, for instance, the IP address of a vertex that represents
+a router or the length of a road connecting two cities.
+
+Complete C++ documentation for the adjacency list representation:
+  http://www.boost.org/libs/graph/doc/adjacency_list.html
+"""
+
+Digraph.__doc__ = """
+A directed graph data structure.
+
+A directed graph (also called a network) is a data structure that
+contains a set of vertices and relationships between pairs of
+vertices, called edges. Given two vertices u and v, an edge (u, v)
+indicates a relationship between them. What vertices and edges mean
+depends on how the data structure is used. For instance, vertices may
+be tasks and edges might mean that the source of the edge cannot be
+completed until the target task has been completed. The ordering of
+vertices in an edge is important For graphs where the edge direction
+does not matter, use the Graph class.
+
+Vertices and edges provide the structure of the graph, but most of the
+interesting domain-specific information of graphs is actually stored on
+the vertices and edges of the graph. For this reason, one can create
+properties via the vertex_property_map and edge_property_map methods
+to represent, for instance, the functionality of a vertex that represents
+a task or the method of transmission for a dependency between tasks.
+
+Complete C++ documentation for the adjacency list representation:
+  http://www.boost.org/libs/graph/doc/adjacency_list.html
+"""
 
 # Algorithm documentation
-bellman_ford_shortest_paths.__doc__ = documentor.function('bellman_ford_shortest_paths') \
+bellman_ford_shortest_paths.__doc__ = _documentor.function('bellman_ford_shortest_paths') \
     .parameter('graph', 
                'the graph on which to compute shortest paths will run. It may be either a directed or undirected graph.') \
     .parameter('root_vertex', 'the starting vertex for the shortest-path search.') \
@@ -67,7 +123,7 @@ bellman_ford_shortest_paths.__doc__ = documentor.function('bellman_ford_shortest
     .cpp_docs("bellman_ford_shortest.html") \
     .__str__()
 
-betweenness_centrality_clustering.__doc__ = documentor.function('betweenness_centrality_clustering') \
+betweenness_centrality_clustering.__doc__ = _documentor.function('betweenness_centrality_clustering') \
     .parameter('graph', 
                'the graph that will be clustered.') \
     .parameter('done',
@@ -80,7 +136,7 @@ betweenness_centrality_clustering.__doc__ = documentor.function('betweenness_cen
     .cpp_docs('bc_clustering.html') \
     .__str__()
 
-biconnected_components.__doc__ = documentor.function('biconnected_components') \
+biconnected_components.__doc__ = _documentor.function('biconnected_components') \
     .parameter('graph', 
                'the graph on which to compute biconnected components. The graph must be undirected.') \
     .parameter('component_map',
@@ -91,7 +147,7 @@ biconnected_components.__doc__ = documentor.function('biconnected_components') \
     .see_also('connected_components') \
     .__str__()
 
-brandes_betweenness_centrality.__doc__ = documentor.function('brandes_betweenness_centrality') \
+brandes_betweenness_centrality.__doc__ = _documentor.function('brandes_betweenness_centrality') \
     .parameter('graph', 'the graph on which centrality should be computed.') \
     .parameter('vertex_centrality_map',
                'a vertex -> float map that stores the centrality of each vertex in the graph.',
@@ -109,7 +165,7 @@ brandes_betweenness_centrality.__doc__ = documentor.function('brandes_betweennes
     .cpp_docs('betweenness_centrality.html') \
     .__str__()
 
-breadth_first_search.__doc__ = documentor.function('breadth_first_search') \
+breadth_first_search.__doc__ = _documentor.function('breadth_first_search') \
     .parameter('graph', 
                'the graph on which the breadth-first search will run. It may be either a directed or undirected graph.') \
     .parameter('root_vertex', 'the vertex where the breadth-first search will originate.') \
@@ -122,7 +178,7 @@ breadth_first_search.__doc__ = documentor.function('breadth_first_search') \
     .see_also('depth_first_search') \
     .__str__()
 
-central_point_dominance.__doc__ = documentor.function('central_point_dominance') \
+central_point_dominance.__doc__ = _documentor.function('central_point_dominance') \
     .parameter('graph', 'the graph on which the relative vertex centrality has been computed.') \
     .parameter('vertex_centrality_map',
                'a vertex -> float map that stores the relative centrality of each vertex in the graph.',
@@ -135,7 +191,7 @@ central_point_dominance.__doc__ = documentor.function('central_point_dominance')
     .cpp_docs('betweenness_centrality.html') \
     .__str__()
 
-circle_graph_layout.__doc__ = documentor.function('circle_graph_layout') \
+circle_graph_layout.__doc__ = _documentor.function('circle_graph_layout') \
     .parameter('graph', 'the graph on which to perform the layout.') \
     .parameter('position_map',
                'a vertex -> Point2D map that stores the position of each vertex.') \
@@ -145,7 +201,7 @@ circle_graph_layout.__doc__ = documentor.function('circle_graph_layout') \
     .see_also('kamada_kawai_spring_layout') \
     .__str__()
   
-connected_components.__doc__ = documentor.function('connected_components') \
+connected_components.__doc__ = _documentor.function('connected_components') \
     .parameter('graph', 
                'the graph on which to compute connected components. The graph must be undirected.') \
     .parameter('component_map',
@@ -156,7 +212,7 @@ connected_components.__doc__ = documentor.function('connected_components') \
     .see_also('biconnected_components') \
     .__str__()
 
-cuthill_mckee_ordering.__doc__ = documentor.function('cuthill_mckee_ordering') \
+cuthill_mckee_ordering.__doc__ = _documentor.function('cuthill_mckee_ordering') \
     .parameter('graph', 
                'the graph to be ordered.') \
     .result('list') \
@@ -165,7 +221,7 @@ cuthill_mckee_ordering.__doc__ = documentor.function('cuthill_mckee_ordering') \
     .see_also('minimum_degree_ordering') \
     .__str__()
 
-dag_shortest_paths.__doc__ = documentor.function('dag_shortest_paths') \
+dag_shortest_paths.__doc__ = _documentor.function('dag_shortest_paths') \
     .parameter('graph', 
                'the graph on which to compute shortest paths will run. It may be either a directed or undirected graph.') \
     .parameter('root_vertex', 'the starting vertex for the shortest-path search.') \
@@ -185,7 +241,7 @@ dag_shortest_paths.__doc__ = documentor.function('dag_shortest_paths') \
     .see_also('dijkstra_shortest_paths') \
     .__str__()
 
-depth_first_search.__doc__ = documentor.function('depth_first_search') \
+depth_first_search.__doc__ = _documentor.function('depth_first_search') \
     .parameter('graph', 
                'the graph on which the depth-first search will run. It may be either a directed or undirected graph.') \
     .parameter('root_vertex', 'the vertex where the depth-first search will originate. If none is provided, the depth-first search will cover all vertices in the graph', 'None') \
@@ -198,7 +254,7 @@ depth_first_search.__doc__ = documentor.function('depth_first_search') \
     .see_also('undirected_dfs') \
     .__str__()
 
-depth_first_visit.__doc__ = documentor.function('depth_first_visit') \
+depth_first_visit.__doc__ = _documentor.function('depth_first_visit') \
     .parameter('graph', 
                'the graph on which the depth-first search will run. It may be either a directed or undirected graph.') \
     .parameter('root_vertex', 'the vertex where the depth-first search will originate.') \
@@ -210,7 +266,7 @@ depth_first_visit.__doc__ = documentor.function('depth_first_visit') \
     .see_also('depth_first_search') \
     .__str__()
 
-dijkstra_shortest_paths.__doc__ = documentor.function('dijkstra_shortest_paths') \
+dijkstra_shortest_paths.__doc__ = _documentor.function('dijkstra_shortest_paths') \
     .parameter('graph', 
                'the graph on which to compute shortest paths will run. It may be either a directed or undirected graph.') \
     .parameter('root_vertex', 'the starting vertex for the shortest-path search.') \
@@ -230,7 +286,7 @@ dijkstra_shortest_paths.__doc__ = documentor.function('dijkstra_shortest_paths')
     .see_also('dijkstra_visitor') \
     .__str__()
 
-fruchterman_reingold_force_directed_layout.__doc__ = documentor.function('fruchterman_reingold_force_directed_layout') \
+fruchterman_reingold_force_directed_layout.__doc__ = _documentor.function('fruchterman_reingold_force_directed_layout') \
     .parameter('graph', 'the graph on which to perform the layout.') \
     .parameter('position',
                'a vertex -> Point2D map or vertex -> Point3D that stores the position of each vertex.') \
@@ -261,7 +317,7 @@ fruchterman_reingold_force_directed_layout.__doc__ = documentor.function('frucht
     .cpp_docs('fruchterman_reingold.html') \
     .__str__()
 
-isomorphism.__doc__ = documentor.function('isomorphism') \
+isomorphism.__doc__ = _documentor.function('isomorphism') \
     .parameter('graph1', 'the first graph') \
     .parameter('graph2', 'the second graph') \
     .parameter('isomorphism_map',
@@ -274,7 +330,7 @@ isomorphism.__doc__ = documentor.function('isomorphism') \
     .paragraph('Determines if the two input graphs are isomorphic. If so, returns True and fills in the isomorphism_map (if provided). Otherwise, it returns false.') \
     .__str__()
 
-kamada_kawai_spring_layout.__doc__ = documentor.function('kamada_kawai_spring_layout') \
+kamada_kawai_spring_layout.__doc__ = _documentor.function('kamada_kawai_spring_layout') \
     .parameter('graph', 'the graph on which to perform the layout, which must be undirected.') \
     .parameter('position',
                'a vertex -> Point2D map that stores the position of each vertex.') \
@@ -298,7 +354,7 @@ kamada_kawai_spring_layout.__doc__ = documentor.function('kamada_kawai_spring_la
     .see_also('fruchterman_reingold_force_directed_layout') \
     .__str__()
 
-king_ordering.__doc__ = documentor.function('king_ordering') \
+king_ordering.__doc__ = _documentor.function('king_ordering') \
     .parameter('graph', 
                'the graph to be ordered.') \
     .result('list') \
@@ -307,7 +363,7 @@ king_ordering.__doc__ = documentor.function('king_ordering') \
     .see_also('minimum_degree_ordering') \
     .__str__()
 
-kruskal_minimum_spanning_tree.__doc__ = documentor.function('kruskal_minimum_spanning_tree') \
+kruskal_minimum_spanning_tree.__doc__ = _documentor.function('kruskal_minimum_spanning_tree') \
     .parameter('graph', 'the graph whose spanning tree will be computed.') \
     .parameter('weight_map',
                'an edge -> float map that stores the weight of each edge in the graph.') \
@@ -317,7 +373,7 @@ kruskal_minimum_spanning_tree.__doc__ = documentor.function('kruskal_minimum_spa
     .cpp_docs('kruskal_min_spanning_tree.html') \
     .__str__()
 
-minimum_degree_ordering.__doc__ = documentor.function('minimum_degree_ordering') \
+minimum_degree_ordering.__doc__ = _documentor.function('minimum_degree_ordering') \
     .parameter('graph', 'the graph to be ordered.') \
     .parameter('supernode_size', 
                'a vertex -> int that provides the supernode size of each vertex. If omitted, the supernode size of each vertex will be initialized to 1.', 'None') \
@@ -328,7 +384,7 @@ minimum_degree_ordering.__doc__ = documentor.function('minimum_degree_ordering')
     .see_also('king_ordering') \
     .__str__()
 
-page_rank.__doc__ = documentor.function('page_rank') \
+page_rank.__doc__ = _documentor.function('page_rank') \
     .parameter('graph', 'the directed graph whose vertices will be ranked.') \
     .parameter('rank_map', 
                'a vertex -> float that will contain the ranks of each vertex in the graph') \
@@ -336,7 +392,7 @@ page_rank.__doc__ = documentor.function('page_rank') \
     .paragraph('Computes the PageRank of each vertex in a directed graph. For optimal results, the graph should be strongly connected.') \
     .__str__()
 
-prim_minimum_spanning_tree.__doc__ = documentor.function('prim_minimum_spanning_tree') \
+prim_minimum_spanning_tree.__doc__ = _documentor.function('prim_minimum_spanning_tree') \
     .parameter('graph', 
                'the graph for which the minimum spanning tree will be computed.') \
     .parameter('predecessor_map',
@@ -358,7 +414,7 @@ prim_minimum_spanning_tree.__doc__ = documentor.function('prim_minimum_spanning_
     .see_also('kruskal_minimum_spanning_tree') \
     .__str__()
 
-relative_betweenness_centrality.__doc__ = documentor.function('relative_betweenness_centrality') \
+relative_betweenness_centrality.__doc__ = _documentor.function('relative_betweenness_centrality') \
     .parameter('graph', 'the graph on which the vertex centrality has been computed.') \
     .parameter('vertex_centrality_map',
                'a vertex -> float map that stores the relative centrality of each vertex in the graph.',
@@ -370,7 +426,7 @@ relative_betweenness_centrality.__doc__ = documentor.function('relative_betweenn
     .cpp_docs('betweenness_centrality.html') \
     .__str__()
 
-sequential_vertex_coloring.__doc__ = documentor.function('sequential_vertex_coloring') \
+sequential_vertex_coloring.__doc__ = _documentor.function('sequential_vertex_coloring') \
     .parameter('graph', 'the graph whose vertices will be colored') \
     .parameter('color_map', 
                'a vertex -> int map that will contain the color of each vertex',
@@ -379,7 +435,7 @@ sequential_vertex_coloring.__doc__ = documentor.function('sequential_vertex_colo
     .paragraph('Colors the vertices of the graph using a simple but relatively efficient algorithm. Returns the number "n" of colors used, and the color_map will contain colors for each vertex in the range [0, n).') \
     .__str__()
 
-strong_components.__doc__ = documentor.function('strong_components') \
+strong_components.__doc__ = _documentor.function('strong_components') \
     .parameter('graph', 
                'the graph on which to compute strongly connected components. The graph must be directed.') \
     .parameter('component_map',
@@ -389,7 +445,7 @@ strong_components.__doc__ = documentor.function('strong_components') \
     .paragraph('Computes the strongly connected components in a directed graph, assigning component numbers in the range [0, n) (where n is the number of strongly connected components) to the vertices in the graph. Returns the number of strongly connected components.') \
     .__str__()
 
-topological_sort.__doc__ = documentor.function('topological_sort') \
+topological_sort.__doc__ = _documentor.function('topological_sort') \
     .parameter('graph', 
                'the graph to be ordered.') \
     .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
@@ -397,7 +453,7 @@ topological_sort.__doc__ = documentor.function('topological_sort') \
     .paragraph('Computes a reverse topological ordering of the vertices in the graph. Returns the list of vertices in their new order.') \
     .__str__()
 
-transitive_closure.__doc__ = documentor.function('transitive_closure') \
+transitive_closure.__doc__ = _documentor.function('transitive_closure') \
     .parameter('graph', 
                'the directed graph from which the transition closure will be computed.') \
     .parameter('orig_to_copy', 'a vertex -> vertex map that maps from the vertices of the input graph to the vertices of the resulting graph.', 'None') \
@@ -405,7 +461,7 @@ transitive_closure.__doc__ = documentor.function('transitive_closure') \
     .paragraph('Computes the transitive closure of a directed graph and returns the resulting graph. The input graph is not modified.') \
     .__str__()
 
-undirected_dfs.__doc__ = documentor.function('undirected_dfs') \
+undirected_dfs.__doc__ = _documentor.function('undirected_dfs') \
     .parameter('graph', 
                'the undirected graph on which the depth-first search will run.') \
     .parameter('visitor', 'a visitor that will receive events as the depth-first search progresses. Typically this visitor should be derived from boost.graph.dfs_visitor.', 'None') \

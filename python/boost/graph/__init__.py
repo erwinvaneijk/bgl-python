@@ -6,12 +6,34 @@
 
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
+import _support
 from _support import *
 from _graph import *
 from bfs_visitor import bfs_visitor
 from bellman_ford_visitor import bellman_ford_visitor
 from dfs_visitor import dfs_visitor
 from dijkstra_visitor import dijkstra_visitor
+
+__doc__ = """Python Bindings for the Boost Graph Library
+
+This package provides Python access to the components of the Boost
+Graph Library (written in C++). Here are some links to more
+information about the Boost Graph Library:
+
+  The Boost Library Collection - http://www.boost.org
+  The Boost Graph Library - http://www.boost.org/libs/graph/doc
+  The Parallel Boost Graph Library - http://www.osl.iu.edu/research/pbgl
+  The BGL-Python Package - http://www.osl.iu.edu/~dgregor/bgl-python
+
+Copyright 2005 The Trustees of Indiana University.
+
+Use, modification and distribution is subject to the Boost Software
+License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+http:#www.boost.org/LICENSE_1_0.txt)
+"""
+
+__license__ = 'Boost Software License, Version 1.0'
+__version__ = '0.9'
 
 # Introduce documentation for all of the algorithms in the module.
 # Doing so here is *much* easier than doing it in the C++ code,
@@ -21,7 +43,9 @@ from dijkstra_visitor import dijkstra_visitor
 import docstring
 documentor = docstring.docstring()
 
-# The actual documentation
+# Data structure documentation
+
+# Algorithm documentation
 bellman_ford_shortest_paths.__doc__ = documentor.function('bellman_ford_shortest_paths') \
     .parameter('graph', 
                'the graph on which to compute shortest paths will run. It may be either a directed or undirected graph.') \

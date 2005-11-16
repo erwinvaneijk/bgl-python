@@ -31,22 +31,35 @@ BOOST_PYTHON_MODULE(_support)
   using boost::python::enum_;
   using boost::python::init;
 
-  class_<point2d>("Point2D")
-    .def(init<float, float>())
-    .def("__getitem__", &get_subscript_key_value<point2d, std::size_t, float>)
-    .def("__setitem__", &set_subscript_key_value<point2d, std::size_t, float>)
-    .def("__len__", &point_traits<point2d>::dimensions)
+  class_<point2d>("Point2D",
+                  "A simple two-dimensional point for vertex positions")
+    .def(init<float, float>("Point2D(x, y)\nCreates a new point (x, y)."))
+    .def("__getitem__", &get_subscript_key_value<point2d, std::size_t, float>,
+         "__getitem__(self, dim) -> float\n"
+         "Returns the value in the given dimension.")
+    .def("__setitem__", &set_subscript_key_value<point2d, std::size_t, float>,
+         "__setitem__(self, dim, value)\nSets the value in a given dimension.")
+    .def("__len__", &point_traits<point2d>::dimensions,
+         "__len__(self) -> int\nReturns the number of dimensions (2).")
     ;
-  class_<point3d>("Point3D")
-    .def(init<float, float, float>())
-    .def("__getitem__", &get_subscript_key_value<point3d, std::size_t, float>)
-    .def("__setitem__", &set_subscript_key_value<point3d, std::size_t, float>)
-    .def("__len__", &point_traits<point3d>::dimensions)
+  class_<point3d>("Point3D", 
+                  "A simple three-dimensional point for vertex positions")
+    .def(init<float, float, float>("Point3D(x, y, z)\n"
+                                   "Creates a new point (x, y, z)."))
+    .def("__getitem__", &get_subscript_key_value<point3d, std::size_t, float>,
+         "__getitem__(self, dim) -> float\n"
+         "Returns the value in the given dimension.")
+    .def("__setitem__", &set_subscript_key_value<point3d, std::size_t, float>,
+         "__setitem__(self, dim, value)\nSets the value in a given dimension.")
+    .def("__len__", &point_traits<point3d>::dimensions,
+         "__len__(self) -> int\nReturns the number of dimensions (3).")
     ;
 
   enum_<default_color_type>("Color")
     .value("white", color_traits<default_color_type>::white())
     .value("gray", color_traits<default_color_type>::gray())
+    .value("green", color_traits<default_color_type>::green())
+    .value("red", color_traits<default_color_type>::red())
     .value("black", color_traits<default_color_type>::black())
     ;
 }

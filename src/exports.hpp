@@ -15,10 +15,10 @@ template<typename DirectedS> void export_basic_graph(const char* name);
 template<typename Graph> void export_property_maps();
 
 template<typename Graph>
-  void export_generators(boost::python::class_<Graph>& graph);
+void export_generators(boost::python::class_<Graph>& graph, const char* name);
 
 template<typename Graph>
-  void export_graphviz(boost::python::class_<Graph>& graph);
+void export_graphviz(boost::python::class_<Graph>& graph, const char* name);
 
 template<typename Graph>
 boost::python::object 

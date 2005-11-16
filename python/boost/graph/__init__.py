@@ -6,7 +6,6 @@
 
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
-import _support
 from _support import *
 from _graph import *
 from bfs_visitor import bfs_visitor

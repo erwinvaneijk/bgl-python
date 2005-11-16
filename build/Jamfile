@@ -27,6 +27,7 @@ extension _graph
         ../src/module.cpp
         # Graph types
         ../src/basic_graph.cpp
+        ../src/graphdocs.cpp
         ../src/properties.cpp
         # Algorithms
         ../src/bellman_ford_shortest_paths.cpp

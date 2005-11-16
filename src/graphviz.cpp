@@ -13,8 +13,42 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <string>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace boost { namespace graph { namespace python {
+
+const char* read_graphviz_doc = 
+"read_graphviz(filename, node_id = 'node_id') -> GRAPH\n\n"
+"Loads a graph written in GraphViz DOT format from the file filename.\n"
+"Parameters:\n"
+"  filename  The name of the file to load.\n"
+"  node_id   The name given to the property map that will store the\n"
+"            identifier associated with each vertex in the DOT file.\n\n"
+"Exceptions:\n"
+"  directed_graph_error    Thrown if one tries to read a directed graph\n"
+"                          into the Graph class.\n"
+"  undirected_graph_error  Thrown if one tries to read an undirected\n"
+"                          graph into the Digraph class.\n\n"
+"See also:\n"
+"  write_graphviz\n\n"
+"The GraphViz DOT language is described here:\n"
+"  http://www.graphviz.org/doc/info/lang.html\n\n"
+"Complete C++ documentation is available at:\n"
+"  http://www.boost.org/libs/graph/doc/read_graphviz.html\n"
+  ;
+
+const char* write_graphviz_doc = 
+"write_graphviz(self, filename)\n\n"
+"Writes the graph into the file filename (overwriting the file if it \n"
+"already exists) using the GraphViz DOT format.\n\n"
+"See also:\n"
+"  read_graphviz\n\n"
+"The GraphViz DOT language is described here:\n"
+"  http://www.graphviz.org/doc/info/lang.html\n\n"
+"Complete C++ documentation is available at:\n"
+"  http://www.boost.org/libs/graph/doc/write-graphviz.html\n"
+  ;
 
 template<typename Graph>
 Graph*
@@ -94,24 +128,30 @@ void export_graphviz_exceptions()
 }
 
 template<typename Graph>
-void export_graphviz(boost::python::class_<Graph>& graph)
+void export_graphviz(boost::python::class_<Graph>& graph, const char* name)
 {
   using boost::python::arg;
   using boost::python::manage_new_object;
   using boost::python::return_value_policy;
 
+  std::string my_read_graphviz_doc(read_graphviz_doc);
+  algorithm::replace_all(my_read_graphviz_doc, "GRAPH", name);
+
   graph.def("read_graphviz", &read_graphviz<Graph>,
             return_value_policy<manage_new_object>(),
-            (arg("filename"), arg("node_id") = "node_id"))
+            (arg("filename"), arg("node_id") = "node_id"),
+            my_read_graphviz_doc.c_str())
     .staticmethod("read_graphviz");
   
   graph.def("write_graphviz", &write_graphviz<Graph>,
-            (arg("graph"), arg("filename"), arg("node_id") = "node_id"));
+            (arg("graph"), arg("filename"), arg("node_id") = "node_id"),
+            write_graphviz_doc);
 }
 
 // Explicit instantiations
 #define UNDIRECTED_GRAPH(Name,Type)                                     \
-  template void export_graphviz(boost::python::class_<Type>& graph);    \
+  template void export_graphviz(boost::python::class_<Type>& graph,     \
+                                const char* name);                      \
   template                                                              \
     Type* read_graphviz(const std::string&, const std::string&);        \
   template                                                              \

@@ -49,13 +49,13 @@ public:
     return n; 
   }
 
-  static void declare(const char* name)
+  static void declare(const char* name, const char* docstring = 0)
   {
     using boost::python::class_;
     using boost::python::no_init;
     using boost::python::objects::identity_function;
     if (!detail::type_already_registered<simple_python_iterator>())
-      class_<simple_python_iterator<Iterator> >(name, no_init)
+      class_<simple_python_iterator<Iterator> >(name, docstring, no_init)
         .def("__iter__", identity_function())
         .def("__len__", &simple_python_iterator<Iterator>::len)
         .def("next", &simple_python_iterator<Iterator>::next)

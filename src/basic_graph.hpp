@@ -70,8 +70,6 @@ get(const basic_index_map<Key, IndexMap>& pm,
     typename basic_index_map<Key, IndexMap>::key_type const& key)
 { return get(pm.id, key.base); }
 
-enum graph_file_kind { gfk_adjlist, gfk_graphviz };
-
 struct stored_minstd_rand
 {
   stored_minstd_rand(int seed = 1) : gen(seed) { }
@@ -133,7 +131,6 @@ class basic_graph
   basic_graph();
   basic_graph(boost::python::object, 
               const std::string& name_map = std::string());
-  basic_graph(const std::string& filename, graph_file_kind kind); 
 
   template<typename InputIterator>
   basic_graph(InputIterator first, InputIterator last,
@@ -153,46 +150,6 @@ class basic_graph
   
   Edge add_edge(Vertex u, Vertex v);
   void remove_edge(Edge edge);
-  
-  
-  // Vertex property maps
-  VertexIndexMap get_vertex_index_map() const 
-  { return get(vertex_index, base()); }
-  
-  template<typename T> 
-  vector_property_map<T, VertexIndexMap> 
-  get_vertex_map(const std::string& name);
-  
-  bool has_vertex_map(const std::string& name) const;
-  
-  // Edge property maps
-  EdgeIndexMap get_edge_index_map() const 
-  { return get(edge_index, base()); }
-  
-  template<typename T> 
-  vector_property_map<T, EdgeIndexMap> 
-  get_edge_map(const std::string& name);
-  
-  bool has_edge_map(const std::string& name) const;
-  
-  // Graph I/O
-  void read_adjlist(const std::string& filename, 
-                    const std::string& node_id = std::string("node_id"));
-  
-  void write_adjlist(const std::string& filename,
-                     const std::string& node_id = std::string("node_id"));
-
-  void write_adjlist_def(const std::string& filename)
-  { write_adjlist(filename); }
-
-  void read_graphviz(const std::string& filename, 
-                     const std::string& node_id = std::string("node_id"));
-  
-  void write_graphviz(const std::string& filename,
-                      const std::string& node_id = std::string("node_id"));
-  
-  void write_graphviz_def(const std::string& filename)
-  { write_graphviz(filename); }
   
   inherited&       base()       { return *this; }
   const inherited& base() const { return *this; }
@@ -353,12 +310,12 @@ void export_basic_graph(const char* name);
 template<typename DirectedS>
 typename basic_graph<DirectedS>::VertexIndexMap
 get(vertex_index_t, const basic_graph<DirectedS>& g)
-{ return g.get_vertex_index_map(); }
+{ return get(vertex_index, g.base()); }
 
 template<typename DirectedS>
 typename basic_graph<DirectedS>::EdgeIndexMap
 get(edge_index_t, const basic_graph<DirectedS>& g)
-{ return g.get_edge_index_map(); }
+{ return get(edge_index, g.base()); }
 
 template<typename DirectedS>
 struct graph_pickle_suite : boost::python::pickle_suite
@@ -456,6 +413,10 @@ public:
 #endif    
   }
 };
+
+extern const char* graph_init_doc;
+extern const char* vertex_property_map_doc;
+extern const char* edge_property_map_doc;
 
 } } } // end namespace boost::graph::python
 

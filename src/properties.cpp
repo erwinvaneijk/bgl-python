@@ -26,11 +26,11 @@ object vertex_property_map(const Graph& g, const std::string type)
   typedef typename graph_traits<Graph>::edge_descriptor edge_descriptor;
 
   if (type == "index")
-    return object(g.get_vertex_index_map());
+    return object(get(vertex_index, g));
 #define VERTEX_PROPERTY(Name,Type,Kind)                                 \
   else if (type == #Name)                                               \
     return object(vector_property_map<Type, IndexMap>(num_vertices(g),  \
-                                                      g.get_vertex_index_map()));
+                                                      get(vertex_index, g)));
 #define EDGE_PROPERTY(Name,Type,Kind)
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
@@ -47,12 +47,12 @@ object edge_property_map(const Graph& g, const std::string type)
   typedef typename graph_traits<Graph>::edge_descriptor edge_descriptor;
 
   if (type == "index")
-    return object(g.get_edge_index_map());
+    return object(get(edge_index, g));
 #define VERTEX_PROPERTY(Name,Type,Kind)
 #define EDGE_PROPERTY(Name,Type,Kind)                                   \
   else if (type == #Name)                                               \
     return object(vector_property_map<Type, IndexMap>(num_edges(g),     \
-                                                      g.get_edge_index_map()));
+                                                      get(edge_index, g)));
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY

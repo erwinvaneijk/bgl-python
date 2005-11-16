@@ -18,6 +18,33 @@
 
 namespace boost { namespace graph { namespace python {
 
+enum graph_doc_kind {
+  gd_vertex_iterator,
+  gd_num_vertices,
+  gd_vertices,
+  gd_edge_iterator,
+  gd_num_edges,
+  gd_edges,
+  gd_out_edge_iterator,
+  gd_source,
+  gd_target,
+  gd_out_degree,
+  gd_out_edges,
+  gd_in_edge_iterator,
+  gd_in_degree,
+  gd_in_edges,
+  gd_adjacency_iterator,
+  gd_adjacent_vertices,
+  gd_add_edge,
+  gd_remove_edge,
+  gd_add_vertex,
+  gd_clear_vertex,
+  gd_remove_vertex,
+  gd_last
+};
+
+extern const char* graph_docs[gd_last];
+
 using boost::python::class_;
 
 namespace detail {
@@ -164,9 +191,10 @@ public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   vertex_list_graph(class_<T, Basis, HeldType, NonCopyable>& graph)
   {
-    simple_python_iterator<vertex_iterator>::declare("VertexIterator");
-    graph.def("num_vertices", &py_num_vertices)
-         .add_property("vertices", &py_vertices);
+    simple_python_iterator<vertex_iterator>
+      ::declare("VertexIterator", graph_docs[gd_vertex_iterator]);
+    graph.def("num_vertices", &py_num_vertices, graph_docs[gd_num_vertices])
+         .add_property("vertices", &py_vertices, graph_docs[gd_vertices]);
   }
 };
 
@@ -191,9 +219,10 @@ public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   edge_list_graph(class_<T, Basis, HeldType, NonCopyable>& graph)
   {
-    simple_python_iterator<edge_iterator>::declare("EdgeIterator");
-    graph.def("num_edges", &py_num_edges)
-         .add_property("edges", &py_edges);
+    simple_python_iterator<edge_iterator>
+      ::declare("EdgeIterator", graph_docs[gd_edge_iterator]);
+    graph.def("num_edges", &py_num_edges, graph_docs[gd_num_edges])
+         .add_property("edges", &py_edges, graph_docs[gd_num_edges]);
   }
 };
 
@@ -231,11 +260,12 @@ public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   incidence_graph(class_<T, Basis, HeldType, NonCopyable>& graph)
   {
-    simple_python_iterator<out_edge_iterator>::declare("OutEdgeIterator");
-    graph.def("source", &py_source)
-         .def("target", &py_target)
-         .def("out_degree", &py_out_degree)
-         .def("out_edges", &py_out_edges);
+    simple_python_iterator<out_edge_iterator>
+      ::declare("OutEdgeIterator", graph_docs[gd_out_edge_iterator]);
+    graph.def("source", &py_source, graph_docs[gd_source])
+         .def("target", &py_target, graph_docs[gd_target])
+         .def("out_degree", &py_out_degree, graph_docs[gd_out_degree])
+         .def("out_edges", &py_out_edges, graph_docs[gd_out_edges]);
   }
 };
 
@@ -263,9 +293,10 @@ public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   bidirectional_graph(class_<T, Basis, HeldType, NonCopyable>& graph)
   {
-    simple_python_iterator<in_edge_iterator>::declare("InEdgeIterator");
-    graph.def("in_degree", &py_in_degree)
-         .def("in_edges", &py_in_edges);
+    simple_python_iterator<in_edge_iterator>
+      ::declare("InEdgeIterator", graph_docs[gd_in_edge_iterator]);
+    graph.def("in_degree", &py_in_degree, graph_docs[gd_in_degree])
+         .def("in_edges", &py_in_edges, graph_docs[gd_in_edges]);
   }
 };
 
@@ -286,8 +317,10 @@ public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   adjacency_graph(class_<T, Basis, HeldType, NonCopyable>& graph)
   {
-    simple_python_iterator<adjacency_iterator>::declare("InEdgeIterator");
-    graph.def("adjacent_vertices", &py_adjacent_vertices);
+    simple_python_iterator<adjacency_iterator>
+      ::declare("AdjacencyIterator", graph_docs[gd_adjacency_iterator]);
+    graph.def("adjacent_vertices", &py_adjacent_vertices, 
+              graph_docs[gd_adjacent_vertices]);
   }
 };
 
@@ -345,11 +378,12 @@ public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   mutable_graph(class_<T, Basis, HeldType, NonCopyable>& graph)
   {
-    graph.def("add_edge", &py_add_edge)
-         .def("remove_edge", &py_remove_edge)
-         .def("add_vertex", &py_add_vertex)
-         .def("clear_vertex", &py_clear_vertex)
-         .def("remove_vertex", &py_remove_vertex);
+    graph.def("add_edge", &py_add_edge, graph_docs[gd_add_edge])
+         .def("remove_edge", &py_remove_edge, graph_docs[gd_remove_edge])
+         .def("add_vertex", &py_add_vertex, graph_docs[gd_add_vertex])
+         .def("clear_vertex", &py_clear_vertex, graph_docs[gd_clear_vertex])
+         .def("remove_vertex", &py_remove_vertex, graph_docs[gd_remove_vertex])
+      ;
   } 
 };
 

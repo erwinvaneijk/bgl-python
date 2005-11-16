@@ -118,6 +118,8 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
       (g.add_edge(vertices[extract<vertices_size_type>(e[0])],
                   vertices[extract<vertices_size_type>(e[1])]));
   }
+
+  dynamic_properties& dp = g.get_dynamic_properties();
   
   // Get the vertex properties
   typedef typename Graph::VertexIndexMap VertexIndexMap;
@@ -126,11 +128,13 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   while (vertex_map_names != list()) {
     object name_obj = vertex_map_names.pop(0);
     const char* name = extract<const char*>(name_obj);
-    vector_property_map<object, VertexIndexMap> pmap = 
-      g.template get_vertex_map<object>(name);
+    vector_property_map<object, VertexIndexMap> pmap(num_vertices(g),
+                                                     get(vertex_index, g));
     tuple values = extract<tuple>(vertex_properties[name_obj]);
     for (vertices_size_type i = 0; i < num_vertices(g); ++i)
       put(pmap, vertices[i], values[i]);
+
+    dp.property(name, pmap);
   }
 
   // Get the edge properties
@@ -140,11 +144,13 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   while (edge_map_names != list()) {
     object name_obj = edge_map_names.pop(0);
     const char* name = extract<const char*>(name_obj);
-    vector_property_map<object, EdgeIndexMap> pmap = 
-      g.template get_edge_map<object>(name);
+    vector_property_map<object, EdgeIndexMap> pmap(num_edges(g),
+                                                   get(edge_index, g));
     tuple values = extract<tuple>(edge_properties[name_obj]);
     for (edges_size_type i = 0; i < num_edges(g); ++i)
       put(pmap, the_edges[i], values[i]);
+
+    dp.property(name, pmap);
   }
 }
 

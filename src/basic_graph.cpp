@@ -11,6 +11,7 @@
 #include <boost/graph/python/graph.hpp>
 #include "exports.hpp"
 #include "graph_types.hpp"
+#include <boost/algorithm/string/replace.hpp>
 
 namespace boost { 
 
@@ -65,13 +66,13 @@ struct build_string_property_maps
       typedef python_dynamic_adaptor<property_map_type> adaptor_type;
       result.reset
         (new adaptor_type(property_map_type(num_vertices(*g),
-                                            g->get_vertex_index_map())));
+                                            get(vertex_index, *g))));
     } else if (key.type() == typeid(typename basic_graph<DirectedS>::Edge)) {
       typedef vector_property_map<std::string, EdgeIndexMap> property_map_type;
       typedef python_dynamic_adaptor<property_map_type> adaptor_type;
       result.reset
         (new adaptor_type(property_map_type(num_edges(*g),
-                                            g->get_edge_index_map())));
+                                            get(edge_index, *g))));
     } 
     return result;
   }
@@ -91,21 +92,17 @@ template<typename DirectedS>
 basic_graph<DirectedS>::basic_graph() 
   : inherited(), dp(build_string_property_maps<DirectedS>(this))
 { }
-#ifdef BOOST_MSVC
-#  pragma warning (pop)
-#endif
 
 template<typename DirectedS>
 basic_graph<DirectedS>::basic_graph(boost::python::object l,
                                     const std::string& name_map)
-  : inherited()
+  : inherited(), dp(build_string_property_maps<DirectedS>(this))
 {
   using boost::python::object;
   std::map<object, vertex_descriptor> verts;
   int len = ::boost::python::extract<int>(l.attr("__len__")());
 
   vector_property_map<object, VertexIndexMap> name;
-  if (!name_map.empty()) name = get_vertex_map<object>(name_map);
 
   for (int  i = 0; i < len; ++i) {
     vertex_descriptor u, v;
@@ -128,135 +125,13 @@ basic_graph<DirectedS>::basic_graph(boost::python::object l,
 
     add_edge(u, v);
   }
-}
 
-template<typename DirectedS>
-basic_graph<DirectedS>::basic_graph(const std::string& filename, 
-                                    graph_file_kind kind)
-  : inherited(), dp(build_string_property_maps<DirectedS>(this))
-{
-  switch (kind) {
-  case gfk_adjlist:
-    read_adjlist(filename);
-    break;
-  case gfk_graphviz:
-    read_graphviz(filename);
-    break;
-  }
+  if (!name_map.empty())
+    dp.property(name_map, name);
 }
-
-// ----------------------------------------------------------
-// Vertex properties
-// ----------------------------------------------------------
-template<typename DirectedS>
-template<typename T> 
-vector_property_map<T, typename basic_graph<DirectedS>::VertexIndexMap> 
-basic_graph<DirectedS>::get_vertex_map(const std::string& name)
-{
-  typedef vector_property_map<T, VertexIndexMap> result_type;
-  typedef python_dynamic_adaptor<result_type> adaptor_type;
-  
-  dynamic_properties::iterator i = dp.lower_bound(name);
-  while (i != dp.end() && i->first == name) {
-    if (i->second->key() == typeid(Vertex)) {
-      if (i->second->value() == typeid(T)) {
-        return dynamic_cast<adaptor_type&>(*i->second).base();
-      } else {
-        // Convert the property map element-by-element to the
-        // requested type.
-        result_type result(num_vertices(*this), get_vertex_index_map());
-        for(vertex_iterator v = vertices(*this).first; v != vertices(*this).second;
-            ++v) {
-          put(result, *v, lexical_cast<T>(i->second->get_string(*v)));
-        }
-        
-        // Replace the existing property map with the converted one
-        adaptor_type* adaptor = new adaptor_type(result);
-        delete i->second;
-        i->second = adaptor;
-        
-        // Return the new property map.
-        return result;
-      }
-    }
-    ++i;
-  }
-  
-  typedef vector_property_map<T, VertexIndexMap> property_map_type;
-  typedef python_dynamic_adaptor<property_map_type> adaptor_type;
-  property_map_type result(num_vertices(*this), get_vertex_index_map());
-  dp.insert(name, 
-            std::auto_ptr<dynamic_property_map>(new adaptor_type(result)));
-  return result;
-}
-
-template<typename DirectedS>
-bool
-basic_graph<DirectedS>::has_vertex_map(const std::string& name) const
-{
-  dynamic_properties::const_iterator i = dp.lower_bound(name);
-  while (i != dp.end() && i->first == name) {
-    if (i->second->key() == typeid(Vertex))
-      return true;
-  }
-  return false;
-}
-
-// ----------------------------------------------------------
-// Edge properties
-// ----------------------------------------------------------
-template<typename DirectedS>
-template<typename T> 
-vector_property_map<T, typename basic_graph<DirectedS>::EdgeIndexMap> 
-basic_graph<DirectedS>::get_edge_map(const std::string& name)
-{
-  typedef vector_property_map<T, EdgeIndexMap> result_type;
-  typedef python_dynamic_adaptor<result_type> adaptor_type;
-  
-  dynamic_properties::iterator i = dp.lower_bound(name);
-  while (i != dp.end() && i->first == name) {
-    if (i->second->key() == typeid(Edge)) {
-      if (i->second->value() == typeid(T)) {
-        return dynamic_cast<adaptor_type&>(*i->second).base();
-      } else {
-        // Convert the property map element-by-element to the
-        // requested type.
-        result_type result(num_vertices(*this), get_edge_index_map());
-        for(edge_iterator e = edges(*this).first; e != edges(*this).second; ++e) {
-          put(result, *e, lexical_cast<T>(i->second->get_string(*e)));
-        }
-        
-        // Replace the existing property map with the converted one
-        adaptor_type* adaptor = new adaptor_type(result);
-        delete i->second;
-        i->second = adaptor;
-        
-        // Return the new property map.
-        return result;
-      }
-    }
-    ++i;
-  }
-
-  typedef vector_property_map<T, EdgeIndexMap> property_map_type;
-  typedef python_dynamic_adaptor<property_map_type> adaptor_type;
-  property_map_type result(num_edges(*this), get_edge_index_map());
-  dp.insert(name, 
-            std::auto_ptr<dynamic_property_map>(new adaptor_type(result)));
-  return result;
-}
-
-template<typename DirectedS>
-bool
-basic_graph<DirectedS>::has_edge_map(const std::string& name) const
-{
-  dynamic_properties::const_iterator i = dp.lower_bound(name);
-  while (i != dp.end() && i->first == name) {
-    if (i->second->key() == typeid(Edge))
-      return true;
-  }
-  return false;
-}
+#ifdef BOOST_MSVC
+#  pragma warning (pop)
+#endif
 
 // ----------------------------------------------------------
 // Mutable graph
@@ -387,22 +262,15 @@ void export_basic_graph(const char* name)
 
     class_<Graph> graph(name);
 
+    std::string my_graph_init_doc(graph_init_doc);
+    algorithm::replace_all(my_graph_init_doc, "GRAPH", std::string(name));
+
     graph
         // Constructors
         .def(init<object>())
-        .def(init<object, std::string>())
-        .def("is_directed", &Graph::is_directed)
-        // Vertex property maps
-        .def("has_vertex_map", &Graph::has_vertex_map)
-        // Edge property maps
-        .def("has_edge_map", &Graph::has_edge_map)
-#if 0
-        // Graph I/O
-        .def("read_adjlist", &Graph::read_adjlist)
-        .def("write_adjlist", &Graph::write_adjlist)
-        .def("write_adjlist", &Graph::write_adjlist_def)
-        .def("read_graphviz", &Graph::read_graphviz)
-#endif
+        .def(init<object, std::string>(my_graph_init_doc.c_str()))
+        .def("is_directed", &Graph::is_directed,
+             "is_directed(self) -> bool\n\nWhether the graph is directed or not.")
         // Pickling
         .def_pickle(graph_pickle_suite<DirectedS>())
       ;
@@ -415,15 +283,17 @@ void export_basic_graph(const char* name)
     boost::graph::python::adjacency_graph<Graph> ag(graph);
     boost::graph::python::mutable_graph<Graph, false, false> mg(graph);
 
-    export_generators(graph);
-    export_graphviz(graph);
+    export_generators(graph, name);
+    export_graphviz(graph, name);
 
     // Properties
     export_property_maps<Graph>();
     graph.def("vertex_property_map", &vertex_property_map<Graph>,
-              (arg("graph"), arg("type")));
+              (arg("graph"), arg("type")),
+              vertex_property_map_doc);
     graph.def("edge_property_map", &edge_property_map<Graph>,
-              (arg("graph"), arg("type")));
+              (arg("graph"), arg("type")),
+              edge_property_map_doc);
   }
 }
 
@@ -439,13 +309,5 @@ template void basic_graph<undirectedS>::renumber_vertices();
 template void basic_graph<undirectedS>::renumber_edges();
 template void basic_graph<bidirectionalS>::renumber_vertices();
 template void basic_graph<bidirectionalS>::renumber_edges();
-
-template 
-  vector_property_map<object, property_map<Graph, edge_index_t>::const_type>
-  basic_graph<undirectedS>::get_edge_map<object>(const std::string&);
-
-template 
-  vector_property_map<object, property_map<Digraph, edge_index_t>::const_type>
-  basic_graph<bidirectionalS>::get_edge_map<object>(const std::string&);
 
 } } } // end namespace boost::graph::python

@@ -15,6 +15,7 @@
 #include <boost/graph/python/iterator.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/graph/iteration_macros.hpp>
+#include <boost/graph/properties.hpp>
 
 namespace boost { namespace graph { namespace python {
 

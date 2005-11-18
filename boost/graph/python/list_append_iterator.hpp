@@ -24,7 +24,7 @@ class list_append_iterator
     template<typename T>
     const T& operator=(const T& value)
     {
-      self->values.append(value);
+      self->values->append(value);
       return value;
     }
     
@@ -35,7 +35,7 @@ class list_append_iterator
 
 public:
   list_append_iterator() : values() { }
-  list_append_iterator(boost::python::list values) : values(values) { }
+  list_append_iterator(boost::python::list& values) : values(&values) { }
   
   append_proxy operator*() { return append_proxy(this); }
   
@@ -43,7 +43,7 @@ public:
   list_append_iterator operator++(int) { return *this; }
 
 protected:
-  boost::python::list values;
+  boost::python::list* values;
 };
 
 } } } // end namespace boost::graph::python

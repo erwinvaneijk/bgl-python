@@ -70,6 +70,31 @@ get(const basic_index_map<Key, IndexMap>& pm,
     typename basic_index_map<Key, IndexMap>::key_type const& key)
 { return get(pm.id, key.base); }
 
+class resizable_property_map : boost::noncopyable
+{
+ public:
+  /* Invoked when a new value has been added to the end of the list of
+     keys. The property map may resize it's internal data structure to
+     accomodate this. Returns true so long as this property map is
+     still "relevant" and should be kept. */ 
+  virtual bool added_key() = 0;
+
+  /* The key with the given index is being removed, and the value with
+     the last index will replace it. Returns true so long as this
+     property map is still "relevant" and should be kept. */
+  virtual bool removed_key(std::size_t index) = 0;
+
+  /* All of the keys in the graph have been shuffled. This vector maps
+     from the old indices to the new indices. Returns true so long as
+     this property map is still "relevant" and should be kept. */
+  virtual bool shuffled_keys(const std::vector<std::size_t>& new_indices) = 0;
+
+  virtual ~resizable_property_map() {}
+
+ protected:
+  resizable_property_map() {}
+};
+
 struct stored_minstd_rand
 {
   stored_minstd_rand(int seed = 1) : gen(seed) { }
@@ -153,6 +178,19 @@ class basic_graph
 
   std::pair<Edge, bool> edge(Vertex u, Vertex v) const;
   
+  // Property map handling
+  void register_vertex_map(std::auto_ptr<resizable_property_map> map)
+  { 
+    vertex_maps.push_back(map.get()); 
+    map.release();
+  }
+
+  void register_edge_map(std::auto_ptr<resizable_property_map> map)
+  { 
+    edge_maps.push_back(map.get()); 
+    map.release();
+  }
+
   inherited&       base()       { return *this; }
   const inherited& base() const { return *this; }
   
@@ -164,8 +202,18 @@ protected:
   void renumber_edges();
   
 private:
+  /* Mapping from indices to descriptors, which allows us to provide
+     edge and vertex removal while retaining O(1) lookup for external
+     property maps. */
   std::vector<vertex_descriptor> index_to_vertex;
   std::vector<edge_descriptor>   index_to_edge;
+
+  /* The lists of property maps "attached" to the graph, which will be
+     updated to deal with vertex and edge removals. */
+  std::list<resizable_property_map*> vertex_maps;
+  std::list<resizable_property_map*> edge_maps;
+
+  // DPG TBD: Currently an awful mess
   dynamic_properties dp;
 };
 

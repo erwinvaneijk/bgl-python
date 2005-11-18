@@ -18,8 +18,52 @@ namespace boost { namespace graph { namespace python {
 
 using boost::python::object;
 
+template<typename T, typename IndexMap>
+class resizable_vector_property_map : public resizable_property_map
+{
+ public:
+  typedef vector_property_map<T, IndexMap> property_map_type;
+
+  resizable_vector_property_map(const property_map_type& pmap) : pmap(pmap) { }
+  
+  /* Invoked when a new value has been added to the end of the list of
+     keys. The property map may resize it's internal data structure to
+     accomodate this. */ 
+  virtual bool added_key()
+  {
+    if (pmap.get_store().unique()) return false;
+    pmap.get_store()->push_back(T());
+    return true;
+  }
+
+  /* The key with the given index is being removed, and the value with
+     the last index will replace it. */
+  virtual bool removed_key(std::size_t index)
+  {
+    if (pmap.get_store().unique()) return false;
+    pmap.get_store()->at(index) = pmap.get_store()->back();
+    pmap.get_store()->pop_back();
+    return true;
+  }
+
+  /* All of the keys in the graph have been shuffled. This vector maps
+     from the old indices to the new indices. */
+  virtual bool shuffled_keys(const std::vector<std::size_t>& new_indices)
+  {
+    if (pmap.get_store().unique()) return false;
+    std::vector<T> new_storage(new_indices.size());
+    for (std::size_t i = 0; i < new_indices.size(); ++i)
+      new_storage[i] = pmap.get_store()->at(i);
+    pmap.get_store()->swap(new_storage);
+    return true;
+  }
+
+ protected:
+  property_map_type pmap;
+};
+
 template<typename Graph>
-object vertex_property_map(const Graph& g, const std::string type)
+object vertex_property_map(Graph& g, const std::string& type)
 {
   typedef typename property_map<Graph, vertex_index_t>::const_type IndexMap;
   typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
@@ -28,9 +72,14 @@ object vertex_property_map(const Graph& g, const std::string type)
   if (type == "index")
     return object(get(vertex_index, g));
 #define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-  else if (type == #Name)                                               \
-    return object(vector_property_map<Type, IndexMap>(num_vertices(g),  \
-                                                      get(vertex_index, g)));
+  else if (type == #Name) {                                             \
+    typedef vector_property_map<Type, IndexMap> pmap_type;              \
+    typedef resizable_vector_property_map<Type, IndexMap> resize_pmap_type; \
+    pmap_type pmap(num_vertices(g), get(vertex_index, g));              \
+    std::auto_ptr<resizable_property_map> reg(new resize_pmap_type(pmap)); \
+    g.register_vertex_map(reg);                                         \
+    return object(pmap);                                                \
+  }
 #define EDGE_PROPERTY(Name,Type,Kind)
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
@@ -40,7 +89,7 @@ object vertex_property_map(const Graph& g, const std::string type)
 }
 
 template<typename Graph>
-object edge_property_map(const Graph& g, const std::string type)
+object edge_property_map(Graph& g, const std::string& type)
 {
   typedef typename property_map<Graph, edge_index_t>::const_type IndexMap;
   typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
@@ -49,10 +98,15 @@ object edge_property_map(const Graph& g, const std::string type)
   if (type == "index")
     return object(get(edge_index, g));
 #define VERTEX_PROPERTY(Name,Type,Kind)
-#define EDGE_PROPERTY(Name,Type,Kind)                                   \
-  else if (type == #Name)                                               \
-    return object(vector_property_map<Type, IndexMap>(num_edges(g),     \
-                                                      get(edge_index, g)));
+#define EDGE_PROPERTY(Name,Type,Kind)                                 \
+  else if (type == #Name) {                                             \
+    typedef vector_property_map<Type, IndexMap> pmap_type;              \
+    typedef resizable_vector_property_map<Type, IndexMap> resize_pmap_type; \
+    pmap_type pmap(num_edges(g), get(edge_index, g));              \
+    std::auto_ptr<resizable_property_map> reg(new resize_pmap_type(pmap)); \
+    g.register_edge_map(reg);                                         \
+    return object(pmap);                                                \
+  }
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
@@ -112,10 +166,10 @@ void export_property_maps()
 // Explicit instantiations for the graph types we're interested in
 #define UNDIRECTED_GRAPH(Name,Type)                                     \
   template void export_property_maps< Type >();                         \
-  template object vertex_property_map< Type >(const Type & g,           \
-                                              const std::string type);  \
-  template object edge_property_map< Type >(const Type & g,             \
-                                            const std::string type);
+  template object vertex_property_map< Type >(Type & g,                 \
+                                              const std::string& type);  \
+  template object edge_property_map< Type >(Type & g,                   \
+                                            const std::string& type);
 #include "graphs.hpp"
 
 } } } // end namespace boost::graph::python

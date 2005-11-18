@@ -214,6 +214,15 @@ void basic_graph<DirectedS>::remove_edge(Edge edge)
 }
 
 template<typename DirectedS>
+std::pair<typename basic_graph<DirectedS>::Edge, bool> 
+basic_graph<DirectedS>::edge(Vertex u, Vertex v) const
+{
+  using boost::edge;
+  std::pair<base_edge_descriptor, bool> result = edge(u, v, base());
+  return std::make_pair(Edge(result.first), result.second);
+}
+
+template<typename DirectedS>
 void basic_graph<DirectedS>::renumber_vertices()
 {
   using boost::vertices;
@@ -233,6 +242,18 @@ void basic_graph<DirectedS>::renumber_edges()
     put(edge_index, base(), e, index_to_edge.size());
     index_to_edge.push_back(e);
   }
+}
+
+template<typename Graph>
+boost::python::object 
+py_edge(const Graph& g, 
+        typename graph_traits<Graph>::vertex_descriptor u,
+        typename graph_traits<Graph>::vertex_descriptor v)
+{
+  std::pair<typename graph_traits<Graph>::edge_descriptor, bool> 
+    result = edge(u, v, g);
+  if (result.second) return boost::python::object(result.first);
+  else return boost::python::object();
 }
 
 template<typename Graph> void export_in_graph();
@@ -271,6 +292,11 @@ void export_basic_graph(const char* name)
         .def(init<object, std::string>(my_graph_init_doc.c_str()))
         .def("is_directed", &Graph::is_directed,
              "is_directed(self) -> bool\n\nWhether the graph is directed or not.")
+        // Miscellaneous adjacency list functions
+        .def("edge", &py_edge<Graph>,
+             (arg("graph"), arg("u"), arg("v")),
+             "edge(self, u, v) -> Object\n\n"
+             "Returns an edge (u, v) if one exists, otherwise None.")
         // Pickling
         .def_pickle(graph_pickle_suite<DirectedS>())
       ;
@@ -282,6 +308,8 @@ void export_basic_graph(const char* name)
     boost::graph::python::bidirectional_graph<Graph> bg(graph);
     boost::graph::python::adjacency_graph<Graph> ag(graph);
     boost::graph::python::mutable_graph<Graph, false, false> mg(graph);
+
+    // Other miscellaneous routines
 
     export_generators(graph, name);
     export_graphviz(graph, name);

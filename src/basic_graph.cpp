@@ -141,9 +141,18 @@ typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
 {
   using boost::add_vertex;
 
+  // Add the vertex and give it an index
   base_vertex_descriptor v = add_vertex(base());
   put(vertex_index, base(), v, index_to_vertex.size());
   index_to_vertex.push_back(v);
+
+  // Update any vertex property maps around
+  for (std::list<resizable_property_map*>::iterator i = vertex_maps.begin();
+       i != vertex_maps.end(); /* in loop */) {
+    if ((*i)->added_key()) ++i;
+    else i = vertex_maps.erase(i);
+  }
+
   return Vertex(v);
 }
 
@@ -160,12 +169,11 @@ void basic_graph<DirectedS>::remove_vertex(Vertex vertex)
 {
   using boost::remove_vertex;
 
-  // Update property maps
-  for (dynamic_properties::iterator i = dp.begin(); i != dp.end(); ++i) {
-    if (i->second->key() == typeid(Vertex)) {
-      dynamic_cast<python_dynamic_property_map*>(&*i->second)->
-        copy_value(vertex, Vertex(index_to_vertex.back()));
-    }
+  // Update any vertex property maps around
+  for (std::list<resizable_property_map*>::iterator i = vertex_maps.begin();
+       i != vertex_maps.end(); /* in loop */) {
+    if ((*i)->removed_key(get(vertex_index, base(), vertex.base))) ++i;
+    else i = vertex_maps.erase(i);
   }
 
   // Update vertex indices
@@ -184,9 +192,18 @@ basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
 {
   using boost::add_edge;
 
+  // Add the edge
   base_edge_descriptor e = add_edge(u.base, v.base, base()).first;
   put(edge_index, base(), e, index_to_edge.size());
   index_to_edge.push_back(e);
+
+  // Update any edge property maps around
+  for (std::list<resizable_property_map*>::iterator i = edge_maps.begin();
+       i != edge_maps.end(); /* in loop */) {
+    if ((*i)->added_key()) ++i;
+    else i = edge_maps.erase(i);
+  }
+
   return Edge(e);
 }
 
@@ -195,12 +212,11 @@ void basic_graph<DirectedS>::remove_edge(Edge edge)
 {
   using boost::remove_edge;
 
-  // Update property maps
-  for (dynamic_properties::iterator i = dp.begin(); i != dp.end(); ++i) {
-    if (i->second->key() == typeid(Edge)) {
-      dynamic_cast<python_dynamic_property_map*>(&*i->second)->
-        copy_value(edge, Edge(index_to_edge.back()));
-    }
+  // Update any edge property maps around
+  for (std::list<resizable_property_map*>::iterator i = edge_maps.begin();
+       i != edge_maps.end(); /* in loop */) {
+    if ((*i)->removed_key(get(edge_index, base(), edge.base))) ++i;
+    else i = edge_maps.erase(i);
   }
 
   // Update edge indices
@@ -295,7 +311,7 @@ void export_basic_graph(const char* name)
         // Miscellaneous adjacency list functions
         .def("edge", &py_edge<Graph>,
              (arg("graph"), arg("u"), arg("v")),
-             "edge(self, u, v) -> Object\n\n"
+             "edge(self, u, v) -> Edge\n\n"
              "Returns an edge (u, v) if one exists, otherwise None.")
         // Pickling
         .def_pickle(graph_pickle_suite<DirectedS>())

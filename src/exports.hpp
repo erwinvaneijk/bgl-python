@@ -22,11 +22,11 @@ void export_graphviz(boost::python::class_<Graph>& graph, const char* name);
 
 template<typename Graph>
 boost::python::object 
-vertex_property_map(const Graph& g, const std::string type);
+vertex_property_map(Graph& g, const std::string& type);
 
 template<typename Graph>
 boost::python::object 
-edge_property_map(const Graph& g, const std::string type);
+edge_property_map(Graph& g, const std::string& type);
 
 } } } // end namespace boost::graph::python
 

@@ -165,6 +165,7 @@ brandes_betweenness_centrality.__doc__ = _documentor.function('brandes_betweenne
     .cpp_docs('betweenness_centrality.html') \
     .__str__()
 
+
 breadth_first_search.__doc__ = _documentor.function('breadth_first_search') \
     .parameter('graph', 
                'the graph on which the breadth-first search will run. It may be either a directed or undirected graph.') \
@@ -215,6 +216,8 @@ connected_components.__doc__ = _documentor.function('connected_components') \
 cuthill_mckee_ordering.__doc__ = _documentor.function('cuthill_mckee_ordering') \
     .parameter('graph', 
                'the graph to be ordered.') \
+    .parameter('comp', 
+               'the comparison function that determines the order the neighbors are visited.', 'None') \
     .result('list') \
     .paragraph('Computes a new ordering for the vertices in the graph that reduces the bandwidth in a sparse matrix.') \
     .see_also('king_ordering') \

@@ -150,6 +150,8 @@ class basic_graph
   
   Edge add_edge(Vertex u, Vertex v);
   void remove_edge(Edge edge);
+
+  std::pair<Edge, bool> edge(Vertex u, Vertex v) const;
   
   inherited&       base()       { return *this; }
   const inherited& base() const { return *this; }
@@ -303,6 +305,16 @@ add_edge(typename basic_graph<DirectedS>::vertex_descriptor u,
          typename basic_graph<DirectedS>::vertex_descriptor v, 
          basic_graph<DirectedS>& g)
 { return std::make_pair(g.add_edge(u, v), true); }
+
+// Adjacency list extras
+template<typename DirectedS>
+inline std::pair<typename basic_graph<DirectedS>::edge_descriptor, bool>
+edge(typename basic_graph<DirectedS>::vertex_descriptor u, 
+     typename basic_graph<DirectedS>::vertex_descriptor v, 
+     const basic_graph<DirectedS>& g)
+{ 
+  return g.edge(u, v);
+}
 
 template<typename DirectedS>
 void export_basic_graph(const char* name);

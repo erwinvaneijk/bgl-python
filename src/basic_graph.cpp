@@ -133,6 +133,17 @@ basic_graph<DirectedS>::basic_graph(boost::python::object l,
 #  pragma warning (pop)
 #endif
 
+template<typename DirectedS>
+basic_graph<DirectedS>::~basic_graph() 
+{
+  for (std::list<resizable_property_map*>::iterator v = vertex_maps.begin();
+       v != vertex_maps.end(); ++v)
+    delete *v;
+  for (std::list<resizable_property_map*>::iterator e = edge_maps.begin();
+       e != edge_maps.end(); ++e)
+    delete *e;
+}
+
 // ----------------------------------------------------------
 // Mutable graph
 // ----------------------------------------------------------
@@ -150,7 +161,10 @@ typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
   for (std::list<resizable_property_map*>::iterator i = vertex_maps.begin();
        i != vertex_maps.end(); /* in loop */) {
     if ((*i)->added_key()) ++i;
-    else i = vertex_maps.erase(i);
+    else {
+      delete *i;
+      i = vertex_maps.erase(i);
+    }
   }
 
   return Vertex(v);
@@ -173,7 +187,10 @@ void basic_graph<DirectedS>::remove_vertex(Vertex vertex)
   for (std::list<resizable_property_map*>::iterator i = vertex_maps.begin();
        i != vertex_maps.end(); /* in loop */) {
     if ((*i)->removed_key(get(vertex_index, base(), vertex.base))) ++i;
-    else i = vertex_maps.erase(i);
+    else {
+      delete *i;
+      i = vertex_maps.erase(i);
+    }
   }
 
   // Update vertex indices
@@ -201,7 +218,10 @@ basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
   for (std::list<resizable_property_map*>::iterator i = edge_maps.begin();
        i != edge_maps.end(); /* in loop */) {
     if ((*i)->added_key()) ++i;
-    else i = edge_maps.erase(i);
+    else {
+      delete *i;
+      i = edge_maps.erase(i);
+    }
   }
 
   return Edge(e);
@@ -216,7 +236,10 @@ void basic_graph<DirectedS>::remove_edge(Edge edge)
   for (std::list<resizable_property_map*>::iterator i = edge_maps.begin();
        i != edge_maps.end(); /* in loop */) {
     if ((*i)->removed_key(get(edge_index, base(), edge.base))) ++i;
-    else i = edge_maps.erase(i);
+    else {
+      delete *i;
+      i = edge_maps.erase(i);
+    }
   }
 
   // Update edge indices

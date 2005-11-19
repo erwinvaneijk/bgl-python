@@ -11,10 +11,42 @@
 
 #include <memory>
 #include <boost/python.hpp>
-#include <boost/graph/python/iterator.hpp> // for type_already_registered
+#include <boost/graph/python/iterator.hpp>
 #include <boost/property_map.hpp>
+#include <boost/vector_property_map.hpp>
 
 namespace boost { namespace graph { namespace python {
+
+namespace detail {
+  template<typename Class, typename PropertyMap>
+  inline void property_map_extras(Class&, type<PropertyMap>) { }
+
+  template<typename T, typename IndexMap>
+  int py_vector_property_map_length(const vector_property_map<T, IndexMap>& pm)
+  {
+    return int(pm.get_store()->size());
+  }
+  
+  template<typename T, typename IndexMap>
+  simple_python_iterator<typename std::vector<T>::iterator>
+  py_vector_property_map_values(vector_property_map<T, IndexMap>& pm)
+  {
+    typedef simple_python_iterator<typename std::vector<T>::iterator>
+      result_type;
+    return result_type(std::make_pair(pm.storage_begin(), pm.storage_end()));
+  }
+
+  template<typename Class, typename T, typename IndexMap>
+  void property_map_extras(Class& pm, type<vector_property_map<T, IndexMap> >)
+  {
+    pm.def("__len__", &py_vector_property_map_length<T, IndexMap>);
+    
+    typedef typename std::vector<T>::iterator value_iterator;
+    simple_python_iterator<value_iterator>::declare("ValueIterator");
+    pm.def("__iter__", &py_vector_property_map_values<T, IndexMap>);
+  }
+
+} // end namespace detail
 
 template<typename PropertyMap>
 class readable_property_map
@@ -53,6 +85,7 @@ class read_write_property_map
     pm.def("__getitem__", &getitem)
       .def("__setitem__", &setitem)
       ;
+    detail::property_map_extras(pm, type<PropertyMap>());
   }
 };
 
@@ -82,6 +115,8 @@ public:
     pm.def("__getitem__", &getitem, return_internal_reference<1>())
       .def("__setitem__", &setitem)
       ;
+
+    detail::property_map_extras(pm, type<PropertyMap>());
   }
 };
 

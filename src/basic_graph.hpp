@@ -166,6 +166,8 @@ class basic_graph
     renumber_edges();
   }
 
+  ~basic_graph();
+
   bool is_directed() const
   { return is_convertible<directed_category, directed_tag>::value; }
 
@@ -348,6 +350,18 @@ add_vertex(basic_graph<DirectedS>& g)
 { return g.add_vertex(); }
 
 template<typename DirectedS>
+inline void
+clear_vertex(typename basic_graph<DirectedS>::vertex_descriptor v, 
+             basic_graph<DirectedS>& g)
+{ return g.clear_vertex(v); }
+
+template<typename DirectedS>
+inline void
+remove_vertex(typename basic_graph<DirectedS>::vertex_descriptor v, 
+              basic_graph<DirectedS>& g)
+{ return g.remove_vertex(v); }
+
+template<typename DirectedS>
 inline std::pair<typename basic_graph<DirectedS>::edge_descriptor, bool>
 add_edge(typename basic_graph<DirectedS>::vertex_descriptor u, 
          typename basic_graph<DirectedS>::vertex_descriptor v, 
@@ -363,6 +377,12 @@ edge(typename basic_graph<DirectedS>::vertex_descriptor u,
 { 
   return g.edge(u, v);
 }
+
+template<typename DirectedS>
+inline void
+remove_edge(typename basic_graph<DirectedS>::edge_descriptor e, 
+            basic_graph<DirectedS>& g)
+{ return g.remove_edge(e); }
 
 template<typename DirectedS>
 void export_basic_graph(const char* name);

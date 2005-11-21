@@ -44,34 +44,30 @@ graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
     edges_list.append(*i);
 
   // Collect vertex and edge properties
-  const dynamic_properties& dp = g.get_dynamic_properties();
-  for (dynamic_properties::const_iterator pm = dp.begin(); 
-       pm != dp.end(); ++pm) {
-    python_dynamic_property_map* pmap = 
-      dynamic_cast<python_dynamic_property_map*>(pm->second);
-    if (pm->second->key() == typeid(Vertex)) {
-      std::vector<object> values(num_vertices(g));
-      BGL_FORALL_VERTICES_T(v, g, Graph)
-        values[get(vertex_index_map, v)] = pmap->get_python(v);
-
-      list values_list;
-      for (std::vector<object>::iterator i = values.begin(); 
-           i != values.end(); ++i)
-        values_list.append(*i);
-      vertex_properties[pm->first] = tuple(values_list);
-    } else if (pm->second->key() == typeid(Edge)) {
-      std::vector<object> values(num_edges(g));
-      BGL_FORALL_EDGES_T(e, g, Graph)
-        values[get(edge_index_map, e)] = pmap->get_python(e);
-
-      list values_list;
-      for (std::vector<object>::iterator i = values.begin(); 
-           i != values.end(); ++i)
-        values_list.append(*i);
-      edge_properties[pm->first] = tuple(values_list);
-    } else {
-      assert(false);
+  try {
+    object iter = g.vertex_properties().iteritems();
+    while (true) {
+      object item = iter.attr("next")();
+      list values;
+      BGL_FORALL_VERTICES_T(v, g, Graph) 
+        values.append(item[1][v]);
+      vertex_properties[item[0]] = tuple(values);
     }
+  } catch (...) {
+    // Swallow end-of-iteration exception
+  }
+
+  try {
+    object iter = g.edge_properties().iteritems();
+    while (true) {
+      object item = iter.attr("next")();
+      list values;
+      BGL_FORALL_EDGES_T(e, g, Graph) 
+        values.append(item[1][e]);
+      edge_properties[item[0]] = tuple(values);
+    }
+  } catch (...) {
+    // Swallow end-of-iteration exception
   }
 
   return make_tuple(g_obj.attr("__dict__"), 
@@ -119,38 +115,35 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
                   vertices[extract<vertices_size_type>(e[1])]));
   }
 
-  dynamic_properties& dp = g.get_dynamic_properties();
-  
   // Get the vertex properties
-  typedef typename Graph::VertexIndexMap VertexIndexMap;
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
   dict vertex_properties = extract<dict>(state[3]);
   list vertex_map_names = vertex_properties.keys();
   while (vertex_map_names != list()) {
     object name_obj = vertex_map_names.pop(0);
-    const char* name = extract<const char*>(name_obj);
     vector_property_map<object, VertexIndexMap> pmap(num_vertices(g),
                                                      get(vertex_index, g));
     tuple values = extract<tuple>(vertex_properties[name_obj]);
     for (vertices_size_type i = 0; i < num_vertices(g); ++i)
       put(pmap, vertices[i], values[i]);
 
-    dp.property(name, pmap);
+    g.vertex_properties()[name_obj] = object(pmap);
   }
 
   // Get the edge properties
-  typedef typename Graph::EdgeIndexMap EdgeIndexMap;
+  typedef typename property_map<Graph, edge_index_t>::const_type EdgeIndexMap;
   dict edge_properties = extract<dict>(state[4]);
   list edge_map_names = edge_properties.keys();
   while (edge_map_names != list()) {
     object name_obj = edge_map_names.pop(0);
-    const char* name = extract<const char*>(name_obj);
     vector_property_map<object, EdgeIndexMap> pmap(num_edges(g),
                                                    get(edge_index, g));
     tuple values = extract<tuple>(edge_properties[name_obj]);
     for (edges_size_type i = 0; i < num_edges(g); ++i)
       put(pmap, the_edges[i], values[i]);
 
-    dp.property(name, pmap);
+    g.edge_properties()[name_obj] = object(pmap);
   }
 }
 

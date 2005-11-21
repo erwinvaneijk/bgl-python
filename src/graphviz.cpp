@@ -13,8 +13,18 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <string>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/graph/python/dynamic_properties.hpp>
+
+namespace boost { namespace python { 
+
+std::ostream& operator<<(std::ostringstream& out, boost::python::str s)
+{
+  using boost::python::extract;
+  return (std::ostream&)out << (const char*)extract<const char*>(s);
+}
+
+} } // end namespace boost::python
 
 namespace boost { namespace graph { namespace python {
 
@@ -56,7 +66,10 @@ read_graphviz(const std::string& filename, const std::string& node_id)
 {
   std::auto_ptr<Graph> result(new Graph);
   std::ifstream in(filename.c_str());
-  boost::read_graphviz(in, *result, result->get_dynamic_properties(), node_id);
+  build_string_property_maps<Graph> builder(result.get());
+  dynamic_properties dp(builder);
+  boost::read_graphviz(in, *result, dp, node_id);
+  string_properties_to_dicts<Graph>(*result, dp);
   return result.release();
 }
 
@@ -66,10 +79,25 @@ void
 write_graphviz(const Graph& g, const std::string& filename, 
                const std::string& node_id)
 {
-  std::ofstream out(filename.c_str());
+  using boost::python::object;
+  using boost::python::str;
 
-  boost::write_graphviz(out, g, g.get_dynamic_properties(), node_id, 
-                        get(vertex_index, g));
+  typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+  typedef typename graph_traits<Graph>::edge_descriptor Edge;
+
+  std::ofstream out(filename.c_str());
+  dynamic_properties dp;
+  dict_to_properties<Vertex>(g.vertex_properties(), dp);
+  dict_to_properties<Edge>(g.edge_properties(), dp);
+
+  object node_id_map = g.vertex_properties()[str(node_id)];
+  if (node_id_map != object()) {
+    boost::write_graphviz(out, g, dp, node_id, 
+                          object_as_string_property_map<Vertex>(node_id_map));
+  } else {
+    boost::write_graphviz(out, g, dp, node_id, 
+                          get(vertex_index, g));
+  }
 }
 
 template<typename E>

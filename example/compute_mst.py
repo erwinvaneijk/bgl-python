@@ -20,6 +20,9 @@ for e in graph.edges:
 # Compute the minimum spanning tree of the graph
 mst_edges = bgl.kruskal_minimum_spanning_tree(graph, weight)
 
+# Compute the weight of the minimum spanning tree 
+print 'MST weight =',sum([weight[e] for e in mst_edges])
+
 # Put the weights into the label. Make MST edges solid while all other
 # edges remain dashed.
 label = graph.edge_property_map('string')

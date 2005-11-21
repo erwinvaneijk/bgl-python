@@ -93,7 +93,10 @@ to the top-level BGL-Python directory (bgl-python-0.9) and run bjam:
    bjam <options>
 
 Once the build has completed, the "python" subdirectory contains the
-BGL-Python package.
+BGL-Python package. In the "python" subdirectory there will be a file
+"libboostpython.EXT" (EXT is the extension used for shared libraries
+on your platform). You should copy that file some place where your
+dynamic linker can find it.
 
 
 Testing
@@ -104,8 +107,8 @@ start a Python interpreter. In the interpreter, enter:
 
       import boost.graph
 
-If the command executes properly, you're all set! Have fun with the
-BGL!.
+If the command executes properly, you're all set! See the example
+subdirectory for some usage examples, and have fun!
 
 
 Installation

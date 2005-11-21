@@ -46,41 +46,6 @@ inline std::istream& operator>>(std::istream& in, default_color_type& c)
 
 namespace graph { namespace python {
 
-template<typename DirectedS>
-struct build_string_property_maps
-{
-  build_string_property_maps(basic_graph<DirectedS>* g) : g(g) { }
-
-  std::auto_ptr<boost::dynamic_property_map>
-  operator()(const std::string& name, const boost::any& key, 
-             const boost::any& value)
-  {
-    typedef typename basic_graph<DirectedS>::VertexIndexMap VertexIndexMap;
-    typedef typename basic_graph<DirectedS>::EdgeIndexMap   EdgeIndexMap;
-
-    std::auto_ptr<boost::dynamic_property_map> result(0);
-
-    if (key.type() == typeid(typename basic_graph<DirectedS>::Vertex)) {
-      typedef vector_property_map<std::string, VertexIndexMap>
-        property_map_type;
-      typedef python_dynamic_adaptor<property_map_type> adaptor_type;
-      result.reset
-        (new adaptor_type(property_map_type(num_vertices(*g),
-                                            get(vertex_index, *g))));
-    } else if (key.type() == typeid(typename basic_graph<DirectedS>::Edge)) {
-      typedef vector_property_map<std::string, EdgeIndexMap> property_map_type;
-      typedef python_dynamic_adaptor<property_map_type> adaptor_type;
-      result.reset
-        (new adaptor_type(property_map_type(num_edges(*g),
-                                            get(edge_index, *g))));
-    } 
-    return result;
-  }
-
-private:
-  basic_graph<DirectedS>* g;
-};
-
 // ----------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------
@@ -89,14 +54,13 @@ private:
 #  pragma warning (disable: 4355)
 #endif
 template<typename DirectedS>
-basic_graph<DirectedS>::basic_graph() 
-  : inherited(), dp(build_string_property_maps<DirectedS>(this))
+basic_graph<DirectedS>::basic_graph() : inherited()
 { }
 
 template<typename DirectedS>
 basic_graph<DirectedS>::basic_graph(boost::python::object l,
                                     const std::string& name_map)
-  : inherited(), dp(build_string_property_maps<DirectedS>(this))
+  : inherited()
 {
   using boost::python::object;
   std::map<object, vertex_descriptor> verts;
@@ -125,9 +89,6 @@ basic_graph<DirectedS>::basic_graph(boost::python::object l,
 
     add_edge(u, v);
   }
-
-  if (!name_map.empty())
-    dp.property(name_map, name);
 }
 #ifdef BOOST_MSVC
 #  pragma warning (pop)
@@ -295,6 +256,18 @@ py_edge(const Graph& g,
   else return boost::python::object();
 }
 
+template<typename Graph>
+boost::python::dict py_get_vertex_properties(const Graph& g)
+{
+  return g.vertex_properties();
+}
+
+template<typename Graph>
+boost::python::dict py_get_edge_properties(const Graph& g)
+{
+  return g.edge_properties();
+}
+
 template<typename Graph> void export_in_graph();
 
 template<typename DirectedS>
@@ -302,6 +275,7 @@ void export_basic_graph(const char* name)
 {
   using boost::python::arg;
   using boost::python::class_;
+  using boost::python::dict;
   using boost::python::init;
   using boost::python::object;
   using boost::python::range;
@@ -322,6 +296,7 @@ void export_basic_graph(const char* name)
 
     class_<Graph> graph(name);
 
+    // Build documentation string
     std::string my_graph_init_doc(graph_init_doc);
     algorithm::replace_all(my_graph_init_doc, "GRAPH", std::string(name));
 
@@ -331,6 +306,15 @@ void export_basic_graph(const char* name)
         .def(init<object, std::string>(my_graph_init_doc.c_str()))
         .def("is_directed", &Graph::is_directed,
              "is_directed(self) -> bool\n\nWhether the graph is directed or not.")
+        // Properties
+        .add_property("vertex_properties", &py_get_vertex_properties<Graph>,
+          "A Python dictionary mapping from vertex property names to\n"
+          "property maps. These properties are \"attached\" to the graph\n"
+          "and will be pickled or serialized along with the graph.")
+        .add_property("edge_properties", &py_get_edge_properties<Graph>,
+          "A Python dictionary mapping from edge property names to\n"
+          "property maps. These properties are \"attached\" to the graph\n"
+          "and will be pickled or serialized along with the graph.")
         // Miscellaneous adjacency list functions
         .def("edge", &py_edge<Graph>,
              (arg("graph"), arg("u"), arg("v")),

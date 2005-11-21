@@ -13,11 +13,11 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/vector_property_map.hpp>
-#include <boost/dynamic_property_map.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/python.hpp>
 #include <boost/graph/python/point2d.hpp>
 #include <boost/graph/python/iterator.hpp>
+#include <boost/graph/python/resizable_property_map.hpp>
 
 namespace boost { namespace graph { namespace python {
 
@@ -69,31 +69,6 @@ inline typename basic_index_map<Key, IndexMap>::value_type
 get(const basic_index_map<Key, IndexMap>& pm, 
     typename basic_index_map<Key, IndexMap>::key_type const& key)
 { return get(pm.id, key.base); }
-
-class resizable_property_map : boost::noncopyable
-{
- public:
-  /* Invoked when a new value has been added to the end of the list of
-     keys. The property map may resize it's internal data structure to
-     accomodate this. Returns true so long as this property map is
-     still "relevant" and should be kept. */ 
-  virtual bool added_key() = 0;
-
-  /* The key with the given index is being removed, and the value with
-     the last index will replace it. Returns true so long as this
-     property map is still "relevant" and should be kept. */
-  virtual bool removed_key(std::size_t index) = 0;
-
-  /* All of the keys in the graph have been shuffled. This vector maps
-     from the old indices to the new indices. Returns true so long as
-     this property map is still "relevant" and should be kept. */
-  virtual bool shuffled_keys(const std::vector<std::size_t>& new_indices) = 0;
-
-  virtual ~resizable_property_map() {}
-
- protected:
-  resizable_property_map() {}
-};
 
 struct stored_minstd_rand
 {
@@ -195,9 +170,15 @@ class basic_graph
 
   inherited&       base()       { return *this; }
   const inherited& base() const { return *this; }
+
+  boost::python::dict& vertex_properties() { return vertex_properties_; }
+  boost::python::dict& edge_properties() { return edge_properties_; }
   
-  dynamic_properties&       get_dynamic_properties()       { return dp; }
-  const dynamic_properties& get_dynamic_properties() const { return dp; }
+  const boost::python::dict& vertex_properties() const 
+  { return vertex_properties_; }
+
+  const boost::python::dict& edge_properties() const 
+  { return edge_properties_; }
 
 protected:
   void renumber_vertices();
@@ -215,8 +196,8 @@ private:
   std::list<resizable_property_map*> vertex_maps;
   std::list<resizable_property_map*> edge_maps;
 
-  // DPG TBD: Currently an awful mess
-  dynamic_properties dp;
+  boost::python::dict vertex_properties_;
+  boost::python::dict edge_properties_;
 };
 
 // Vertex List Graph concept
@@ -411,87 +392,6 @@ struct graph_pickle_suite : boost::python::pickle_suite
   static
   void
   setstate(boost::python::object g_obj, boost::python::tuple state);
-};
-
-class python_dynamic_property_map
-{
- public:
-  virtual ~python_dynamic_property_map() {}
-
-  virtual void copy_value(const any& to, const any& from) = 0;
-  virtual boost::python::object get_python(const any& key) = 0;
-};
-
-template<typename PropertyMap,
-         typename ValueType = typename property_traits<PropertyMap>::value_type>
-class python_dynamic_adaptor
-  : public boost::detail::dynamic_property_map_adaptor<PropertyMap>, 
-    public python_dynamic_property_map
-{
-  typedef boost::detail::dynamic_property_map_adaptor<PropertyMap> inherited;
-
-public:
-  typedef typename property_traits<PropertyMap>::key_type key_type;
-
-  explicit python_dynamic_adaptor(const PropertyMap& property_map)
-    : inherited(property_map) { }
-
-  virtual void copy_value(const any& to, const any& from)
-  { 
-    boost::put(this->base(), any_cast<key_type>(to), 
-               boost::get(this->base(), any_cast<key_type>(from)));
-  }
-
-  virtual boost::python::object get_python(const any& key)
-  {
-#if defined(__GNUC__) && (__GNUC__ == 2) && (__GNUC_MINOR__ == 95)
-    return boost::get(this->base(), any_cast<key_type>(key));
-#else
-    using boost::get;
-
-    return boost::python::object(get(this->base(), any_cast<key_type>(key)));
-#endif    
-  }
-};
-
-template<typename PropertyMap>
-class python_dynamic_adaptor<PropertyMap, boost::python::object>
-  : public boost::detail::dynamic_property_map_adaptor<PropertyMap>, 
-    public python_dynamic_property_map
-{
-  typedef boost::detail::dynamic_property_map_adaptor<PropertyMap> inherited;
-
-public:
-  typedef typename property_traits<PropertyMap>::key_type key_type;
-
-  explicit python_dynamic_adaptor(const PropertyMap& property_map)
-    : inherited(property_map) { }
-
-  virtual void copy_value(const any& to, const any& from)
-  { 
-    boost::put(this->base(), any_cast<key_type>(to), 
-               boost::get(this->base(), any_cast<key_type>(from)));
-  }
-
-  virtual std::string get_string(const any& key)
-  {
-    using boost::python::extract;
-    using boost::python::str;
-    return std::string(
-             extract<const char*>(str(boost::get(this->base(),
-                                                 any_cast<key_type>(key)))));
-  }
-
-  virtual boost::python::object get_python(const any& key)
-  {
-#if defined(__GNUC__) && (__GNUC__ == 2) && (__GNUC_MINOR__ == 95)
-    return boost::get(this->base(), any_cast<key_type>(key));
-#else
-    using boost::get;
-
-    return get(this->base(), any_cast<key_type>(key));
-#endif    
-  }
 };
 
 extern const char* graph_init_doc;

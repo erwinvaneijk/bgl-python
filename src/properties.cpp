@@ -13,54 +13,11 @@
 #include <boost/graph/python/point3d.hpp>
 #include <boost/graph/python/iterator.hpp> // for type_already_registered
 #include <string>
+#include <boost/graph/python/resizable_property_map.hpp>
 
 namespace boost { namespace graph { namespace python {
 
 using boost::python::object;
-
-template<typename T, typename IndexMap>
-class resizable_vector_property_map : public resizable_property_map
-{
- public:
-  typedef vector_property_map<T, IndexMap> property_map_type;
-
-  resizable_vector_property_map(const property_map_type& pmap) : pmap(pmap) { }
-  
-  /* Invoked when a new value has been added to the end of the list of
-     keys. The property map may resize it's internal data structure to
-     accomodate this. */ 
-  virtual bool added_key()
-  {
-    if (pmap.get_store().unique()) return false;
-    pmap.get_store()->push_back(T());
-    return true;
-  }
-
-  /* The key with the given index is being removed, and the value with
-     the last index will replace it. */
-  virtual bool removed_key(std::size_t index)
-  {
-    if (pmap.get_store().unique()) return false;
-    pmap.get_store()->at(index) = pmap.get_store()->back();
-    pmap.get_store()->pop_back();
-    return true;
-  }
-
-  /* All of the keys in the graph have been shuffled. This vector maps
-     from the old indices to the new indices. */
-  virtual bool shuffled_keys(const std::vector<std::size_t>& new_indices)
-  {
-    if (pmap.get_store().unique()) return false;
-    std::vector<T> new_storage(new_indices.size());
-    for (std::size_t i = 0; i < new_indices.size(); ++i)
-      new_storage[i] = pmap.get_store()->at(i);
-    pmap.get_store()->swap(new_storage);
-    return true;
-  }
-
- protected:
-  property_map_type pmap;
-};
 
 template<typename Graph>
 object vertex_property_map(Graph& g, const std::string& type)

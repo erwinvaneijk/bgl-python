@@ -17,7 +17,7 @@
 //
 //   - Name is the name of the property type in Python, e.g., "string"
 //     or "float".
-//   - Type is the C++ type of the property, e.g., "std::string" or
+//   - Type is the C++ type of the property, e.g., "point2d" or
 //     "float". The types "vertex_descriptor" and "edge_descriptor"
 //     are used for vertices and edges, respectively.
 //   - Kind is the kind of property map, e.g., "read_write" or
@@ -27,7 +27,7 @@ VERTEX_PROPERTY(integer, int, read_write)
 VERTEX_PROPERTY(float, float, read_write)
 VERTEX_PROPERTY(vertex, vertex_descriptor, read_write)
 VERTEX_PROPERTY(edge, edge_descriptor, read_write)
-VERTEX_PROPERTY(string, std::string, lvalue)
+VERTEX_PROPERTY(string, boost::python::str, read_write)
 VERTEX_PROPERTY(point2d, boost::graph::python::point2d, lvalue)
 VERTEX_PROPERTY(point3d, boost::graph::python::point3d, lvalue)
 VERTEX_PROPERTY(object, boost::python::object, read_write)
@@ -36,7 +36,7 @@ EDGE_PROPERTY(integer, int, read_write)
 EDGE_PROPERTY(float, float, read_write)
 EDGE_PROPERTY(vertex, vertex_descriptor, read_write)
 EDGE_PROPERTY(edge, edge_descriptor, read_write)
-EDGE_PROPERTY(string, std::string, lvalue)
+EDGE_PROPERTY(string, boost::python::str, read_write)
 EDGE_PROPERTY(point2d, boost::graph::python::point2d, lvalue)
 EDGE_PROPERTY(point3d, boost::graph::python::point3d, lvalue)
 EDGE_PROPERTY(object, boost::python::object, read_write)

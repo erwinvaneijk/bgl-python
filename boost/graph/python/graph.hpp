@@ -223,7 +223,7 @@ public:
     simple_python_iterator<edge_iterator>
       ::declare("EdgeIterator", graph_docs[gd_edge_iterator]);
     graph.def("num_edges", &py_num_edges, graph_docs[gd_num_edges])
-         .add_property("edges", &py_edges, graph_docs[gd_num_edges]);
+         .add_property("edges", &py_edges, graph_docs[gd_edges]);
   }
 };
 

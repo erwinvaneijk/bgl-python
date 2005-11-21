@@ -93,3 +93,11 @@ stage ../python/boost/graph : <pyd>_graph
        release
     ;
 
+stage ../python : <dll>@boost/libs/python/build/boost_python
+    :
+     # add this target to the "stage" and "all" pseudo-targets:
+       <target>stage
+       <target>all
+    :
+       release
+    ;

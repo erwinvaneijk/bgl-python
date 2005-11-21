@@ -1,6 +1,5 @@
-Boost Graph Library - Python Bindings
-            Version 0.9
-=====================================
+Boost Graph Library Python Bindings - Version 0.9
+=================================================
 
 Copyright (C) 2005 Trustees of Indiana University
 
@@ -26,6 +25,10 @@ This file contains:
 Build & Install
 ---------------
 
+The section describes how to build, install, and test the BGL-Python
+bindings.
+
+
 Prebuilt binaries
 ~~~~~~~~~~~~~~~~~
 
@@ -33,6 +36,7 @@ Prebuild binaries might already be available for your
 platform on the BGL-Python web site at:
 
   http://www.osl.iu.edu/~dgregor/bgl-python/
+
 
 Prerequisites
 ~~~~~~~~~~~~~

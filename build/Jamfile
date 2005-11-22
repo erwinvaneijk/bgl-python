@@ -52,6 +52,7 @@ extension _graph
         ../src/page_rank.cpp
         ../src/prim_minimum_spanning_tree.cpp
         ../src/sequential_vertex_coloring.cpp
+        ../src/sloan_ordering.cpp
         ../src/strong_components.cpp
         ../src/topological_sort.cpp
         ../src/transitive_closure.cpp

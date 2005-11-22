@@ -13,38 +13,7 @@
 #include "graph_types.hpp"
 #include <boost/algorithm/string/replace.hpp>
 
-namespace boost { 
-
-inline std::ostream& operator<<(std::ostream& out, default_color_type c)
-{
-  switch (c) {
-  case white_color: return out << "white";
-  case gray_color: return out << "gray";
-  case green_color: return out << "green";
-  case red_color: return out << "red";
-  case black_color: return out << "black";
-  }
-  return out;
-}
-
-inline std::istream& operator>>(std::istream& in, default_color_type& c)
-{
-  std::string text;
-  if (in >> text) {
-    if (text == "white") c = white_color;
-    else if (text == "gray") c = gray_color;
-    else if (text == "green") c = green_color;
-    else if (text == "red") c = red_color;
-    else if (text == "black") c = black_color;
-    else {
-      in.setstate(std::ios_base::failbit);
-      return in;
-    }
-  }
-  return in;
-}
-
-namespace graph { namespace python {
+namespace boost { namespace graph { namespace python {
 
 // ----------------------------------------------------------
 // Constructors
@@ -270,6 +239,10 @@ boost::python::dict py_get_edge_properties(const Graph& g)
 
 template<typename Graph> void export_in_graph();
 
+// Defined and instantiated in convert_properties.cpp
+template<typename Graph>
+void export_property_map_conversions(boost::python::class_<Graph>& graph);
+
 template<typename DirectedS>
 void export_basic_graph(const char* name)
 {
@@ -345,6 +318,7 @@ void export_basic_graph(const char* name)
     graph.def("edge_property_map", &edge_property_map<Graph>,
               (arg("graph"), arg("type")),
               edge_property_map_doc);
+    export_property_map_conversions<Graph>(graph);
   }
 }
 

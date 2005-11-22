@@ -61,6 +61,9 @@ namespace boost {
         shared_ptr< std::vector<T> >&       get_store()       { return store; }
         const shared_ptr< std::vector<T> >& get_store() const { return store; }
 
+        IndexMap&       get_index_map()       { return index; }
+        const IndexMap& get_index_map() const { return index; }
+
     public:
         // Copy ctor absent, default semantics is OK.
         // Assignment operator absent, default semantics is OK.

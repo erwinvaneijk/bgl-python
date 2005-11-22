@@ -18,7 +18,7 @@
 
 namespace boost { namespace python { 
 
-std::ostream& operator<<(std::ostringstream& out, boost::python::str s)
+inline std::ostream& operator<<(std::ostringstream& out, boost::python::str s)
 {
   using boost::python::extract;
   return (std::ostream&)out << (const char*)extract<const char*>(s);

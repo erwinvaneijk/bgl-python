@@ -12,10 +12,8 @@ import boost.graph as bgl
 graph = bgl.Graph.read_graphviz('mst.dot')
 
 # Convert the weight into floating-point values
-in_weight = graph.edge_properties['weight']
-weight = graph.edge_property_map('float')
-for e in graph.edges:
-    weight[e] = float(in_weight[e])
+weight = graph.convert_property_map(graph.edge_properties['weight'],
+                                    'float')
 
 # Compute the minimum spanning tree of the graph
 mst_edges = bgl.kruskal_minimum_spanning_tree(graph, weight)

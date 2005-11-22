@@ -7,13 +7,14 @@
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
 #include "graph_types.hpp"
-#include <boost/graph/astar_search.hpp>
-#include <boost/graph/iteration_macros.hpp>
 
 namespace boost {
   // Work around an annoying qualified "boost::get" call.
   using boost::graph::python::get;
 }
+
+#include <boost/graph/astar_search.hpp>
+#include <boost/graph/iteration_macros.hpp>
 
 namespace boost { namespace graph { namespace python {
 

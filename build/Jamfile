@@ -30,6 +30,7 @@ extension _graph
         ../src/graphdocs.cpp
         ../src/properties.cpp
         ../src/directed_properties.cpp
+        ../src/convert_properties.cpp
         # Algorithms
         ../src/bellman_ford_shortest_paths.cpp
         ../src/betweenness_centrality.cpp

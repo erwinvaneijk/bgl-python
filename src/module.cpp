@@ -13,11 +13,12 @@
 namespace boost { namespace graph { namespace python {
 
 extern void export_graphs();
+extern void export_astar_search();
+extern void export_bellman_ford_shortest_paths();
 extern void export_breadth_first_search();
 extern void export_connected_components();
 extern void export_dijkstra_shortest_paths();
 extern void export_fruchterman_reingold_force_directed_layout();
-extern void export_bellman_ford_shortest_paths();
 extern void export_betweenness_centrality();
 extern void export_biconnected_components();
 extern void export_circle_graph_layout();
@@ -40,6 +41,7 @@ extern void export_graphviz_exceptions();
 BOOST_PYTHON_MODULE(_graph)
 {
   export_graphs();
+  export_astar_search();
   export_bellman_ford_shortest_paths();
   export_betweenness_centrality();
   export_biconnected_components();

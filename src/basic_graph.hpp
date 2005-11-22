@@ -61,6 +61,11 @@ struct basic_index_map
   basic_index_map(const IndexMap& id = IndexMap())
     : id(id) { }
 
+  value_type operator[](const key_type& key) const
+  {
+    return get(id, key.base);
+  }
+
   IndexMap id;
 };
 

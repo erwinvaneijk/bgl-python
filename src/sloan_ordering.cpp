@@ -57,6 +57,49 @@ sloan_ordering
   return result;
 }
 
+template<typename Graph>
+boost::python::list 
+sloan_ordering_se
+  (Graph& g,
+   typename graph_traits<Graph>::vertex_descriptor start,
+   typename graph_traits<Graph>::vertex_descriptor end,
+   vector_property_map<
+     default_color_type, 
+     typename property_map<Graph, vertex_index_t>::const_type
+   >* in_color,
+   vector_property_map<
+     float, 
+     typename property_map<Graph, vertex_index_t>::const_type
+   >* in_priority,
+   float weight1,
+   float weight2)
+{
+  typedef typename graph_traits<Graph>::degree_size_type degree_size_type;
+
+  typedef typename property_map<Graph, vertex_index_t>::const_type 
+    VertexIndexMap;
+  typedef vector_property_map<default_color_type, VertexIndexMap> ColorMap;
+  typedef vector_property_map<float, VertexIndexMap> PriorityMap;
+  typedef vector_property_map<degree_size_type, VertexIndexMap>
+    OutDegreeMap;
+
+  // Out-degree map
+  OutDegreeMap out_degree_map(num_vertices(g), get(vertex_index, g));
+  BGL_FORALL_VERTICES_T(v, g, Graph)
+    put(out_degree_map, v, out_degree(v, g));
+
+  ColorMap color = in_color ? *in_color 
+                            : ColorMap(num_vertices(g), get(vertex_index, g));
+
+  PriorityMap priority = in_priority ? *in_priority 
+                           : PriorityMap(num_vertices(g), get(vertex_index, g));
+
+  boost::python::list result;
+  boost::sloan_ordering(g, start, end, list_append_iterator(result),
+                        color, out_degree_map, priority, weight1, weight2);
+  return result;
+}
+
 void export_sloan_ordering()
 {
   using boost::python::arg;
@@ -71,8 +114,18 @@ void export_sloan_ordering()
     def("sloan_ordering",                                               \
         &sloan_ordering<Type>,                                          \
         (arg("graph"),                                                  \
-         arg("color") = static_cast<ColorMap*>(0),                      \
-         arg("priority") = static_cast<PriorityMap*>(0),                \
+         arg("color_map") = static_cast<ColorMap*>(0),                  \
+         arg("priority_map") = static_cast<PriorityMap*>(0),            \
+         arg("weight1") = 1.0,                                          \
+         arg("weight2") = 2.0));                                        \
+                                                                        \
+    def("sloan_ordering",                                               \
+        &sloan_ordering_se<Type>,                                       \
+        (arg("graph"),                                                  \
+         arg("start"),                                                  \
+         arg("end"),                                                    \
+         arg("color_map") = static_cast<ColorMap*>(0),                  \
+         arg("priority_map") = static_cast<PriorityMap*>(0),            \
          arg("weight1") = 1.0,                                          \
          arg("weight2") = 2.0));                                        \
   }

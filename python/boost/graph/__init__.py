@@ -249,6 +249,7 @@ cuthill_mckee_ordering.__doc__ = _documentor.function('cuthill_mckee_ordering') 
     .paragraph('Computes a new ordering for the vertices in the graph that reduces the bandwidth in a sparse matrix.') \
     .see_also('king_ordering') \
     .see_also('minimum_degree_ordering') \
+    .see_also('sloan_ordering') \
     .__str__()
 
 dag_shortest_paths.__doc__ = _documentor.function('dag_shortest_paths') \
@@ -391,6 +392,7 @@ king_ordering.__doc__ = _documentor.function('king_ordering') \
     .paragraph('Computes a new ordering for the vertices in the graph that reduces the bandwidth of a sparse matrix.') \
     .see_also('cuthill_mckee_ordering') \
     .see_also('minimum_degree_ordering') \
+    .see_also('sloan_ordering') \
     .__str__()
 
 kruskal_minimum_spanning_tree.__doc__ = _documentor.function('kruskal_minimum_spanning_tree') \
@@ -412,6 +414,7 @@ minimum_degree_ordering.__doc__ = _documentor.function('minimum_degree_ordering'
     .paragraph('Computes a new ordering for the vertices in the graph that reduces the fill-in of sparse matrices.') \
     .see_also('cuthill_mckee_ordering') \
     .see_also('king_ordering') \
+    .see_also('sloan_ordering') \
     .__str__()
 
 page_rank.__doc__ = _documentor.function('page_rank') \
@@ -464,6 +467,28 @@ sequential_vertex_coloring.__doc__ = _documentor.function('sequential_vertex_col
     .result('int') \
     .paragraph('Colors the vertices of the graph using a simple but relatively efficient algorithm. Returns the number "n" of colors used, and the color_map will contain colors for each vertex in the range [0, n).') \
     .__str__()
+
+sloan_ordering.__doc__ = _documentor.function('sloan_ordering') \
+    .parameter('graph', 'the graph to be ordered.') \
+    .parameter('start', 'the vertex from which ordering should start') \
+    .parameter('end', 'the vertex at which ordering should end') \
+    .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
+    .parameter('priority_map', 
+               'a vertex -> float map used internally that tracks the priority of each vertex.', 'None') \
+    .parameter('weight1', 'Relative weight applied to the global "degree".', '1.0') \
+    .parameter('weight2', 'Relative weight applied to the global "degree".', '2.0') \
+    .signature(('graph', 'start', 'end', 'color_map', 'priority_map', 
+                'weight1', 'weight2'),
+               'list') \
+    .signature(('graph', 'color_map', 'priority_map', 'weight1', 'weight2'),
+               'list') \
+    .result('list') \
+    .paragraph('Computes a new ordering for the vertices in the graph that reduces the profile and wavefront of sparse matrices. The start and end vertices are optional, but providing them can have a large (positive or negative) effect on the resulting ordering.') \
+    .see_also('cuthill_mckee_ordering') \
+    .see_also('king_ordering') \
+    .see_also('minimum_degree_ordering') \
+    .__str__()
+
 
 strong_components.__doc__ = _documentor.function('strong_components') \
     .parameter('graph', 

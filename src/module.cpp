@@ -33,6 +33,7 @@ extern void export_minimum_degree_ordering();
 extern void export_page_rank();
 extern void export_prim_minimum_spanning_tree();
 extern void export_sequential_vertex_coloring();
+extern void export_sloan_ordering();
 extern void export_strong_components();
 extern void export_topological_sort();
 extern void export_transitive_closure();
@@ -61,6 +62,7 @@ BOOST_PYTHON_MODULE(_graph)
   export_page_rank();
   export_prim_minimum_spanning_tree();
   export_sequential_vertex_coloring();
+  export_sloan_ordering();
   export_strong_components();
   export_topological_sort();
   export_transitive_closure();

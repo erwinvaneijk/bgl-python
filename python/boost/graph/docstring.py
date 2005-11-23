@@ -30,11 +30,11 @@ class function_documentor:
         self._name = name
         self._parameters = list()
         self._result = None
+        self._signatures = list()
         self._paragraphs = list()
         self._example = None
         self._see_also = list()
         self._cppdocs = name + ".html"
-
     def parameter(self, name, doc, default = None):
         """ 
         Declares a function parameter given its name, a documentation
@@ -56,6 +56,16 @@ class function_documentor:
         Add a paragraph of descriptive text.
         """
         self._paragraphs.append(para.strip())
+        return self
+
+    def signature(self, parameters, result = None):
+        """
+        Add a signature for the function. parameters is a tuple
+        containing the names of the parameters used in the signature
+        and result is the result type. If no signatures are added, a
+        signature will be generated from the parameters.
+        """
+        self._signatures.append((parameters, result))
         return self
 
     def example(self, example):
@@ -86,18 +96,18 @@ class function_documentor:
         self._cppdocs = html
         return self
 
-    def __signature_string(self):
+    def __signature_string(self, parameters, result):
         """
         Builds a string containing the signature of this function, e.g.,
 
-          __signature_string(self) -> str
+          __signature_string(self, parameters, result) -> str
         """
         docstring = self._name + '('
-        if self._parameters != list():
+        if parameters != list():
             param_start_column = len(self._name + '(')
             column = param_start_column
             max_column = columns - 2
-            for (on_param, param) in enumerate(self._parameters):
+            for (on_param, param) in enumerate(parameters):
                 # Add ", " when needed
                 if on_param > 0:
                     docstring += ', '
@@ -106,13 +116,14 @@ class function_documentor:
                 # If we're on the last parameter and there is a
                 # result, we have stricter requirements on maximum
                 # column.
-                if on_param+1 == len(self._parameters) and self._result != None:
-                    max_column = columns - len(') -> ') - len(self._result)
+                if on_param+1 == len(parameters) and result != None:
+                    max_column = columns - len(') -> ') - len(result)
 
                 # Build a string for the parameter signature
-                paramstr = param[0]
-                if param[2] != None:
-                    paramstr += ' = ' + param[2]
+                paramstr = param
+                default=filter(lambda p: p[0] == param, self._parameters)[0][2]
+                if default != None:
+                    paramstr += ' = ' + default
 
                 # If the parameter won't fit on this list, and we're
                 # not already at the beginning of a new line, put in a
@@ -127,8 +138,8 @@ class function_documentor:
                 column += len(paramstr)
         docstring += ')'
 
-        if self._result != None:
-            docstring += ' -> ' + self._result
+        if result != None:
+            docstring += ' -> ' + result
 
         return docstring
 
@@ -167,7 +178,15 @@ Parameters:
 
     def __str__(self):
         # Start with the signature
-        docstring = self.__signature_string()
+        if self._signatures == list():
+            docstring=self.__signature_string([p[0] for p in self._parameters],
+                                              self._result)
+        else:
+            docstring=''
+            for sig in self._signatures:
+                if sig != self._signatures[0]:
+                    docstring += '\n'
+                docstring += self.__signature_string(sig[0], sig[1])
 
         # Add the documentation paragraphs
         for para in self._paragraphs:

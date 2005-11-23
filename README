@@ -97,10 +97,14 @@ to the top-level BGL-Python directory (bgl-python-0.9) and run bjam:
    bjam <options>
 
 Once the build has completed, the "python" subdirectory contains the
-BGL-Python package. In the "python" subdirectory there will be a file
-"libboostpython.EXT" (EXT is the extension used for shared libraries
-on your platform). You should copy that file some place where your
-dynamic linker can find it.
+BGL-Python package. You will need to add this path to your PYTHONPATH
+environment variant, so that Python will find the extension module.
+
+In the "python" subdirectory there will be a file "libboostpython.EXT"
+(EXT is the extension used for shared libraries on your platform). You
+should copy that file some place where your dynamic linker can find
+it, so set your LD_LIBRARY_PATH equivalent to include the python
+subdirectory.
 
 
 Testing
@@ -122,7 +126,9 @@ Although we do not have an automated installation procedure at this
 time, once the build has succeeded the "python" subdirectory is a
 standalone Python package for the BGL-Python bindings. You may copy
 the contents of the "python" subdirectory anywhere within your
-PYTHONPATH. 
+PYTHONPATH. Be sure that the directory is also in your LD_LIBRARY_PATH
+(or equivalent), so that your dynamic linker can find the
+libboost_python shared library/DLL.
 
 ------------
 Getting Help

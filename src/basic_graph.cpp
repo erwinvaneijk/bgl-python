@@ -237,7 +237,37 @@ boost::python::dict py_get_edge_properties(const Graph& g)
   return g.edge_properties();
 }
 
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
+/* The following routines are needed to work around a Visual C++ 7.1 bug
+   where add_property() can't tell the difference between a docstring
+   and a setter for a read-only property. So, we give it setters that
+   throw Python exceptions. */
+
+template<typename Graph>
+void py_set_vertex_properties(const Graph&, boost::python::dict)
+{
+  PyErr_SetString(PyExc_AttributeError, 
+                  "object attribute 'vertex_properties' is read-only");
+}
+
+template<typename Graph>
+void py_set_edge_properties(const Graph&, boost::python::dict)
+{
+  PyErr_SetString(PyExc_AttributeError, 
+                  "object attribute 'edge_properties' is read-only");
+}
+#endif
+
 template<typename Graph> void export_in_graph();
+
+static const char* vertex_properties_doc = 
+      "A Python dictionary mapping from vertex property names to\n"
+       "property maps. These properties are \"attached\" to the graph\n"
+       "and will be pickled or serialized along with the graph.";
+static const char* edge_properties_doc =
+       "A Python dictionary mapping from edge property names to\n"
+       "property maps. These properties are \"attached\" to the graph\n"
+       "and will be pickled or serialized along with the graph.";
 
 // Defined and instantiated in convert_properties.cpp
 template<typename Graph>
@@ -281,13 +311,17 @@ void export_basic_graph(const char* name)
              "is_directed(self) -> bool\n\nWhether the graph is directed or not.")
         // Properties
         .add_property("vertex_properties", &py_get_vertex_properties<Graph>,
-          "A Python dictionary mapping from vertex property names to\n"
-          "property maps. These properties are \"attached\" to the graph\n"
-          "and will be pickled or serialized along with the graph.")
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
+                      &py_set_vertex_properties<Graph>,
+#endif 
+                      vertex_properties_doc
+                      )
         .add_property("edge_properties", &py_get_edge_properties<Graph>,
-          "A Python dictionary mapping from edge property names to\n"
-          "property maps. These properties are \"attached\" to the graph\n"
-          "and will be pickled or serialized along with the graph.")
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
+                      &py_set_edge_properties<Graph>,
+#endif
+                      edge_properties_doc
+                      )
         // Miscellaneous adjacency list functions
         .def("edge", &py_edge<Graph>,
              (arg("graph"), arg("u"), arg("v")),

@@ -192,6 +192,18 @@ brandes_betweenness_centrality.__doc__ = _documentor.function('brandes_betweenne
     .cpp_docs('betweenness_centrality.html') \
     .__str__()
 
+breadth_first_visit.__doc__ = _documentor.function('breadth_first_visit') \
+    .parameter('graph', 
+               'the graph on which the breadth-first search will run. It may be either a directed or undirected graph.') \
+    .parameter('root_vertex', 'the vertex where the breadth-first search will originate.') \
+    .parameter('buffer', 'the queue used by the breadth-first search. If not supplied, a simple FIFO queue will be used.', 'None') \
+    .parameter('visitor', 'a visitor that will receive events as the breadth-first search progresses. Typically this visitor should be derived from boost.graph.bfs_visitor.', 'None') \
+    .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
+    .paragraph('Performs a breadth-first search on the given graph starting at a particular vertex. Unlike breadth_first_search, the color map will NOT be reinitialized to all-white values before running the breadth-first search.') \
+    .see_also('bfs_visitor') \
+    .see_also('breadth_first_search') \
+    .see_also('depth_first_search') \
+    .__str__()
 
 breadth_first_search.__doc__ = _documentor.function('breadth_first_search') \
     .parameter('graph', 
@@ -200,7 +212,7 @@ breadth_first_search.__doc__ = _documentor.function('breadth_first_search') \
     .parameter('buffer', 'the queue used by the breadth-first search. If not supplied, a simple FIFO queue will be used.', 'None') \
     .parameter('visitor', 'a visitor that will receive events as the breadth-first search progresses. Typically this visitor should be derived from boost.graph.bfs_visitor.', 'None') \
     .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
-    .paragraph('Performs a breadth-first search on the given graph starting at a particular vertex.') \
+    .paragraph('Performs a breadth-first search on the given graph starting at a particular vertex. The color map will be initialized to contain all white values before the the breadth-first search runs.') \
     .see_also('bfs_visitor') \
     .see_also('breadth_first_visit') \
     .see_also('depth_first_search') \

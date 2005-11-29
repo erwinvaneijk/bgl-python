@@ -176,7 +176,11 @@ DEALINGS IN THE SOFTWARE.
 -------
 History
 -------
- 
+  
+  - DATE - Version XXX of BGL-PYthon bindings. Improvements include:
+
+      - breadth_first_visit is now available from within Python
+
   - November 23, 2005 - Version 0.9 of BGL-Python bindings.  The
     initial release as a separate package.
 

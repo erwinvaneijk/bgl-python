@@ -107,36 +107,36 @@ namespace detail {
   }
 }
 
+template<typename T>
+boost::python::object pod_getstate(const T& value)
+{
+  using boost::python::list;
+
+  list bytes;
+  const char* data = reinterpret_cast<const char*>(&value);
+  for (std::size_t i = 0; i < sizeof(T); ++i)
+    bytes.append(data[i]);
+  return bytes;
+}
+
+template<typename T>
+void pod_setstate(T& value, boost::python::object state)
+{
+  using boost::python::list;
+  using boost::python::extract;
+
+  list bytes = extract<list>(state);
+  char* data = reinterpret_cast<char*>(&value);
+  for (std::size_t i = 0; i < sizeof(T); ++i)
+    data[i] = extract<char>(bytes[i]);
+}
+
 template<typename Graph>
 class graph
 {
   typedef graph_traits<Graph> Traits;
   typedef typename Traits::vertex_descriptor vertex_descriptor;
   typedef typename Traits::edge_descriptor   edge_descriptor;
-
-  template<typename T>
-  static boost::python::object pod_getstate(const T& value)
-  {
-    using boost::python::list;
-
-    list bytes;
-    const char* data = reinterpret_cast<const char*>(&value);
-    for (std::size_t i = 0; i < sizeof(T); ++i)
-      bytes.append(data[i]);
-    return bytes;
-  }
-
-  template<typename T>
-  static void pod_setstate(T& value, boost::python::object state)
-  {
-    using boost::python::list;
-    using boost::python::extract;
-
-    list bytes = extract<list>(state);
-    char* data = reinterpret_cast<char*>(&value);
-    for (std::size_t i = 0; i < sizeof(T); ++i)
-      data[i] = extract<char>(bytes[i]);
-  }
 
  public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
@@ -145,18 +145,13 @@ class graph
     using boost::python::class_;
     using boost::python::self;
 
-#ifdef BOOST_MSVC
-#define BGL_PYTHON_HACK graph<Graph>::
-#else
-#define BGL_PYTHON_HACK
-#endif
     if (!detail::type_already_registered<vertex_descriptor>())
       class_<vertex_descriptor>("Vertex")
         .def(self == self)
         .def(self != self)
         .enable_pickling()
-        .def("__getstate__", &BGL_PYTHON_HACK pod_getstate<vertex_descriptor>)
-        .def("__setstate__", &BGL_PYTHON_HACK pod_setstate<vertex_descriptor>)
+        .def("__getstate__", &pod_getstate<vertex_descriptor>)
+        .def("__setstate__", &pod_setstate<vertex_descriptor>)
         ;
     
     if (!detail::type_already_registered<edge_descriptor>())
@@ -164,10 +159,9 @@ class graph
         .def(self == self)
         .def(self != self)
         .enable_pickling()
-        .def("__getstate__", &BGL_PYTHON_HACK pod_getstate<edge_descriptor>)
-        .def("__setstate__", &BGL_PYTHON_HACK pod_setstate<edge_descriptor>)
+        .def("__getstate__", &pod_getstate<edge_descriptor>)
+        .def("__setstate__", &pod_setstate<edge_descriptor>)
         ;
-#undef BGL_PYTHON_HACK
   }
 };
 

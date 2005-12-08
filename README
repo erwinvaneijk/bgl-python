@@ -177,7 +177,7 @@ DEALINGS IN THE SOFTWARE.
 History
 -------
   
-  - DATE - Version XXX of BGL-PYthon bindings. Improvements include:
+  - DATE - Version XXX of BGL-Python bindings. Improvements include:
 
       - breadth_first_visit is now available from within Python
 

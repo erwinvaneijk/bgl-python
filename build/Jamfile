@@ -22,6 +22,28 @@ extension _support
     <include>$(BGL_PYTHON_ROOT)
     ;
 
+EXTRA_SRCS = ;
+EXTRA_REQUIREMENTS = ;
+
+if $(OS) = MACOSX {
+#   if $(IETL_INCLUDE) {
+       EXTRA_SRCS = ../src/spectrum.cpp
+                    ../src/spectral_embedding_3d_layout.cpp 
+                    ../src/spectral_embedding_layout.cpp ;
+       EXTRA_REQUIREMENTS = <framework>/System/Library/Frameworks/vecLib.framework/vecLib
+                            ;
+#                            <include>$(IETL_INCLUDE) ;
+#   }
+#  else ECHO IETL_INCLUDE not set, NOT building spectral routines. ;
+}
+else if $(LAPACK_PATH) {
+       EXTRA_SRCS = ../src/spectrum.cpp
+                    ../src/spectral_embedding_3d_layout.cpp ;
+
+       EXTRA_REQUIREMENTS = <find-library>libclapack 
+                            <library-path>$(LAPACK_PATH) ;
+}
+
 extension _graph
         : # Sources
         ../src/module.cpp
@@ -61,11 +83,13 @@ extension _graph
         # Graph I/O
         ../src/graphviz.cpp
         ../src/pickle.cpp
+	$(EXTRA_SRCS)
         # Depend on the Boost Python library
         <template>@boost/libs/python/build/extension
         # Depend on the bgl-viz library for GraphViz support
         <lib>@boost/libs/graph/build/bgl-viz
         : # Requirements
+	$(EXTRA_REQUIREMENTS)
         <include>$(BGL_PYTHON_ROOT)
         ;
 

@@ -71,6 +71,23 @@ object edge_property_map(Graph& g, const std::string& type)
     return object();
 }
 
+#define VERTEX_PROPERTY(Name,Type,Kind)                                 \
+template<typename VertexMap>                                            \
+ std::string BOOST_JOIN(get_vertex_map_type_,Name)(const VertexMap&)     \
+ { return #Name; }
+
+#define EDGE_PROPERTY(Name,Type,Kind)                                 \
+template<typename EdgeMap>                                            \
+ std::string BOOST_JOIN(get_edge_map_type_,Name)(const EdgeMap&)       \
+ { return #Name; }
+#  include  <boost/graph/python/properties.hpp>
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
+
+const char* property_map_type_doc = 
+  "type(self) -> string\n\n"
+  "Returns the type of data stored in the property map.";
+
 template<typename Graph> 
 void export_property_maps()
 {
@@ -95,6 +112,8 @@ void export_property_maps()
     if (!type_already_registered<VertexMap>()) {                        \
       class_<VertexMap> pm("Vertex" #Name "Map", no_init);              \
       BOOST_JOIN(Kind,_property_map)<VertexMap> reflect_pm(pm);         \
+      pm.def("type", &BOOST_JOIN(get_vertex_map_type_,Name)<VertexMap>, \
+             property_map_type_doc);                                    \
     }                                                                   \
   }
 #define EDGE_PROPERTY(Name,Type,Kind)                                   \
@@ -103,11 +122,13 @@ void export_property_maps()
     if (!type_already_registered<EdgeMap>()) {                          \
       class_<EdgeMap> pm("Edge" #Name "Map", no_init);                  \
       BOOST_JOIN(Kind,_property_map)<EdgeMap> reflect_pm(pm);           \
+      pm.def("type", &BOOST_JOIN(get_edge_map_type_,Name)<EdgeMap>,     \
+             property_map_type_doc);                                    \
     }                                                                   \
   }
 #  include <boost/graph/python/properties.hpp>
-#undef EDGE_PROPERTY_MAP
-#undef VERTEX_PROPERTY_MAP
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
 
   if (!type_already_registered<VertexIndexMap>()) {
     class_<VertexIndexMap> pm("VertexIndexMap", no_init);

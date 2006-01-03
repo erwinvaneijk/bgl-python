@@ -84,7 +84,7 @@ template<typename EdgeMap>                                            \
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
 
-const char* property_map_type_doc = 
+static const char* property_map_type_doc = 
   "type(self) -> string\n\n"
   "Returns the type of data stored in the property map.";
 

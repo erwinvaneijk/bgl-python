@@ -55,6 +55,9 @@ graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
     }
   } catch (...) {
     // Swallow end-of-iteration exception
+    if(PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_StopIteration)) {
+      PyErr_Clear();
+    }
   }
 
   try {
@@ -68,6 +71,9 @@ graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
     }
   } catch (...) {
     // Swallow end-of-iteration exception
+    if(PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_StopIteration)) {
+      PyErr_Clear();
+    }
   }
 
   return make_tuple(g_obj.attr("__dict__"), 

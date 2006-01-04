@@ -49,6 +49,7 @@ graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
     while (true) {
       object item = iter.attr("next")();
       list values;
+      values.append(item[1].attr("type")());
       BGL_FORALL_VERTICES_T(v, g, Graph) 
         values.append(item[1][v]);
       vertex_properties[item[0]] = tuple(values);
@@ -65,6 +66,7 @@ graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
     while (true) {
       object item = iter.attr("next")();
       list values;
+      values.append(item[1].attr("type")());
       BGL_FORALL_EDGES_T(e, g, Graph) 
         values.append(item[1][e]);
       edge_properties[item[0]] = tuple(values);
@@ -128,13 +130,12 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   list vertex_map_names = vertex_properties.keys();
   while (vertex_map_names != list()) {
     object name_obj = vertex_map_names.pop(0);
-    vector_property_map<object, VertexIndexMap> pmap(num_vertices(g),
-                                                     get(vertex_index, g));
     tuple values = extract<tuple>(vertex_properties[name_obj]);
+    object pmap = g_obj.attr("vertex_property_map")(object(values[0]));
     for (vertices_size_type i = 0; i < num_vertices(g); ++i)
-      put(pmap, vertices[i], values[i]);
+      pmap.attr("__setitem__")(vertices[i], object(values[i+1]));
 
-    g.vertex_properties()[name_obj] = object(pmap);
+    g.vertex_properties()[name_obj] = pmap;
   }
 
   // Get the edge properties
@@ -143,13 +144,12 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   list edge_map_names = edge_properties.keys();
   while (edge_map_names != list()) {
     object name_obj = edge_map_names.pop(0);
-    vector_property_map<object, EdgeIndexMap> pmap(num_edges(g),
-                                                   get(edge_index, g));
     tuple values = extract<tuple>(edge_properties[name_obj]);
+    object pmap = g_obj.attr("edge_property_map")(object(values[0]));
     for (edges_size_type i = 0; i < num_edges(g); ++i)
-      put(pmap, the_edges[i], values[i]);
+      pmap.attr("__setitem__")(the_edges[i], object(values[i+1]));
 
-    g.edge_properties()[name_obj] = object(pmap);
+    g.edge_properties()[name_obj] = pmap;
   }
 }
 

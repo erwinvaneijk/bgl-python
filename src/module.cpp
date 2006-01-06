@@ -34,9 +34,11 @@ extern void export_page_rank();
 extern void export_prim_minimum_spanning_tree();
 extern void export_sequential_vertex_coloring();
 extern void export_sloan_ordering();
+#ifdef INCLUDE_SPECTRUM
 extern void export_spectral_embedding_layout();
 extern void export_spectral_embedding_3d_layout();
 extern void export_spectrum();
+#endif
 extern void export_strong_components();
 extern void export_topological_sort();
 extern void export_transitive_closure();
@@ -66,9 +68,11 @@ BOOST_PYTHON_MODULE(_graph)
   export_prim_minimum_spanning_tree();
   export_sequential_vertex_coloring();
   export_sloan_ordering();
+#ifdef INCLUDE_SPECTRUM
   export_spectral_embedding_layout();
   export_spectral_embedding_3d_layout();
   export_spectrum();
+#endif
   export_strong_components();
   export_topological_sort();
   export_transitive_closure();

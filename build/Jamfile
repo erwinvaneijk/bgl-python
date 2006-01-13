@@ -31,6 +31,7 @@ if $(OS) = MACOSX {
                     ../src/spectral_embedding_3d_layout.cpp 
                     ../src/spectral_embedding_layout.cpp ;
        EXTRA_REQUIREMENTS = <framework>/System/Library/Frameworks/vecLib.framework/vecLib
+       			    <define>INCLUDE_SPECTRUM
                             ;
 #                            <include>$(IETL_INCLUDE) ;
 #   }
@@ -41,7 +42,8 @@ else if $(LAPACK_PATH) {
                     ../src/spectral_embedding_3d_layout.cpp ;
 
        EXTRA_REQUIREMENTS = <find-library>libclapack 
-                            <library-path>$(LAPACK_PATH) ;
+                            <library-path>$(LAPACK_PATH)
+       			    <define>INCLUDE_SPECTRUM ;
 }
 
 extension _graph

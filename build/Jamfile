@@ -25,25 +25,35 @@ extension _support
 EXTRA_SRCS = ;
 EXTRA_REQUIREMENTS = ;
 
+if $(IETL_INCLUDE) {
+       EXTRA_SRCS = ../src/sparse_spectrum.cpp ;
+       EXTRA_REQUIREMENTS = <include>$(IETL_INCLUDE)
+	   		        <define>INCLUDE_SPARSE_SPECTRUM ;
+}
+else {
+       EXTRA_SRCS = ;
+       EXTRA_REQUIREMENTS = ;
+}
+
 if $(OS) = MACOSX {
 #   if $(IETL_INCLUDE) {
-       EXTRA_SRCS = ../src/spectrum.cpp
-                    ../src/spectral_embedding_3d_layout.cpp 
-                    ../src/spectral_embedding_layout.cpp ;
-       EXTRA_REQUIREMENTS = <framework>/System/Library/Frameworks/vecLib.framework/vecLib
-       			    <define>INCLUDE_SPECTRUM
-                            ;
+       EXTRA_SRCS += ../src/spectrum.cpp
+                     ../src/spectral_embedding_3d_layout.cpp 
+                     ../src/spectral_embedding_layout.cpp ;
+       EXTRA_REQUIREMENTS += <framework>/System/Library/Frameworks/vecLib.framework/vecLib
+       			     <define>INCLUDE_SPECTRUM
+                             ;
 #                            <include>$(IETL_INCLUDE) ;
 #   }
 #  else ECHO IETL_INCLUDE not set, NOT building spectral routines. ;
 }
 else if $(LAPACK_PATH) {
-       EXTRA_SRCS = ../src/spectrum.cpp
-                    ../src/spectral_embedding_3d_layout.cpp ;
+       EXTRA_SRCS += ../src/spectrum.cpp
+                     ../src/spectral_embedding_3d_layout.cpp ;
 
-       EXTRA_REQUIREMENTS = <find-library>libclapack 
-                            <library-path>$(LAPACK_PATH)
-       			    <define>INCLUDE_SPECTRUM ;
+       EXTRA_REQUIREMENTS += <find-library>libclapack 
+                             <library-path>$(LAPACK_PATH)
+       			     <define>INCLUDE_SPECTRUM ;
 }
 
 extension _graph

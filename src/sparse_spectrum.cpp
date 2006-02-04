@@ -23,7 +23,7 @@ sparse_spectrum
   typedef std::vector<double> Vector;
 
   int N = num_vertices(g);
-  std::vector<Vector> evecs(3);
+  std::vector<Vector> evecs(num_eigenvectors);
   for (int i = 0; i < num_eigenvectors; i++)
     evecs[i] = *(new Vector(N));
 

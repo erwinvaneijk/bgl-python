@@ -24,7 +24,9 @@
 
 #include <iostream.h>
 #ifdef USE_LAPACK
+#ifdef _APPLE_
 #include <vecLib/clapack.h>
+#endif
 //#include "f2c.h"
 //#include "cblas.h"
 //#include "clapack.h"
@@ -55,6 +57,18 @@ extern "C" int dsyevr_(char *jobz, char *range, char *uplo, integer *n,
 
 namespace boost {
 
+  template <typename Graph, typename Matrix >
+  void spectrum(Graph& g, 
+		int first_eigenvector_index,
+		int num_eigenvectors,
+		Matrix &eigenvectors,
+		double rel_tol = 100, 
+		double abs_tol = 1000) 
+  {
+    std::vector<double> evals(num_eigenvectors);
+    spectrum(g, first_eigenvector_index, num_eigenvectors, eigenvectors, evals, rel_tol, abs_tol);
+  }
+
   // Parameters:
   //   first_eigenvector_index:
   //     Since the smallest eigenvector is not useful, often this will 
@@ -64,12 +78,13 @@ namespace boost {
   //   num_eigenvectors:
   //     The number of eigencectors to return.
 
-  template <typename Graph, typename Matrix >
+  template <typename Graph, typename Matrix , typename EVector>
   void spectrum(Graph& g, 
 		int first_eigenvector_index,
 		int num_eigenvectors,
 		//		std::vector<Vector> &eigenvectors,
 		Matrix &eigenvectors,
+		EVector &eigenvalues,
 		double rel_tol = 100, 
 		double abs_tol = 1000) 
   {
@@ -124,6 +139,7 @@ namespace boost {
 #endif
 
     i = 0;
+    /*
     for (v = vs; v != ve; ++v) {
 #ifdef USE_LAPACK
       A[(index_map[*v] * N) + index_map[*v]] = (doublereal)out_degree(*v, g);
@@ -131,15 +147,25 @@ namespace boost {
       A(index_map[*v], index_map[*v]) = (double)out_degree(*v, g);
 #endif
     }
+    */
     for (e = es; e != ee; ++e) {
+      i += 1;
       src = source(*e, g);
       tgt = target(*e, g);
 #ifdef USE_LAPACK      
-      A[index_map[src] + index_map[tgt]*N] = (doublereal)(-1);
-      A[index_map[src]*N + index_map[tgt]] = (doublereal)(-1);
+      if (src != tgt and A[index_map[src] + index_map[tgt]*N] != -1) {
+	A[index_map[src] + index_map[tgt]*N] = (doublereal)(-1);
+	A[index_map[src]*N + index_map[tgt]] = (doublereal)(-1);
+	A[index_map[src] + index_map[src]*N] += (doublereal)1;
+	A[index_map[tgt] + index_map[tgt]*N] += (doublereal)1;
+      }
 #elif USE_IETL
-      A(index_map[src], index_map[tgt]) = (double)(-1);
-      A(index_map[tgt], index_map[src]) = (double)(-1);
+      if (src != tgt and A(index_map[src], index_map[tgt]) != -1) {
+	A(index_map[src], index_map[tgt]) = (double)(-1);
+	A(index_map[tgt], index_map[src]) = (double)(-1);
+	A(index_map[src], index_map[src]) += (double)1;
+	A(index_map[tgt], index_map[tgt]) += (double)1;
+      }
 #endif
     }
 
@@ -313,7 +339,11 @@ namespace boost {
 	i++;
       }
     }
-
+#ifdef USE_LAPACK
+    for (int j = 0; j < M; j++) {
+      eigenvalues[j] = W[j];
+    }
+#endif
     //    return retval;
     
   } // end spectrum()

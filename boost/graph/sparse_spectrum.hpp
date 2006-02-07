@@ -1,5 +1,5 @@
 // Ben Martin
-// January 31, 2005
+// January 31, 2006
 
 // This currently works only on undirected graphs...
 // Graph must model Adjacency Graph, Incidence Graph, VertexListGraph
@@ -31,6 +31,18 @@ typedef double doublereal;
 
 namespace boost {
 
+  template <typename Graph, typename EigenvectorMatrix >
+  void sparse_spectrum(Graph& g, 
+		       int first_eigenvector_index,
+		       int num_eigenvectors,
+		       EigenvectorMatrix &eigenvectors,
+		       double rel_tol = 100, 
+		       double abs_tol = 1000) 
+  {
+    std::vector<double> evals(num_eigenvectors);
+    sparse_spectrum(g, first_eigenvector_index, num_eigenvectors, eigenvectors, evals, rel_tol, abs_tol);
+  }
+
   // Parameters:
   //   first_eigenvector_index:
   //     Since the smallest eigenvector is not useful, often this will 
@@ -40,14 +52,14 @@ namespace boost {
   //   num_eigenvectors:
   //     The number of eigencectors to return.
 
-  template <typename Graph, typename EigenvectorMatrix >
+  template <typename Graph, typename EigenvectorMatrix, typename EVector >
   void sparse_spectrum(Graph& g, 
-		int first_eigenvector_index,
-		int num_eigenvectors,
-		//		std::vector<Vector> &eigenvectors,
-		EigenvectorMatrix &eigenvectors,
-		double rel_tol = 100, 
-		double abs_tol = 1000) 
+		       int first_eigenvector_index,
+		       int num_eigenvectors,
+		       EigenvectorMatrix &eigenvectors,
+		       EVector &eigenalues,
+		       double rel_tol = 100, 
+		       double abs_tol = 1000) 
   {
 
     //    Matrix eigenvectors = *(in_eigenvectors);
@@ -88,15 +100,20 @@ namespace boost {
     AdjacencyIterator a, as, ae;
     std::pair<AdjacencyIterator, AdjacencyIterator> ap;
     
-    i = 0;
+    /*
     for (v = vs; v != ve; ++v) {
       A(index_map[*v], index_map[*v]) = (double)out_degree(*v, g);
     }
+    */
     for (e = es; e != ee; ++e) {
       src = source(*e, g);
       tgt = target(*e, g);
-      A(index_map[src], index_map[tgt]) = (double)(-1);
-      A(index_map[tgt], index_map[src]) = (double)(-1);
+      if (src != tgt and A(index_map[src], index_map[tgt]) != -1) {
+	A(index_map[src], index_map[tgt]) = (double)(-1);
+	A(index_map[tgt], index_map[src]) = (double)(-1);
+	A(index_map[src], index_map[src]) += (double)1;
+	A(index_map[tgt], index_map[tgt]) += (double)1;
+      }
     }
 
     /*

@@ -7,7 +7,7 @@
 namespace boost { namespace graph { namespace python {
 
 template <typename Graph>
-boost::python::list
+boost::python::tuple
 sparse_spectrum
   (Graph& g,
    int first_eigenvector_index,
@@ -26,21 +26,26 @@ sparse_spectrum
   std::vector<Vector> evecs(num_eigenvectors);
   for (int i = 0; i < num_eigenvectors; i++)
     evecs[i] = *(new Vector(N));
+  std::vector<double> evals(num_eigenvectors);
 
-  boost::sparse_spectrum<Graph, std::vector<Vector> >(g, first_eigenvector_index, num_eigenvectors, evecs, rel_tol, abs_tol);
+  boost::sparse_spectrum<Graph, std::vector<Vector> >(g, first_eigenvector_index, num_eigenvectors, evecs, evals, rel_tol, abs_tol);
 
   boost::python::list *evec;
 
-  boost::python::list result;
+  boost::python::list eigenvectors;
   for(int i = 0; i < num_eigenvectors; i++) {
     evec = new boost::python::list();
     for (int j = 0; j < N; j++)
       evec->append(evecs[i][j]);
-    result.append(*evec);
+    eigenvectors.append(*evec);
   }
 
-  return result;
-
+  boost::python::list eigenvalues;
+  for(int i = 0; i < num_eigenvectors; i++) {
+      eigenvalues.append(evals[i]);
+  }
+  
+  return boost::python::make_tuple(eigenvalues, eigenvectors);
 }
 
 void export_sparse_spectrum()

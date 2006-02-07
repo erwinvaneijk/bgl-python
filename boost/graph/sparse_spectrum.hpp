@@ -13,7 +13,7 @@
 #include <boost/vector_property_map.hpp>
 #include <utility> // for pair
 
-#include <iostream.h>
+//#include <iostream.h>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_sparse.hpp>
@@ -108,7 +108,7 @@ namespace boost {
     for (e = es; e != ee; ++e) {
       src = source(*e, g);
       tgt = target(*e, g);
-      if (src != tgt and A(index_map[src], index_map[tgt]) != -1) {
+      if (src != tgt && A(index_map[src], index_map[tgt]) != -1) {
 	A(index_map[src], index_map[tgt]) = (double)(-1);
 	A(index_map[tgt], index_map[src]) = (double)(-1);
 	A(index_map[src], index_map[src]) += (double)1;

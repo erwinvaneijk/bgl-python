@@ -7,8 +7,6 @@
 #ifndef BOOST_GRAPH_SPECTRUM_HPP
 #define BOOST_GRAPH_SPECTRUM_HPP
 
-#define INCLUDE_SPECTRUM
-
 #define USE_IETL 0
 
 #if USE_IETL
@@ -22,7 +20,7 @@
 #include <boost/vector_property_map.hpp>
 #include <utility> // for pair
 
-#include <iostream.h>
+//#include <iostream.h>
 #ifdef USE_LAPACK
 #ifdef _APPLE_
 #include <vecLib/clapack.h>
@@ -153,14 +151,14 @@ namespace boost {
       src = source(*e, g);
       tgt = target(*e, g);
 #ifdef USE_LAPACK      
-      if (src != tgt and A[index_map[src] + index_map[tgt]*N] != -1) {
+      if (src != tgt && A[index_map[src] + index_map[tgt]*N] != -1) {
 	A[index_map[src] + index_map[tgt]*N] = (doublereal)(-1);
 	A[index_map[src]*N + index_map[tgt]] = (doublereal)(-1);
 	A[index_map[src] + index_map[src]*N] += (doublereal)1;
 	A[index_map[tgt] + index_map[tgt]*N] += (doublereal)1;
       }
 #elif USE_IETL
-      if (src != tgt and A(index_map[src], index_map[tgt]) != -1) {
+      if (src != tgt && A(index_map[src], index_map[tgt]) != -1) {
 	A(index_map[src], index_map[tgt]) = (double)(-1);
 	A(index_map[tgt], index_map[src]) = (double)(-1);
 	A(index_map[src], index_map[src]) += (double)1;

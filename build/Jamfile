@@ -49,7 +49,8 @@ if $(OS) = MACOSX {
 }
 else if $(LAPACK_PATH) {
        EXTRA_SRCS += ../src/spectrum.cpp
-                     ../src/spectral_embedding_3d_layout.cpp ;
+                     ../src/spectral_embedding_3d_layout.cpp
+                     ../src/spectral_embedding_layout.cpp ;
 
        EXTRA_REQUIREMENTS += <find-library>libclapack 
                              <library-path>$(LAPACK_PATH)

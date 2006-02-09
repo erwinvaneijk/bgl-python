@@ -540,3 +540,24 @@ undirected_dfs.__doc__ = _documentor.function('undirected_dfs') \
     .see_also('depth_first_visit') \
     .__str__()
 
+#spectrum.__doc__ = _documentor.function('spectrum') \
+#    .parameter('graph', 'an undirected graph.') \
+#    .parameter('first_eigenvector_index', 'the index of the lowest eigenvalue and eigenvector to return.') \
+#    .parameter('num_eigenvectors', 'the number of eigenvalues and eigenvectors to return.') \
+#    .parameter('rel_tol', 'the relative tolerance to use when computing the eigenvectors.') \
+#    .parameter('abs_tol', 'the absolute tolerance to use when computing the eigenvectors.') \
+#    .result('(eigenvalues, eigenvectors)') \
+#    .paragraph('Finds the eigenvalues and eigenvectors of an undirected graph within the specified range. Returns a tuple of a list of the eigenvalues and a list of the eigenvectors. (Note that multiple edges are considered as single edges, and self-loops are ignored.) This function performs better than sparse_spectrum() on sufficiently small or dense graphs.') \
+#    .see_also('sparse_spectrum') \
+#    .__str__()
+
+#sparse_spectrum.__doc__ = _documentor.function('spectrum') \
+#    .parameter('graph', 'an undirected graph.') \
+#    .parameter('first_eigenvector_index', 'the index of the lowest eigenvalue and eigenvector to return.') \
+#    .parameter('num_eigenvectors', 'the number of eigenvalues and eigenvectors to return.') \
+#    .parameter('rel_tol', 'the relative tolerance to use when computing the eigenvectors.') \
+#    .parameter('abs_tol', 'the absolute tolerance to use when computing the eigenvectors.') \
+#    .result('(eigenvalues, eigenvectors)') \
+#    .paragraph('Finds the eigenvalues and eigenvectors of an undirected graph within the specified range. Returns a tuple of a list of the eigenvalues and a list of the eigenvectors. (Note that multiple edges are considered as single edges, and self-loops are ignored.) This function performs better than spectrum() on large, sparse graphs.') \
+#    .see_also('sparse_spectrum') \
+#    .__str__()

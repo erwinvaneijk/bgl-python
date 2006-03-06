@@ -305,8 +305,9 @@ void export_basic_graph(const char* name)
 
     graph
         // Constructors
-        .def(init<object>())
-        .def(init<object, std::string>(my_graph_init_doc.c_str()))
+        .def(init<object>(arg("edges")))
+        .def(init<object, std::string>((arg("edges"), arg("name_map")),
+                                       my_graph_init_doc.c_str()))
         .def("is_directed", &Graph::is_directed,
              "is_directed(self) -> bool\n\nWhether the graph is directed or not.")
         // Properties

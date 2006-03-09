@@ -1,0 +1,17 @@
+Items to be completed before BGL-Python 1.0:
+  - Make vertex/edge descriptors work properly in Python dicts, either
+  with caching or __hash__ tricks.
+
+  - Make write_graphviz take a file descriptor instead of a file name
+
+  - pybgl-like property injection into vertex and edge descriptors,
+    e.g. for e in g.edges: e.weight = random()
+
+  - Provide wrappers for all of the algorithms in the BGL
+
+  - Push changes made to the BGL in the BGL-Python bindings back into
+    the main Boost tree
+
+Items to be completed "in the future":
+  - Subgraph support
+  - Vertex/edge filtering

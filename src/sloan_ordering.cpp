@@ -100,6 +100,30 @@ sloan_ordering_se
   return result;
 }
 
+template<typename Graph>
+typename graph_traits<Graph>::vertex_descriptor
+sloan_se(Graph &g,
+         typename graph_traits<Graph>::vertex_descriptor &s)
+{
+  typedef typename graph_traits<Graph>::degree_size_type degree_size_type;
+
+  typedef typename property_map<Graph, vertex_index_t>::const_type 
+    VertexIndexMap;
+  typedef vector_property_map<default_color_type, VertexIndexMap> ColorMap;
+  typedef vector_property_map<degree_size_type, VertexIndexMap>
+    OutDegreeMap;
+
+  // Out-degree map
+  OutDegreeMap out_degree_map(num_vertices(g), get(vertex_index, g));
+  BGL_FORALL_VERTICES_T(v, g, Graph)
+    put(out_degree_map, v, out_degree(v, g));
+
+  ColorMap color = ColorMap(num_vertices(g), get(vertex_index, g));
+
+
+  return boost::sloan_start_end_vertices(g, s, color, out_degree_map);
+}
+
 void export_sloan_ordering()
 {
   using boost::python::arg;
@@ -128,6 +152,12 @@ void export_sloan_ordering()
          arg("priority_map") = static_cast<PriorityMap*>(0),            \
          arg("weight1") = 1.0,                                          \
          arg("weight2") = 2.0));                                        \
+                                                                        \
+    def("sloan_start_end_vertices",					    \
+        &sloan_se<Type>,                                                \
+        (arg("graph"),                                                  \
+         arg("start_vertex")));                                         \
+                                                                        \
   }
 #define DIRECTED_GRAPH(Name,Type)
 #include "graphs.hpp"

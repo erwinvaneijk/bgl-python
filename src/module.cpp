@@ -38,8 +38,8 @@ extern void export_sloan_ordering();
 extern void export_spectral_embedding_layout();
 extern void export_spectral_embedding_3d_layout();
 extern void export_spectrum();
-#else
-#warning "Not building spectrum() and related functions."
+//#else
+//#warning "Not building spectrum() and related functions."
 #endif
 #ifdef INCLUDE_SPARSE_SPECTRUM
 extern void export_sparse_spectrum();
@@ -77,8 +77,8 @@ BOOST_PYTHON_MODULE(_graph)
   export_spectral_embedding_layout();
   export_spectral_embedding_3d_layout();
   export_spectrum();
-#else
-#warning "Not using spectrum()."
+//#else
+//#warning "Not using spectrum()."
 #endif
 #ifdef INCLUDE_SPARSE_SPECTRUM
   export_sparse_spectrum();

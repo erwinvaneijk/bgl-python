@@ -13,6 +13,7 @@
 #include <vector>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/python/list_append_iterator.hpp>
+#include <utility>
 
 namespace boost { namespace graph { namespace python {
 
@@ -101,9 +102,9 @@ sloan_ordering_se
 }
 
 template<typename Graph>
-typename graph_traits<Graph>::vertex_descriptor
+boost::python::tuple
 sloan_se(Graph &g,
-         typename graph_traits<Graph>::vertex_descriptor &s)
+         typename graph_traits<Graph>::vertex_descriptor s)
 {
   typedef typename graph_traits<Graph>::degree_size_type degree_size_type;
 
@@ -113,6 +114,10 @@ sloan_se(Graph &g,
   typedef vector_property_map<degree_size_type, VertexIndexMap>
     OutDegreeMap;
 
+  typename graph_traits<Graph>::vertex_descriptor s2 = s;
+  typename graph_traits<Graph>::vertex_descriptor e;
+
+
   // Out-degree map
   OutDegreeMap out_degree_map(num_vertices(g), get(vertex_index, g));
   BGL_FORALL_VERTICES_T(v, g, Graph)
@@ -120,8 +125,9 @@ sloan_se(Graph &g,
 
   ColorMap color = ColorMap(num_vertices(g), get(vertex_index, g));
 
+  e = boost::sloan_start_end_vertices(g, s2, color, out_degree_map);
 
-  return boost::sloan_start_end_vertices(g, s, color, out_degree_map);
+  return boost::python::make_tuple(s, e);
 }
 
 void export_sloan_ordering()

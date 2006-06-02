@@ -35,7 +35,16 @@ basic_graph<DirectedS>::basic_graph(boost::python::object l,
   std::map<object, vertex_descriptor> verts;
   int len = ::boost::python::extract<int>(l.attr("__len__")());
 
-  vector_property_map<object, VertexIndexMap> name;
+  typedef vector_property_map<object, VertexIndexMap> name_map_type;
+  typedef resizable_vector_property_map<object, VertexIndexMap> 
+    resize_name_map_type;
+  name_map_type name(1, get(vertex_index, *this));
+
+  if (!name_map.empty()) {
+    std::auto_ptr<resizable_property_map> reg(new resize_name_map_type(name));
+    register_vertex_map(reg);
+    vertex_properties()[name_map] = object(name);
+  }
 
   for (int  i = 0; i < len; ++i) {
     vertex_descriptor u, v;
@@ -305,8 +314,8 @@ void export_basic_graph(const char* name)
 
     graph
         // Constructors
-        .def(init<object>(arg("edges")))
-        .def(init<object, std::string>((arg("edges"), arg("name_map")),
+        .def(init<object, std::string>((arg("edges"), 
+                                        arg("name_map") = "node_id"),
                                        my_graph_init_doc.c_str()))
         .def("is_directed", &Graph::is_directed,
              "is_directed(self) -> bool\n\nWhether the graph is directed or not.")

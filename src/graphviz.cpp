@@ -73,7 +73,6 @@ read_graphviz(const std::string& filename, const std::string& node_id)
   return result.release();
 }
 
-// DPG TBD: Handle node_id properly
 template<typename Graph>
 void
 write_graphviz(const Graph& g, const std::string& filename, 
@@ -81,6 +80,7 @@ write_graphviz(const Graph& g, const std::string& filename,
 {
   using boost::python::object;
   using boost::python::str;
+  using boost::python::extract;
 
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
   typedef typename graph_traits<Graph>::edge_descriptor Edge;
@@ -90,8 +90,8 @@ write_graphviz(const Graph& g, const std::string& filename,
   dict_to_properties<Vertex>(g.vertex_properties(), dp);
   dict_to_properties<Edge>(g.edge_properties(), dp);
 
-  object node_id_map = g.vertex_properties()[str(node_id)];
-  if (node_id_map != object()) {
+  if (g.vertex_properties().has_key(str(node_id))) {
+    object node_id_map = g.vertex_properties()[str(node_id)];
     boost::write_graphviz(out, g, dp, node_id, 
                           object_as_string_property_map<Vertex>(node_id_map));
   } else {

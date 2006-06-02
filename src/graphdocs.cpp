@@ -39,12 +39,16 @@ const char* graph_docs[gd_last] = {
 };
 
 const char* graph_init_doc = 
-"__init__(self, edges = list()) -> GRAPH\n\n"
+"__init__(self, edges = list(), name_map = 'node_id') -> GRAPH\n\n"
 "Constructs a new graph from a list of edges. The edges argument\n"
 "should be a sequence of tuples, where each tuple contains the source and\n"
 "target vertices of an edge. The sources and targets can be any type,\n"
 "so long as that type can be ordered with < and compared with ==, e.g.,\n"
-"strings, integers, or floating-point-numbers."
+"strings, integers, or floating-point-numbers. The name_map argument is the\n"
+"name of the vertex property map that will be used to store the mapping from\n"
+"vertices to their names. After this constructor completes,\n"
+"  self.vertex_properties[name_map][v]\n"
+"will contain the name of vertex v as it appears in the edge list."
   ;
 
 const char* vertex_property_map_doc =

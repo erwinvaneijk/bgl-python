@@ -14,6 +14,8 @@ from bellman_ford_visitor import bellman_ford_visitor
 from dfs_visitor import dfs_visitor
 from dijkstra_visitor import dijkstra_visitor
 
+from show import show
+
 __doc__ = """Python Bindings for the Boost Graph Library
 
 This package provides Python access to the components of the Boost

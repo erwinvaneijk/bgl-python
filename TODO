@@ -15,3 +15,4 @@ Items to be completed before BGL-Python 1.0:
 Items to be completed "in the future":
   - Subgraph support
   - Vertex/edge filtering
+  - Easy display of graphs

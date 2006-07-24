@@ -73,11 +73,13 @@ template<typename Graph>
   using boost::python::return_value_policy;
 
   std::string my_erdos_renyi_doc(erdos_renyi_doc);
-  algorithm::replace_all(my_erdos_renyi_doc, "GRAPH", name);
+  algorithm::replace_all(my_erdos_renyi_doc, std::string("GRAPH"), 
+                         std::string(name));
   std::string my_plod_doc(plod_doc);
-  algorithm::replace_all(my_plod_doc, "GRAPH", name);
+  algorithm::replace_all(my_plod_doc, std::string("GRAPH"), std::string(name));
   std::string my_small_world_doc(small_world_doc);
-  algorithm::replace_all(my_small_world_doc, "GRAPH", name);
+  algorithm::replace_all(my_small_world_doc, 
+                         std::string("GRAPH"), std::string(name));
 
   // Generators
   graph

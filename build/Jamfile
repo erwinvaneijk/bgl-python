@@ -1,4 +1,5 @@
-# Copyright 2005 The Trustees of Indiana University.
+# Copyright (C) 2005, 2006 The Trustees of Indiana University.
+# Copyright (C) 2006 Douglas Gregor <doug.gregor -at- gmail.com>
 
 # Use, modification and distribution is subject to the Boost Software
 # License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,11 +8,23 @@
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
 
-# This file builds the Python bindings for the Boost Graph Library.
+# This file builds and installs the Python bindings for the Boost
+# Graph Library.
 
 subproject build ;
 
 import python ;
+
+BOOST_GRAPH_PYTHON_SOURCES =
+  astar_visitor
+  bfs_visitor
+  dijkstra_visitor
+  dfs_visitor
+  docstring
+  __init__
+  show
+  bellman_ford_visitor
+  ;
 
 extension _support 
 :   # Sources 
@@ -116,6 +129,116 @@ install _graph pyd
           <dll>@boost/libs/python/build/boost_python
         ;
 
+if install in $(ARGV)
+{
+    exec-prefix = [ MATCH "^--exec-prefix=(.*)" : $(ARGV) ] ;
+    home = [ MATCH "^--home=(.*)" : $(ARGV) ] ;
+    libdir = [ MATCH "^--libdir=(.*)" : $(ARGV) ] ;
+    pythonlibdir = [ MATCH "^--pythonlibdir=(.*)" : $(ARGV) ] ;
+
+    if $(home) 
+    {
+      # Only one of --home or --exec-prefix can be provided
+      if $(exec-prefix)
+      {
+        ECHO "ERROR: Cannot specify both --home and --exec-prefix" ;
+        ECHO "  --home is for home-directory installations" ;
+        ECHO "  --exec-prefix is for system-wide installations" ;
+        EXIT -1 ;
+      }
+
+      # Install libraries in $(home)/lib
+      if ! $(libdir)
+      {
+        libdir = $(home)/lib ;
+      }
+
+      # Install Python module in $(home)/lib/python
+      if ! $(pythonlibdir)
+      {
+        pythonlibdir = $(home)/lib/python ;
+      }
+    }
+    else
+    {
+      # If no --home or --exec-prefix given. Ask Python 
+      if ! $(exec-prefix) 
+      {
+        exec-prefix = [ SHELL "$(PYTHON:G=) -c \"import sys; print sys.exec_prefix\"" ] ;
+      }
+    
+      # Libraries go into $(exec-prefix)/lib
+      if ! $(libdir)
+      {
+        libdir = $(exec-prefix)/lib ;
+      }
+
+      # Non-pure Python modules go into the exec-prefix's site-packages
+      if ! $(pythonlibdir)
+      {
+        pythonlibdir = $(exec-prefix)/lib/python$(PYTHON_VERSION)/site-packages ;
+      }
+    }
+
+    # Replace any occurrences of "~" in libdir with $(HOME)
+    local tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
+    while $(tilde)
+    {
+      libdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+      tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
+    }
+
+    # Replace any occurrences of "~" in pythonlibdir with $(HOME)
+    tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
+    while $(tilde)
+    {
+      pythonlibdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+      tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
+    }
+
+    # Setup "install" as a target that we can stage with
+    declare-fake-targets install ;
+
+    # Tell the user what we're planning to do
+    if ! $(gBGL_PYTHON_INSTALL_MSG)
+    {
+      gBGL_PYTHON_INSTALL_MSG = yes ;
+      ECHO "Installing BGL support libraries in $(libdir)..." ;
+    }
+
+    # Tell the user what we're planning to do
+    if ! $(gBGL_PYTHON_PYTHON_INSTALL_MSG)
+    {
+      gBGL_PYTHON_PYTHON_INSTALL_MSG = yes ;
+      ECHO "Installing BGL Python module in $(pythonlibdir)..." ;
+    }
+
+    # Add a stage target that copies the __init.py__ for the "boost"
+    # module.
+    stage $(pythonlibdir)/boost
+      : ../python/boost/__init__.py
+      : <target>install
+      ;
+
+    # Add a stage target that copies the Python module and its
+    # __init__.py
+    stage $(pythonlibdir)/boost/graph
+      : <pyd>_support <pyd>_graph
+        ../python/boost/graph/$(BOOST_GRAPH_PYTHON_SOURCES).py
+      : <target>install
+      : release
+      ;
+  
+    # Add a stage target to copy the Boost.Python library. 
+    stage $(libdir)
+      : <dll>@boost/libs/python/build/boost_python
+      : <target>install
+      : release
+      ;
+
+}
+else
+{
 stage ../python/boost/graph : <pyd>_support
     :
      # add this target to the "stage" and "all" pseudo-targets:
@@ -142,3 +265,4 @@ stage ../python : <dll>@boost/libs/python/build/boost_python
     :
        release
     ;
+}

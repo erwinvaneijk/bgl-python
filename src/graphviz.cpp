@@ -163,7 +163,8 @@ void export_graphviz(boost::python::class_<Graph>& graph, const char* name)
   using boost::python::return_value_policy;
 
   std::string my_read_graphviz_doc(read_graphviz_doc);
-  algorithm::replace_all(my_read_graphviz_doc, "GRAPH", name);
+  algorithm::replace_all(my_read_graphviz_doc, 
+                         std::string("GRAPH"), std::string(name));
 
   graph.def("read_graphviz", &read_graphviz<Graph>,
             return_value_policy<manage_new_object>(),

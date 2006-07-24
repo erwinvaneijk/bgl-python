@@ -17,7 +17,13 @@ DEFAULT_SLICES = 20
 
 LINE_WIDTH = 1.0
 
-def show(g, position_map):
+def show(g, position_map = None):
+    # If we didn't receive a position map, layout the graph...
+    if position_map == None:
+        import boost.graph
+        position_map = g.vertex_property_map('point2d')
+        boost.graph.fruchterman_reingold_force_directed_layout(g, position_map)
+        
     app = wx.PySimpleApp()
     frame = wx.Frame(None, title="")
     canvas = MiniOpenGLGraphCanvas(frame, g, position_map)

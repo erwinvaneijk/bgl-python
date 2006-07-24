@@ -119,16 +119,6 @@ extension _graph
         <include>$(BGL_PYTHON_ROOT)
         ;
 
-install _support pyd 
-        : <pyd>_support
-          <dll>@boost/libs/python/build/boost_python
-        ;
-
-install _graph pyd 
-        : <pyd>_graph
-          <dll>@boost/libs/python/build/boost_python
-        ;
-
 if install in $(ARGV)
 {
     exec-prefix = [ MATCH "^--exec-prefix=(.*)" : $(ARGV) ] ;
@@ -236,33 +226,4 @@ if install in $(ARGV)
       : release
       ;
 
-}
-else
-{
-stage ../python/boost/graph : <pyd>_support
-    :
-     # add this target to the "stage" and "all" pseudo-targets:
-       <target>stage
-       <target>all
-    :
-       release
-    ;
-
-stage ../python/boost/graph : <pyd>_graph
-    :
-     # add this target to the "stage" and "all" pseudo-targets:
-       <target>stage
-       <target>all
-    :
-       release
-    ;
-
-stage ../python : <dll>@boost/libs/python/build/boost_python
-    :
-     # add this target to the "stage" and "all" pseudo-targets:
-       <target>stage
-       <target>all
-    :
-       release
-    ;
 }

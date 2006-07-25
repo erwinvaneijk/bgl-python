@@ -94,7 +94,7 @@ typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
   // Add the vertex and give it an index
   base_vertex_descriptor v = add_vertex(base());
   put(vertex_index, base(), v, index_to_vertex.size());
-  index_to_vertex.push_back(v);
+  index_to_vertex.push_back(Vertex(v, this));
 
   // Update any vertex property maps around
   for (std::list<resizable_property_map*>::iterator i = vertex_maps.begin();
@@ -106,7 +106,7 @@ typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
     }
   }
 
-  return Vertex(v);
+  return Vertex(v, this);
 }
 
 template<typename DirectedS>
@@ -151,7 +151,7 @@ basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
   // Add the edge
   base_edge_descriptor e = add_edge(u.base, v.base, base()).first;
   put(edge_index, base(), e, index_to_edge.size());
-  index_to_edge.push_back(e);
+  index_to_edge.push_back(Edge(e, this));
 
   // Update any edge property maps around
   for (std::list<resizable_property_map*>::iterator i = edge_maps.begin();
@@ -163,7 +163,7 @@ basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
     }
   }
 
-  return Edge(e);
+  return Edge(e, this);
 }
 
 template<typename DirectedS>
@@ -197,7 +197,7 @@ basic_graph<DirectedS>::edge(Vertex u, Vertex v) const
 {
   using boost::edge;
   std::pair<base_edge_descriptor, bool> result = edge(u, v, base());
-  return std::make_pair(Edge(result.first), result.second);
+  return std::make_pair(Edge(result.first, this), result.second);
 }
 
 template<typename DirectedS>
@@ -207,7 +207,7 @@ void basic_graph<DirectedS>::renumber_vertices()
 
   BGL_FORALL_VERTICES_T(v, base(), inherited) {
     put(vertex_index, base(), v, index_to_vertex.size());
-    index_to_vertex.push_back(v);
+    index_to_vertex.push_back(vertex_descriptor(v, this));
   }
 }
 
@@ -218,7 +218,7 @@ void basic_graph<DirectedS>::renumber_edges()
 
   BGL_FORALL_EDGES_T(e, base(), inherited) {
     put(edge_index, base(), e, index_to_edge.size());
-    index_to_edge.push_back(e);
+    index_to_edge.push_back(edge_descriptor(e, this));
   }
 }
 

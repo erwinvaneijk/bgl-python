@@ -21,21 +21,36 @@
 
 namespace boost { namespace graph { namespace python {
 
+template<typename DirectedS>
+class basic_graph;
+
 template<typename T, typename DirectedS>
 struct basic_descriptor
 {
-  basic_descriptor() {}
-  basic_descriptor(T base) : base(base) { }
+  basic_descriptor() : graph(0) {}
+  basic_descriptor(T base, const basic_graph<DirectedS>* graph) 
+    : base(base), graph(graph) { }
 
   operator T() const { return base; }
 
   struct create 
   {
     typedef basic_descriptor result_type;
-    basic_descriptor operator()(T base) const { return base; }
+    
+    create() : graph(0) { }
+
+    explicit create(const basic_graph<DirectedS>* graph) : graph(graph) { }
+
+    basic_descriptor operator()(T base) const 
+    { 
+      return basic_descriptor<T, DirectedS>(base, graph); 
+    }
+
+    const basic_graph<DirectedS>* graph;
   };
 
   T base;
+  const basic_graph<DirectedS>* graph;
 };
 
 template<typename T, typename DirectedS>
@@ -103,10 +118,11 @@ class basic_graph
                                                      base_vertex_index_map;
   typedef typename property_map<inherited, edge_index_t>::const_type
                                                      base_edge_index_map;
+
+ public:
   typedef typename traits::vertex_descriptor         base_vertex_descriptor;
   typedef typename traits::edge_descriptor           base_edge_descriptor;
 
- public:
   typedef basic_descriptor<base_vertex_descriptor, DirectedS>
                                                      Vertex;
   typedef Vertex                                     vertex_descriptor;
@@ -132,6 +148,11 @@ class basic_graph
                                                      in_edge_iterator;
   typedef transform_iterator<typename Vertex::create, base_adjacency_iterator>
                                                      adjacency_iterator;
+
+  static Vertex null_vertex()
+  {
+    return Vertex(traits::null_vertex(), 0);
+  }
 
   basic_graph();
   basic_graph(boost::python::object, 
@@ -185,6 +206,9 @@ class basic_graph
   const boost::python::dict& edge_properties() const 
   { return edge_properties_; }
 
+  boost::python::object vertex_type_;
+  boost::python::object edge_type_;
+
 protected:
   void renumber_vertices();
   void renumber_edges();
@@ -217,9 +241,9 @@ vertices(const basic_graph<DirectedS>& g)
     Vertex;
 
   return std::make_pair(vertex_iterator(vertices(g.base()).first, 
-                                        typename Vertex::create()),
+                                        typename Vertex::create(&g)),
                         vertex_iterator(vertices(g.base()).second, 
-                                        typename Vertex::create()));
+                                        typename Vertex::create(&g)));
 }
 
 template<typename DirectedS>
@@ -237,9 +261,9 @@ edges(const basic_graph<DirectedS>& g)
   typedef typename graph_traits<basic_graph<DirectedS> >::edge_descriptor Edge;
 
   return std::make_pair(edge_iterator(edges(g.base()).first, 
-                                        typename Edge::create()),
+                                        typename Edge::create(&g)),
                         edge_iterator(edges(g.base()).second, 
-                                        typename Edge::create()));  
+                                        typename Edge::create(&g)));  
 }
 
 template<typename DirectedS>
@@ -254,7 +278,7 @@ source(typename basic_graph<DirectedS>::edge_descriptor e,
 { 
   typedef typename graph_traits<basic_graph<DirectedS> >::vertex_descriptor
     Vertex;
-  return Vertex(source(e.base, g.base()));
+  return Vertex(source(e.base, g.base()), &g);
 }
 
 template<typename DirectedS>
@@ -264,7 +288,7 @@ target(typename basic_graph<DirectedS>::edge_descriptor e,
 { 
   typedef typename graph_traits<basic_graph<DirectedS> >::vertex_descriptor
     Vertex;
-  return Vertex(target(e.base, g.base()));
+  return Vertex(target(e.base, g.base()), &g);
 }
 
 template<typename DirectedS>
@@ -277,9 +301,9 @@ out_edges(typename basic_graph<DirectedS>::vertex_descriptor u,
     out_edge_iterator;
   typedef typename graph_traits<basic_graph<DirectedS> >::edge_descriptor Edge;
   return std::make_pair(out_edge_iterator(out_edges(u.base, g.base()).first, 
-                                          typename Edge::create()),
+                                          typename Edge::create(&g)),
                         out_edge_iterator(out_edges(u.base, g.base()).second,
-                                          typename Edge::create()));
+                                          typename Edge::create(&g)));
 }
 
 template<typename DirectedS>
@@ -299,9 +323,9 @@ in_edges(typename basic_graph<DirectedS>::vertex_descriptor u,
     in_edge_iterator;
   typedef typename graph_traits<basic_graph<DirectedS> >::edge_descriptor Edge;
   return std::make_pair(in_edge_iterator(in_edges(u.base, g.base()).first, 
-                                         typename Edge::create()),
+                                         typename Edge::create(&g)),
                         in_edge_iterator(in_edges(u.base, g.base()).second,
-                                         typename Edge::create()));
+                                         typename Edge::create(&g)));
 }
 
 template<typename DirectedS>
@@ -324,9 +348,9 @@ adjacent_vertices(typename basic_graph<DirectedS>::vertex_descriptor u,
 
   return std::make_pair
            (adjacency_iterator(adjacent_vertices(u.base, g.base()).first, 
-                               typename Vertex::create()),
+                               typename Vertex::create(&g)),
             adjacency_iterator(adjacent_vertices(u.base, g.base()).second, 
-                               typename Vertex::create()));
+                               typename Vertex::create(&g)));
 }
 
 // Mutable basic_graph<DirectedS> concept
@@ -369,6 +393,33 @@ inline void
 remove_edge(typename basic_graph<DirectedS>::edge_descriptor e, 
             basic_graph<DirectedS>& g)
 { return g.remove_edge(e); }
+
+template<typename DirectedS, typename Predicate>
+struct adapt_edge_predicate
+{
+  explicit adapt_edge_predicate(const Predicate& pred,
+                                basic_graph<DirectedS>* graph) 
+    : pred(pred), graph(graph) { }
+
+  bool operator()(typename basic_graph<DirectedS>::base_edge_descriptor e)
+  {
+    typedef typename basic_graph<DirectedS>::edge_descriptor Edge;
+    return pred(Edge(e, graph));
+  }
+
+  Predicate pred;
+  basic_graph<DirectedS>* graph;
+};
+
+template<typename DirectedS, typename Predicate>
+void 
+remove_out_edge_if(typename basic_graph<DirectedS>::vertex_descriptor u,
+                   Predicate pred, basic_graph<DirectedS>& g)
+{
+  remove_out_edge_if(u.base, 
+                     adapt_edge_predicate<DirectedS, Predicate>(pred, &g),
+                     g.base());
+}
 
 template<typename DirectedS>
 void export_basic_graph(const char* name);

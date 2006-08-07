@@ -374,6 +374,36 @@ struct cached_edge_object {
   }
 };
 
+// Retrieve an arbitrary property from a vertex using attribute syntax
+template<typename Vertex>
+boost::python::object vertex_get_attr(Vertex v, const char* name)
+{
+  return v.graph->vertex_properties()[name][v];
+}
+
+// Set an arbitrary property on a vertex using attribute syntax
+template<typename Vertex>
+void
+vertex_set_attr(Vertex v, const char* name, boost::python::object value)
+{
+  v.graph->vertex_properties()[name][v] = value;
+}
+
+// Retrieve an arbitrary property from a edge using attribute syntax
+template<typename Edge>
+boost::python::object edge_get_attr(Edge e, const char* name)
+{
+  return e.graph->edge_properties()[name][e];
+}
+
+// Set an arbitrary property on a edge using attribute syntax
+template<typename Edge>
+void
+edge_set_attr(Edge e, const char* name, boost::python::object value)
+{
+  e.graph->edge_properties()[name][e] = value;
+}
+
 template<typename DirectedS>
 void export_basic_graph(const char* name)
 {
@@ -436,6 +466,11 @@ void export_basic_graph(const char* name)
       ;
 
     boost::graph::python::graph<Graph> g(graph);
+    g.vertex_class.def("__getattr__", &vertex_get_attr<Vertex>);
+    g.vertex_class.def("__setattr__", &vertex_set_attr<Vertex>);
+    g.edge_class.def("__getattr__", &edge_get_attr<Edge>);
+    g.edge_class.def("__setattr__", &edge_set_attr<Edge>);
+
     boost::graph::python::vertex_list_graph<Graph> vlg(graph);
     boost::graph::python::edge_list_graph<Graph> elg(graph);
     boost::graph::python::incidence_graph<Graph> ig(graph);

@@ -7,6 +7,7 @@
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
 #include "graph_types.hpp"
+#include "exports.hpp"
 #include <boost/graph/python/generators.hpp>
 #include <boost/python.hpp>
 #include <string>
@@ -65,7 +66,7 @@ const char* small_world_doc =
   ;
 
 template<typename Graph>
- void export_generators(boost::python::class_<Graph>& graph, const char* name)
+void export_generators(BGL_GRAPH_CLASS_(Graph)& graph, const char* name)
 {
   using boost::python::arg;
   using boost::python::def;
@@ -85,21 +86,18 @@ template<typename Graph>
   graph
     .def("erdos_renyi_graph",
          &boost::graph::python::erdos_renyi_graph<Graph>,
-         return_value_policy<manage_new_object>(),
          (arg("num_vertices"), arg("probability"),
           arg("allow_self_loops") = false, arg("random_seed") = 1),
          my_erdos_renyi_doc.c_str())
     .staticmethod("erdos_renyi_graph")
     .def("plod_graph",
          &boost::graph::python::plod_graph<Graph>,
-         return_value_policy<manage_new_object>(),
          (arg("num_vertices"), arg("alpha"), arg("beta"),
           arg("allow_self_loops") = false, arg("random_seed") = 1),
          my_plod_doc.c_str())
     .staticmethod("plod_graph")
     .def("small_world_graph",
          &boost::graph::python::small_world_graph<Graph>,
-         return_value_policy<manage_new_object>(),
          (arg("num_vertices"), arg("num_neighbors"), arg("rewire_probability"),
           arg("allow_self_loops") = false, arg("random_seed") = 1),
          my_small_world_doc.c_str())
@@ -107,7 +105,7 @@ template<typename Graph>
 }
 
 #define UNDIRECTED_GRAPH(Name,Type) \
-  template void export_generators<Type>(boost::python::class_< Type >&, \
+  template void export_generators<Type>(BGL_GRAPH_CLASS_(Type)&, \
                                         const char*);
 #include "graphs.hpp"
 

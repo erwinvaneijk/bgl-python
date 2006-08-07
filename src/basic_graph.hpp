@@ -24,6 +24,20 @@ namespace boost { namespace graph { namespace python {
 template<typename DirectedS>
 class basic_graph;
 
+} } } 
+
+namespace boost { namespace python {
+
+template<typename DirectedS> 
+class has_back_reference<graph::python::basic_graph<DirectedS> > { 
+public:
+  typedef mpl::true_ type;
+};
+
+} } 
+
+namespace boost { namespace graph { namespace python {
+
 template<typename T, typename DirectedS>
 struct basic_descriptor
 {
@@ -99,7 +113,8 @@ struct stored_minstd_rand
 
 template<typename DirectedS>
 class basic_graph
-  : public stored_minstd_rand,
+  : private noncopyable, 
+    public stored_minstd_rand,
     public adjacency_list<listS, listS, DirectedS,
                           property<vertex_index_t, std::size_t>,
                           property<edge_index_t, std::size_t> >
@@ -154,18 +169,11 @@ class basic_graph
     return Vertex(traits::null_vertex(), 0);
   }
 
-  basic_graph();
-  basic_graph(boost::python::object, 
-              const std::string& name_map = std::string());
+  basic_graph(PyObject* self);
 
-  template<typename InputIterator>
-  basic_graph(InputIterator first, InputIterator last,
-              vertices_size_type n)
-    : inherited(first, last, n)
-  {
-    renumber_vertices();
-    renumber_edges();
-  }
+  basic_graph(PyObject* self, 
+              boost::python::object, 
+              const std::string& name_map = std::string());
 
   ~basic_graph();
 
@@ -209,11 +217,51 @@ class basic_graph
   boost::python::object vertex_type_;
   boost::python::object edge_type_;
 
+  static boost::python::handle<> py_null_vertex;
+  vector_property_map<boost::python::object, VertexIndexMap> vertex_objects;
+  vector_property_map<boost::python::object, EdgeIndexMap>   edge_objects;
+
+  static boost::python::object pyconstruct() { return graph_type(); }
+
+  template<typename InputIterator>
+  static boost::python::object 
+  pyconstruct(InputIterator first, InputIterator last, vertices_size_type n)
+  {
+    typedef basic_graph<DirectedS> self_type;
+
+    // Build through Python, so that self-references work
+    boost::python::object result = pyconstruct();
+    self_type& g = boost::python::extract<self_type&>(result)();
+
+    // Initialize vertices
+    std::vector<Vertex> vertices;
+    for (vertices_size_type i = 0; i < n; ++i)
+      vertices.push_back(g.add_vertex());
+
+    // Add edges
+    for (; first != last; ++first)
+      g.add_edge(Vertex(vertex(first->first, g.base()), &g), 
+                 Vertex(vertex(first->second, g.base()), &g));
+
+    // Renumber vertices and edges
+    g.renumber_vertices();
+    g.renumber_edges();
+
+    return result;
+  }
+
+  // The Python type corresponding to this instance of basic_graph<>
+  static boost::python::object graph_type;
+
 protected:
+  void initialize();
   void renumber_vertices();
   void renumber_edges();
   
 private:
+  // The Python object instance corresponding to this graph instance.
+  PyObject* self;
+
   /* Mapping from indices to descriptors, which allows us to provide
      edge and vertex removal while retaining O(1) lookup for external
      property maps. */

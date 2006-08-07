@@ -1,4 +1,4 @@
-# Copyright 2005 The Trustees of Indiana University.
+# Copyright (C) 2005, 2006 The Trustees of Indiana University.
 
 # Use, modification and distribution is subject to the Boost Software
 # License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,6 +6,12 @@
 
 #  Authors: Douglas Gregor
 #           Andrew Lumsdaine
+
+# Filter out some annoying Boost.Python warnings that expose our dirty
+# laundry.
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="boost.graph");
+
 from _support import *
 from _graph import *
 from astar_visitor import astar_visitor
@@ -15,6 +21,8 @@ from dfs_visitor import dfs_visitor
 from dijkstra_visitor import dijkstra_visitor
 
 from show import show
+
+# Documentation that is not part of the compiled extension modules.
 
 __doc__ = """Python Bindings for the Boost Graph Library
 

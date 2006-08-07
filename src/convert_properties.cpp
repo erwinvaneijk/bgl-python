@@ -14,6 +14,7 @@
 
 #include "graph_types.hpp"
 #include <boost/python.hpp>
+#include "exports.hpp"
 #include <boost/graph/python/property_map.hpp>
 #include <boost/graph/python/point2d.hpp>
 #include <boost/graph/python/point3d.hpp>
@@ -205,7 +206,7 @@ static const char* convert_property_map_docs =
   ;
 
 template<typename Graph>
-void export_property_map_conversions(boost::python::class_<Graph>& graph)
+void export_property_map_conversions(BGL_GRAPH_CLASS_(Graph)& graph)
 {
   using boost::python::arg;
   
@@ -265,7 +266,7 @@ void export_property_map_conversions(boost::python::class_<Graph>& graph)
 // Explicit instantiations for the graph types we're interested in
 #define UNDIRECTED_GRAPH(Name,Type)                                     \
   template void                                                         \
-    export_property_map_conversions< Type >(boost::python::class_< Type >&);
+  export_property_map_conversions< Type >(BGL_GRAPH_CLASS_(Type)&);
 #include "graphs.hpp"
 
 } } } // end namespace boost::graph::python

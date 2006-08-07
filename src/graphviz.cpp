@@ -10,6 +10,7 @@
 #include "graph_types.hpp"
 #include <boost/graph/graphviz.hpp>
 #include <boost/python.hpp>
+#include "exports.hpp"
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -61,16 +62,17 @@ const char* write_graphviz_doc =
   ;
 
 template<typename Graph>
-Graph*
+boost::python::object
 read_graphviz(const std::string& filename, const std::string& node_id)
 {
-  std::auto_ptr<Graph> result(new Graph);
+  boost::python::object result = Graph::pyconstruct();
+  Graph& g = boost::python::extract<Graph&>(result)();
   std::ifstream in(filename.c_str());
-  build_string_property_maps<Graph> builder(result.get());
+  build_string_property_maps<Graph> builder(&g);
   dynamic_properties dp(builder);
-  boost::read_graphviz(in, *result, dp, node_id);
-  string_properties_to_dicts<Graph>(*result, dp);
-  return result.release();
+  boost::read_graphviz(in, g, dp, node_id);
+  string_properties_to_dicts<Graph>(g, dp);
+  return result;
 }
 
 template<typename Graph>
@@ -156,7 +158,7 @@ void export_graphviz_exceptions()
 }
 
 template<typename Graph>
-void export_graphviz(boost::python::class_<Graph>& graph, const char* name)
+void export_graphviz(BGL_GRAPH_CLASS_(Graph)& graph, const char* name)
 {
   using boost::python::arg;
   using boost::python::manage_new_object;
@@ -167,7 +169,6 @@ void export_graphviz(boost::python::class_<Graph>& graph, const char* name)
                          std::string("GRAPH"), std::string(name));
 
   graph.def("read_graphviz", &read_graphviz<Graph>,
-            return_value_policy<manage_new_object>(),
             (arg("filename"), arg("node_id") = "node_id"),
             my_read_graphviz_doc.c_str())
     .staticmethod("read_graphviz");
@@ -179,10 +180,11 @@ void export_graphviz(boost::python::class_<Graph>& graph, const char* name)
 
 // Explicit instantiations
 #define UNDIRECTED_GRAPH(Name,Type)                                     \
-  template void export_graphviz(boost::python::class_<Type>& graph,     \
+  template void export_graphviz(BGL_GRAPH_CLASS_(Type)& graph,          \
                                 const char* name);                      \
   template                                                              \
-    Type* read_graphviz(const std::string&, const std::string&);        \
+     boost::python::object                                              \
+     read_graphviz<Type>(const std::string&, const std::string&);       \
   template                                                              \
     void write_graphviz(const Type&, const std::string&,  const std::string&);
 #include "graphs.hpp"

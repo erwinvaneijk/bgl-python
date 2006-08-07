@@ -1,4 +1,4 @@
-// Copyright 2005 The Trustees of Indiana University.
+// Copyright (C)2005, 2006 The Trustees of Indiana University.
 
 // Use, modification and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -15,6 +15,12 @@
 
 namespace boost { namespace graph { namespace python {
 
+template<typename DirectedS>
+boost::python::object basic_graph<DirectedS>::graph_type;
+
+template<typename DirectedS>
+boost::python::handle<> basic_graph<DirectedS>::py_null_vertex;
+
 // ----------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------
@@ -23,14 +29,25 @@ namespace boost { namespace graph { namespace python {
 #  pragma warning (disable: 4355)
 #endif
 template<typename DirectedS>
-basic_graph<DirectedS>::basic_graph() : inherited()
-{ }
+basic_graph<DirectedS>::basic_graph(PyObject* self) 
+  : inherited(), 
+    vertex_objects(0, get(vertex_index, *this)),
+    edge_objects(0, get(edge_index, *this)),
+    self(self)
+{ 
+  initialize();
+}
 
 template<typename DirectedS>
-basic_graph<DirectedS>::basic_graph(boost::python::object l,
+basic_graph<DirectedS>::basic_graph(PyObject* self, boost::python::object l,
                                     const std::string& name_map)
-  : inherited()
+  : inherited(), 
+    vertex_objects(0, get(vertex_index, *this)),
+    edge_objects(0, get(edge_index, *this)),
+    self(self)
 {
+  initialize();
+
   using boost::python::object;
   std::map<object, vertex_descriptor> verts;
   int len = ::boost::python::extract<int>(l.attr("__len__")());
@@ -90,6 +107,7 @@ template<typename DirectedS>
 typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
 {
   using boost::add_vertex;
+  using boost::python::handle;
 
   // Add the vertex and give it an index
   base_vertex_descriptor v = add_vertex(base());
@@ -106,7 +124,20 @@ typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
     }
   }
 
-  return Vertex(v, this);
+  // Create a Python object for this vertex and put it into the
+  // vertex_objects property map.
+  using boost::python::objects::value_holder;
+  using boost::python::objects::make_instance;
+  using boost::python::objects::class_cref_wrapper;
+  typedef class_cref_wrapper<Vertex, 
+                             make_instance<Vertex, value_holder<Vertex> > >
+    Converter;
+
+  Vertex result(v, this);
+  boost::python::object vertex_object(handle<>(Converter::convert(result)));
+  put(vertex_objects, result, vertex_object);
+
+  return result;
 }
 
 template<typename DirectedS>
@@ -147,6 +178,7 @@ typename basic_graph<DirectedS>::Edge
 basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
 {
   using boost::add_edge;
+  using boost::python::handle;
 
   // Add the edge
   base_edge_descriptor e = add_edge(u.base, v.base, base()).first;
@@ -163,7 +195,20 @@ basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
     }
   }
 
-  return Edge(e, this);
+  // Create a Python object for this edge and put it into the
+  // edge_objects property map.
+  using boost::python::objects::value_holder;
+  using boost::python::objects::make_instance;
+  using boost::python::objects::class_cref_wrapper;
+  typedef class_cref_wrapper<Edge, 
+                             make_instance<Edge, value_holder<Edge> > >
+    Converter;
+
+  Edge result(e, this);
+  boost::python::object edge_object(handle<>(Converter::convert(result)));
+  put(edge_objects, result, edge_object);
+
+  return result;
 }
 
 template<typename DirectedS>
@@ -198,6 +243,24 @@ basic_graph<DirectedS>::edge(Vertex u, Vertex v) const
   using boost::edge;
   std::pair<base_edge_descriptor, bool> result = edge(u, v, base());
   return std::make_pair(Edge(result.first, this), result.second);
+}
+
+template<typename DirectedS>
+void basic_graph<DirectedS>::initialize()
+{
+  // Register the cached Python objects for each vertex and edge.
+  typedef resizable_vector_property_map<boost::python::object,
+                                        VertexIndexMap> vertex_object_map;
+  typedef resizable_vector_property_map<boost::python::object,
+                                        EdgeIndexMap> edge_object_map;
+
+  std::auto_ptr<resizable_property_map> 
+    reg_vertex_objects(new vertex_object_map(vertex_objects));
+  register_vertex_map(reg_vertex_objects);
+
+  std::auto_ptr<resizable_property_map> 
+    reg_edge_objects(new edge_object_map(edge_objects));
+  register_edge_map(reg_edge_objects);
 }
 
 template<typename DirectedS>
@@ -280,7 +343,30 @@ static const char* edge_properties_doc =
 
 // Defined and instantiated in convert_properties.cpp
 template<typename Graph>
-void export_property_map_conversions(boost::python::class_<Graph>& graph);
+void export_property_map_conversions(BGL_GRAPH_CLASS_(Graph)& graph);
+
+template<typename Graph>
+struct cached_vertex_object {
+  typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+  static PyObject* convert(const Vertex& v) {
+    if (v == graph_traits<Graph>::null_vertex()) {
+      Py_INCREF(Graph::py_null_vertex.get());
+      return Graph::py_null_vertex.get();
+    }
+    else {
+      PyObject* result = get(v.graph->vertex_objects, v).ptr();
+      Py_INCREF(result);
+      return result;
+    }
+  }
+};
+
+template<typename Edge>
+struct cached_edge_object {
+  static PyObject* convert(const Edge& e) {
+    return get(e.graph->edge_objects, e).ptr();
+  }
+};
 
 template<typename DirectedS>
 void export_basic_graph(const char* name)
@@ -294,6 +380,7 @@ void export_basic_graph(const char* name)
   using boost::python::scope;
   using boost::python::self;
   using boost::python::tuple;
+  using boost::python::to_python_converter;
 
   typedef basic_graph<DirectedS> Graph;
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
@@ -306,8 +393,9 @@ void export_basic_graph(const char* name)
   {
     scope s;
 
-    class_<Graph> graph(name);
-
+    class_<Graph, boost::noncopyable> graph(name);
+    Graph::graph_type = graph;
+    
     // Build documentation string
     std::string my_graph_init_doc(graph_init_doc);
     algorithm::replace_all(my_graph_init_doc, "GRAPH", std::string(name));
@@ -348,6 +436,25 @@ void export_basic_graph(const char* name)
     boost::graph::python::bidirectional_graph<Graph> bg(graph);
     boost::graph::python::adjacency_graph<Graph> ag(graph);
     boost::graph::python::mutable_graph<Graph, false, false> mg(graph);
+
+    // Create a Python object for this vertex and put it into the
+    // vertex_objects property map.
+    using boost::python::objects::value_holder;
+    using boost::python::objects::make_instance;
+    using boost::python::objects::class_cref_wrapper;
+    using boost::python::handle;
+    using boost::python::borrowed;
+
+    typedef class_cref_wrapper<Vertex, 
+                               make_instance<Vertex, value_holder<Vertex> > >
+      Converter;
+    
+    Graph::py_null_vertex = handle<>(Converter::convert(Graph::null_vertex()));
+
+    // Register conversion routines that access the cached vertex/edge
+    // objects in the graph.
+    to_python_converter<Vertex, cached_vertex_object<Graph> >();
+    to_python_converter<Edge, cached_edge_object<Edge> >();
 
     // Other miscellaneous routines
 

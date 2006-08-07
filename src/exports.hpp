@@ -9,16 +9,18 @@
 #ifndef BOOST_GRAPH_PYTHON_EXPORTS_HPP
 #define BOOST_GRAPH_PYTHON_EXPORTS_HPP
 
+#define BGL_GRAPH_CLASS_(G) boost::python::class_<G, boost::noncopyable>
+
 namespace boost { namespace graph { namespace python {
 
 template<typename DirectedS> void export_basic_graph(const char* name);
 template<typename Graph> void export_property_maps();
 
 template<typename Graph>
-void export_generators(boost::python::class_<Graph>& graph, const char* name);
+void export_generators(BGL_GRAPH_CLASS_(Graph)& graph, const char* name);
 
 template<typename Graph>
-void export_graphviz(boost::python::class_<Graph>& graph, const char* name);
+void export_graphviz(BGL_GRAPH_CLASS_(Graph)& graph, const char* name);
 
 template<typename Graph>
 boost::python::object 

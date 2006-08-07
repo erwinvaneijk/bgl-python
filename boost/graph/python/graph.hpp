@@ -141,28 +141,29 @@ class graph
  public:
   template<typename T, typename Basis, typename HeldType, typename NonCopyable>
   graph(class_<T, Basis, HeldType, NonCopyable>&)
+    : vertex_class("Vertex"), edge_class("Edge")
   {
-    using boost::python::class_;
     using boost::python::self;
 
-    if (!detail::type_already_registered<vertex_descriptor>())
-      class_<vertex_descriptor>("Vertex")
-        .def(self == self)
-        .def(self != self)
-        .enable_pickling()
-        .def("__getstate__", &pod_getstate<vertex_descriptor>)
-        .def("__setstate__", &pod_setstate<vertex_descriptor>)
-        ;
+    vertex_class
+      .def(self == self)
+      .def(self != self)
+      .enable_pickling()
+      .def("__getstate__", &pod_getstate<vertex_descriptor>)
+      .def("__setstate__", &pod_setstate<vertex_descriptor>)
+      ;
     
-    if (!detail::type_already_registered<edge_descriptor>())
-      class_<edge_descriptor>("Edge")
-        .def(self == self)
-        .def(self != self)
-        .enable_pickling()
-        .def("__getstate__", &pod_getstate<edge_descriptor>)
-        .def("__setstate__", &pod_setstate<edge_descriptor>)
-        ;
+    edge_class
+      .def(self == self)
+      .def(self != self)
+      .enable_pickling()
+      .def("__getstate__", &pod_getstate<edge_descriptor>)
+      .def("__setstate__", &pod_setstate<edge_descriptor>)
+      ;
   }
+
+  boost::python::class_<vertex_descriptor> vertex_class;
+  boost::python::class_<edge_descriptor> edge_class;
 };
 
 template<typename Graph>

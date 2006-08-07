@@ -345,6 +345,8 @@ static const char* edge_properties_doc =
 template<typename Graph>
 void export_property_map_conversions(BGL_GRAPH_CLASS_(Graph)& graph);
 
+/* Function object that retrieves the cached Python object
+   corresponding to the given vertex value. */
 template<typename Graph>
 struct cached_vertex_object {
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
@@ -361,10 +363,14 @@ struct cached_vertex_object {
   }
 };
 
+/* Function object that retrieves the cached Python object
+   corresponding to the given edge value. */
 template<typename Edge>
 struct cached_edge_object {
   static PyObject* convert(const Edge& e) {
-    return get(e.graph->edge_objects, e).ptr();
+    PyObject* result = get(e.graph->edge_objects, e).ptr();
+    Py_INCREF(result);
+    return result;
   }
 };
 

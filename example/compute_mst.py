@@ -23,18 +23,14 @@ print 'MST weight =',sum([weight[e] for e in mst_edges])
 
 # Put the weights into the label. Make MST edges solid while all other
 # edges remain dashed.
-label = graph.edge_property_map('string')
-style = graph.edge_property_map('string')
+graph.edge_properties['label'] = graph.edge_property_map('string')
+graph.edge_properties['style'] = graph.edge_property_map('string')
 for e in graph.edges:
-    label[e] = str(weight[e])
+    e.label = str(e.weight)
     if e in mst_edges:
-        style[e] = 'solid'
+        e.style = 'solid'
     else:
-        style[e] = 'dashed'
-
-# Associate the label and style property maps with the graph for output
-graph.edge_properties['label'] = label
-graph.edge_properties['style'] = style
+        e.style = 'dashed'
 
 # Write out the graph in GraphViz DOT format
 graph.write_graphviz('mst-out.dot')

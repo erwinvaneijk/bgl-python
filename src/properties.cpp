@@ -100,11 +100,16 @@ struct astype_property_map_extractor
 };
 
 static const char* property_map_type_doc = 
-  "type(self) -> string\n\n"
+  "type(self) -> str\n\n"
   "Returns the type of data stored in the property map.";
 
+static const char* property_map_astype_doc = 
+  "astype(self, type) -> object\n\n"
+  "Returns a new property map that contains the same values as the\n"
+  "property map self, but converted to the given type.\n";
+
 template<typename Graph> 
-void export_property_maps()
+void export_property_maps(const char* graph_name)
 {
   using boost::graph::python::readable_property_map;
   using boost::graph::python::read_write_property_map;
@@ -125,21 +130,29 @@ void export_property_maps()
 
   // Make vertex property map available in Python
   typedef python_property_map<vertex_index_t, Graph> VertexPropertyMap;
-  class_<VertexPropertyMap> vertex_property_map("VertexPropertyMap", no_init);
+  std::string vpm_name(graph_name);
+  vpm_name += "VertexPropertyMap";
+  class_<VertexPropertyMap> vertex_property_map(vpm_name.c_str(), no_init);
   read_write_property_map<VertexPropertyMap> vertex_reflect(vertex_property_map);
   vertex_property_map.def("astype", &VertexPropertyMap::astype,
-                          (arg("property_map"), arg("type")));
+                          (arg("property_map"), arg("type")),
+                          property_map_astype_doc);
   vertex_property_map.def("type", &VertexPropertyMap::type, 
-                          arg("property_map"));
+                          arg("property_map"),
+                          property_map_type_doc);
 
   // Make edge property map available in Python
   typedef python_property_map<edge_index_t, Graph> EdgePropertyMap;
-  class_<EdgePropertyMap> edge_property_map("EdgePropertyMap", no_init);
+  std::string epm_name(graph_name);
+  epm_name += "EdgePropertyMap";
+  class_<EdgePropertyMap> edge_property_map(epm_name.c_str(), no_init);
   read_write_property_map<EdgePropertyMap> edge_reflect(edge_property_map);
   edge_property_map.def("astype", &EdgePropertyMap::astype,
-                        (arg("property_map"), arg("type")));
+                        (arg("property_map"), arg("type")),
+                        property_map_astype_doc);
   edge_property_map.def("type", &EdgePropertyMap::type, 
-                        arg("property_map"));
+                        arg("property_map"),
+                        property_map_type_doc);
 
   // Make implicit conversions from the vertex and edge property maps
   // to the associated vector_property_maps.
@@ -175,7 +188,7 @@ void export_property_maps()
 
 // Explicit instantiations for the graph types we're interested in
 #define INSTANTIATE_FOR_GRAPH(Name,Type)                                \
-  template void export_property_maps< Type >();                         \
+  template void export_property_maps< Type >(const char*);              \
   template object add_vertex_property< Type >(Type & g,                 \
                                               const std::string& name,  \
                                               const std::string& type); \

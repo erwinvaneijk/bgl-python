@@ -9,7 +9,7 @@
 import boost.graph as bgl
 
 # Load a graph from the GraphViz file 'mst.dot'
-graph = bgl.Graph.read_graphviz('mst.dot')
+graph = bgl.read_graphviz('mst.dot')
 
 # Compute the minimum spanning tree of the graph
 mst_edges = bgl.kruskal_minimum_spanning_tree(graph, graph.edge_properties['weight'])

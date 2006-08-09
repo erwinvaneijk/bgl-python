@@ -498,15 +498,25 @@ void export_basic_graph(const char* name)
     export_graphviz(graph, name);
 
     // Properties
-    export_property_maps<Graph>();
+    std::string my_add_vertex_property_doc(add_vertex_property_doc);
+    algorithm::replace_all(my_add_vertex_property_doc, 
+                           "GRAPH", std::string(name));
+    std::string my_add_edge_property_doc(add_edge_property_doc);
+    algorithm::replace_all(my_add_edge_property_doc, 
+                           "GRAPH", std::string(name));
+
+
+    export_property_maps<Graph>(name);
     graph.def("add_vertex_property", &add_vertex_property<Graph>,
               (arg("graph"), 
                arg("name") = std::string(),
-               arg("type") = std::string("object")));
+               arg("type") = std::string("object")),
+              my_add_vertex_property_doc.c_str());
     graph.def("add_edge_property", &add_edge_property<Graph>,
               (arg("graph"), 
                arg("name") = std::string(),
-               arg("type") = std::string("object")));
+               arg("type") = std::string("object")),
+              my_add_edge_property_doc.c_str());
   }
 }
 

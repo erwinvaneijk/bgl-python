@@ -39,7 +39,7 @@ web pages:
   The Parallel Boost Graph Library - http://www.osl.iu.edu/research/pbgl
   The BGL-Python Package - http://www.osl.iu.edu/~dgregor/bgl-python
 
-Copyright (C) 2005 The Trustees of Indiana University.
+Copyright (C) 2005, 2006 The Trustees of Indiana University.
 
 Use, modification and distribution is subject to the Boost Software
 License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -51,7 +51,9 @@ Authors: Douglas Gregor
 """
 
 __license__ = 'Boost Software License, Version 1.0'
-__version__ = '0.9'
+__version__ = '1.0'
+__copyright__ = "Copyright (C) 2005, 2006 The Trustees of Indiana University"
+__author__ = "Douglas Gregor, Ben Martin, and Andrew Lumsdaine"
 
 # Introduce documentation for all of the algorithms in the module.
 # Doing so here is *much* easier than doing it in the C++ code,
@@ -79,7 +81,7 @@ does matter, use the Digraph class.
 Vertices and edges provide the structure of the graph, but most of the
 interesting domain-specific information of graphs is actually stored on
 the vertices and edges of the graph. For this reason, one can create
-properties via the vertex_property_map and edge_property_map methods
+properties via the add_vertex_property and add_edge_property methods
 to represent, for instance, the IP address of a vertex that represents
 a router or the length of a road connecting two cities.
 
@@ -103,7 +105,7 @@ does not matter, use the Graph class.
 Vertices and edges provide the structure of the graph, but most of the
 interesting domain-specific information of graphs is actually stored on
 the vertices and edges of the graph. For this reason, one can create
-properties via the vertex_property_map and edge_property_map methods
+properties via the add_vertex_property and add_edge_property methods
 to represent, for instance, the functionality of a vertex that represents
 a task or the method of transmission for a dependency between tasks.
 
@@ -571,3 +573,30 @@ undirected_dfs.__doc__ = _documentor.function('undirected_dfs') \
 #    .paragraph('Finds the eigenvalues and eigenvectors of an undirected graph within the specified range. Returns a tuple of a list of the eigenvalues and a list of the eigenvectors. (Note that multiple edges are considered as single edges, and self-loops are ignored.) This function performs better than spectrum() on large, sparse graphs.') \
 #    .see_also('sparse_spectrum') \
 #    .__str__()
+
+def read_graphviz(filename, node_id = 'node_id'):
+    """
+    Loads a graph (which may be either directed or undirected) written
+    in the GraphViz DOT format from the file filename. Once loaded,
+    all of the vertex and edge properties of the graph will be
+    available in the vertex_properties and edge_properties of the
+    graph. If you already know whether your graph will be undirected
+    or directed, use Graph.read_graphviz or Digraph.read_graphviz,
+    respectively.
+    
+    Parameters:
+      filename  The name of the file to load.
+      node_id   The name given to the property map that will store the
+                identifier associated with each vertex in the DOT file.
+
+    The GraphViz DOT language is described here:
+      http://www.graphviz.org/doc/info/lang.html
+      
+    Complete C++ documentation is available at:
+      http://www.boost.org/libs/graph/doc/read_graphviz.html
+    """
+    try:
+        graph = Digraph.read_graphviz(filename, node_id)
+    except undirected_graph_error:
+        graph = Graph.read_graphviz(filename, node_id)
+    return graph

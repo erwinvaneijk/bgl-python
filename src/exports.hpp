@@ -14,7 +14,7 @@
 namespace boost { namespace graph { namespace python {
 
 template<typename DirectedS> void export_basic_graph(const char* name);
-template<typename Graph> void export_property_maps();
+template<typename Graph> void export_property_maps(const char* name);
 
 template<typename Graph>
 void export_generators(BGL_GRAPH_CLASS_(Graph)& graph, const char* name);

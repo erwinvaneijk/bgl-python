@@ -14,75 +14,90 @@
 #include <boost/graph/python/iterator.hpp> // for type_already_registered
 #include <string>
 #include <boost/graph/python/resizable_property_map.hpp>
+#include <boost/graph/python/python_property_map.hpp>
+
+namespace boost { namespace python {
+
+// From http://aspn.activestate.com/ASPN/Mail/Message/C++-sig/1662717
+template <class Extractor> 
+struct lvalue_from_nonconst_pytype
+{
+  lvalue_from_nonconst_pytype(PyTypeObject *type)
+  {
+    // assume this is called only once
+    m_type = type;
+    converter::registry::insert(
+      &extract, detail::extractor_type_id(&Extractor::execute));
+  }
+private:
+  static PyTypeObject *m_type;
+
+  static void* extract(PyObject* op)
+  {
+    return PyObject_TypeCheck(op, m_type)
+             ? const_cast<void*> (
+                 static_cast<void const volatile*> (
+                    detail::normalize<Extractor> (&Extractor::execute).
+                      execute(op)))
+             : 0
+      ;
+  }
+};
+
+template <class Extractor>  PyTypeObject *
+    lvalue_from_nonconst_pytype<Extractor> ::m_type = 0;
+} } // end namespace boost::python
 
 namespace boost { namespace graph { namespace python {
 
 using boost::python::object;
 
 template<typename Graph>
-object vertex_property_map(Graph& g, const std::string& type)
+boost::python::object
+add_vertex_property(Graph& g, const std::string& name, const std::string& type)
 {
-  typedef typename property_map<Graph, vertex_index_t>::const_type IndexMap;
-  typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-  typedef typename graph_traits<Graph>::edge_descriptor edge_descriptor;
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
 
-  if (type == "index")
-    return object(get(vertex_index, g));
-#define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-  else if (type == #Name) {                                             \
-    typedef vector_property_map<Type, IndexMap> pmap_type;              \
-    typedef resizable_vector_property_map<Type, IndexMap> resize_pmap_type; \
-    pmap_type pmap(num_vertices(g), get(vertex_index, g));              \
-    std::auto_ptr<resizable_property_map> reg(new resize_pmap_type(pmap)); \
-    g.register_vertex_map(reg);                                         \
-    return object(pmap);                                                \
-  }
-#define EDGE_PROPERTY(Name,Type,Kind)
-#  include <boost/graph/python/properties.hpp>
-#undef EDGE_PROPERTY
-#undef VERTEX_PROPERTY
-  else
-    return object();
+  typedef python_property_map<vertex_index_t, Graph> result_type;
+  result_type result(&g, type.c_str());
+
+  boost::python::object result_obj(result);
+  
+  // Register named property maps
+  if (!name.empty())
+    g.vertex_properties()[name] = result_obj;
+
+  return result_obj;
 }
 
 template<typename Graph>
-object edge_property_map(Graph& g, const std::string& type)
+boost::python::object
+add_edge_property(Graph& g, const std::string& name, const std::string& type)
 {
-  typedef typename property_map<Graph, edge_index_t>::const_type IndexMap;
-  typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-  typedef typename graph_traits<Graph>::edge_descriptor edge_descriptor;
+  typedef typename property_map<Graph, edge_index_t>::const_type
+    EdgeIndexMap;
 
-  if (type == "index")
-    return object(get(edge_index, g));
-#define VERTEX_PROPERTY(Name,Type,Kind)
-#define EDGE_PROPERTY(Name,Type,Kind)                                 \
-  else if (type == #Name) {                                             \
-    typedef vector_property_map<Type, IndexMap> pmap_type;              \
-    typedef resizable_vector_property_map<Type, IndexMap> resize_pmap_type; \
-    pmap_type pmap(num_edges(g), get(edge_index, g));              \
-    std::auto_ptr<resizable_property_map> reg(new resize_pmap_type(pmap)); \
-    g.register_edge_map(reg);                                         \
-    return object(pmap);                                                \
-  }
-#  include <boost/graph/python/properties.hpp>
-#undef EDGE_PROPERTY
-#undef VERTEX_PROPERTY
-  else
-    return object();
+  typedef python_property_map<edge_index_t, Graph> result_type;
+  result_type result(&g, type.c_str());
+
+  boost::python::object result_obj(result);
+  
+  // Register named property maps
+  if (!name.empty())
+    g.edge_properties()[name] = result_obj;
+
+  return result_obj;
 }
 
-#define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-template<typename VertexMap>                                            \
- std::string BOOST_JOIN(get_vertex_map_type_,Name)(const VertexMap&)     \
- { return #Name; }
-
-#define EDGE_PROPERTY(Name,Type,Kind)                                 \
-template<typename EdgeMap>                                            \
- std::string BOOST_JOIN(get_edge_map_type_,Name)(const EdgeMap&)       \
- { return #Name; }
-#  include  <boost/graph/python/properties.hpp>
-#undef EDGE_PROPERTY
-#undef VERTEX_PROPERTY
+template<typename PythonPropertyMap, typename CppPropertyMap>
+struct astype_property_map_extractor
+{
+  static CppPropertyMap& execute(PyObject& obj)
+  {
+    return boost::python::extract<PythonPropertyMap&>(&obj)();
+  }
+};
 
 static const char* property_map_type_doc = 
   "type(self) -> string\n\n"
@@ -95,7 +110,9 @@ void export_property_maps()
   using boost::graph::python::read_write_property_map;
   using boost::graph::python::lvalue_property_map;
 
+  using boost::python::arg;
   using boost::python::class_;
+  using boost::python::lvalue_from_nonconst_pytype;
   using boost::python::no_init;
 
   using boost::graph::python::detail::type_already_registered;
@@ -106,48 +123,65 @@ void export_property_maps()
     VertexIndexMap;
   typedef typename property_map<Graph, edge_index_t>::const_type EdgeIndexMap;
 
-#define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-  {                                                                     \
-    typedef vector_property_map<Type, VertexIndexMap> VertexMap;        \
-    if (!type_already_registered<VertexMap>()) {                        \
-      class_<VertexMap> pm("Vertex" #Name "Map", no_init);              \
-      BOOST_JOIN(Kind,_property_map)<VertexMap> reflect_pm(pm);         \
-      pm.def("type", &BOOST_JOIN(get_vertex_map_type_,Name)<VertexMap>, \
-             property_map_type_doc);                                    \
-    }                                                                   \
-  }
-#define EDGE_PROPERTY(Name,Type,Kind)                                   \
-  {                                                                     \
-    typedef vector_property_map<Type, EdgeIndexMap> EdgeMap;            \
-    if (!type_already_registered<EdgeMap>()) {                          \
-      class_<EdgeMap> pm("Edge" #Name "Map", no_init);                  \
-      BOOST_JOIN(Kind,_property_map)<EdgeMap> reflect_pm(pm);           \
-      pm.def("type", &BOOST_JOIN(get_edge_map_type_,Name)<EdgeMap>,     \
-             property_map_type_doc);                                    \
-    }                                                                   \
-  }
+  // Make vertex property map available in Python
+  typedef python_property_map<vertex_index_t, Graph> VertexPropertyMap;
+  class_<VertexPropertyMap> vertex_property_map("VertexPropertyMap", no_init);
+  read_write_property_map<VertexPropertyMap> vertex_reflect(vertex_property_map);
+  vertex_property_map.def("astype", &VertexPropertyMap::astype,
+                          (arg("property_map"), arg("type")));
+  vertex_property_map.def("type", &VertexPropertyMap::type, 
+                          arg("property_map"));
+
+  // Make edge property map available in Python
+  typedef python_property_map<edge_index_t, Graph> EdgePropertyMap;
+  class_<EdgePropertyMap> edge_property_map("EdgePropertyMap", no_init);
+  read_write_property_map<EdgePropertyMap> edge_reflect(edge_property_map);
+  edge_property_map.def("astype", &EdgePropertyMap::astype,
+                        (arg("property_map"), arg("type")));
+  edge_property_map.def("type", &EdgePropertyMap::type, 
+                        arg("property_map"));
+
+  // Make implicit conversions from the vertex and edge property maps
+  // to the associated vector_property_maps.
+#define VERTEX_PROPERTY(Name,Type,Kind)                 \
+  lvalue_from_nonconst_pytype<                          \
+    astype_property_map_extractor<                      \
+      VertexPropertyMap,                                \
+      vector_property_map<Type, VertexIndexMap> > >     \
+    BOOST_JOIN(Vertex,BOOST_JOIN(Name,PropertyMap))(    \
+     (PyTypeObject*)vertex_property_map.ptr());
+#define EDGE_PROPERTY(Name,Type,Kind)                   \
+  lvalue_from_nonconst_pytype<                          \
+    astype_property_map_extractor<                      \
+      EdgePropertyMap,                                  \
+      vector_property_map<Type, EdgeIndexMap> > >       \
+    BOOST_JOIN(Edge,BOOST_JOIN(Name,PropertyMap))(      \
+     (PyTypeObject*)edge_property_map.ptr());
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
 
-  if (!type_already_registered<VertexIndexMap>()) {
-    class_<VertexIndexMap> pm("VertexIndexMap", no_init);
-    readable_property_map<VertexIndexMap> rpm(pm);
-  }
-
-  if (!type_already_registered<EdgeIndexMap>()) {
-    class_<EdgeIndexMap> pm("EdgeIndexMap", no_init);
-    readable_property_map<EdgeIndexMap> rpm(pm);
-  }
+  // Reflect the underlying vector_property_maps into Python. This is
+  // needed only to handle the default-value case (where we use NULL
+  // pointers).
+#define VERTEX_PROPERTY(Name,Type,Kind)                                 \
+  class_<vector_property_map< Type, VertexIndexMap> >("", no_init);
+#define EDGE_PROPERTY(Name,Type,Kind)                                   \
+  class_<vector_property_map< Type, EdgeIndexMap> >("", no_init);
+#  include <boost/graph/python/properties.hpp>
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
 }
 
 // Explicit instantiations for the graph types we're interested in
 #define INSTANTIATE_FOR_GRAPH(Name,Type)                                \
   template void export_property_maps< Type >();                         \
-  template object vertex_property_map< Type >(Type & g,                 \
-                                              const std::string& type);  \
-  template object edge_property_map< Type >(Type & g,                   \
-                                            const std::string& type);
+  template object add_vertex_property< Type >(Type & g,                 \
+                                              const std::string& name,  \
+                                              const std::string& type); \
+  template object add_edge_property< Type >(Type & g,                   \
+                                              const std::string& name,  \
+                                              const std::string& type);
 #ifdef DIRECTED_PROPERTIES_ONLY
 #define UNDIRECTED_GRAPH(Name,Type)
 #define DIRECTED_GRAPH(Name,Type) INSTANTIATE_FOR_GRAPH(Name,Type)

@@ -23,12 +23,12 @@ template<typename Graph>
 void export_graphviz(BGL_GRAPH_CLASS_(Graph)& graph, const char* name);
 
 template<typename Graph>
-boost::python::object 
-vertex_property_map(Graph& g, const std::string& type);
+boost::python::object
+add_vertex_property(Graph& g, const std::string& name, const std::string& type);
 
 template<typename Graph>
-boost::python::object 
-edge_property_map(Graph& g, const std::string& type);
+boost::python::object
+add_edge_property(Graph& g, const std::string& name, const std::string& type);
 
 } } } // end namespace boost::graph::python
 

@@ -11,20 +11,16 @@ import boost.graph as bgl
 # Load a graph from the GraphViz file 'mst.dot'
 graph = bgl.Graph.read_graphviz('mst.dot')
 
-# Convert the weight into floating-point values
-weight = graph.convert_property_map(graph.edge_properties['weight'],
-                                    'float')
-
 # Compute the minimum spanning tree of the graph
-mst_edges = bgl.kruskal_minimum_spanning_tree(graph, weight)
+mst_edges = bgl.kruskal_minimum_spanning_tree(graph, graph.edge_properties['weight'])
 
 # Compute the weight of the minimum spanning tree 
-print 'MST weight =',sum([weight[e] for e in mst_edges])
+print 'MST weight =',sum([e.weight for e in mst_edges])
 
 # Put the weights into the label. Make MST edges solid while all other
 # edges remain dashed.
-graph.edge_properties['label'] = graph.edge_property_map('string')
-graph.edge_properties['style'] = graph.edge_property_map('string')
+graph.add_edge_property('label', 'string')
+graph.add_edge_property('style', 'string')
 for e in graph.edges:
     e.label = str(e.weight)
     if e in mst_edges:

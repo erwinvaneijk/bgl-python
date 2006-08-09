@@ -9,6 +9,7 @@
 #include "basic_graph.hpp"
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/python/graph.hpp>
+#include <boost/graph/python/python_property_map.hpp>
 #include "exports.hpp"
 #include "graph_types.hpp"
 #include <boost/algorithm/string/replace.hpp>
@@ -52,18 +53,14 @@ basic_graph<DirectedS>::basic_graph(PyObject* self, boost::python::object l,
   std::map<object, vertex_descriptor> verts;
   int len = ::boost::python::extract<int>(l.attr("__len__")());
 
-  typedef vector_property_map<object, VertexIndexMap> name_map_type;
-  typedef resizable_vector_property_map<object, VertexIndexMap> 
-    resize_name_map_type;
-  name_map_type name(1, get(vertex_index, *this));
+  // Mapping from vertices to names
+  object name;
 
-  if (!name_map.empty()) {
-    std::auto_ptr<resizable_property_map> reg(new resize_name_map_type(name));
-    register_vertex_map(reg);
-    vertex_properties()[name_map] = object(name);
-  }
+  // Build a vertex->object map for the names, 
+  if (!name_map.empty())
+    name = add_vertex_property(*this, name_map, "object");
 
-  for (int  i = 0; i < len; ++i) {
+  for (int i = 0; i < len; ++i) {
     vertex_descriptor u, v;
     object up = l[i][0];
     object vp = l[i][1];
@@ -263,28 +260,6 @@ void basic_graph<DirectedS>::initialize()
   register_edge_map(reg_edge_objects);
 }
 
-template<typename DirectedS>
-void basic_graph<DirectedS>::renumber_vertices()
-{
-  using boost::vertices;
-
-  BGL_FORALL_VERTICES_T(v, base(), inherited) {
-    put(vertex_index, base(), v, index_to_vertex.size());
-    index_to_vertex.push_back(vertex_descriptor(v, this));
-  }
-}
-
-template<typename DirectedS>
-void basic_graph<DirectedS>::renumber_edges()
-{
-  using boost::edges;
-
-  BGL_FORALL_EDGES_T(e, base(), inherited) {
-    put(edge_index, base(), e, index_to_edge.size());
-    index_to_edge.push_back(edge_descriptor(e, this));
-  }
-}
-
 template<typename Graph>
 boost::python::object 
 py_edge(const Graph& g, 
@@ -340,10 +315,6 @@ static const char* edge_properties_doc =
        "A Python dictionary mapping from edge property names to\n"
        "property maps. These properties are \"attached\" to the graph\n"
        "and will be pickled or serialized along with the graph.";
-
-// Defined and instantiated in convert_properties.cpp
-template<typename Graph>
-void export_property_map_conversions(BGL_GRAPH_CLASS_(Graph)& graph);
 
 /* Function object that retrieves the cached Python object
    corresponding to the given vertex value. */
@@ -504,13 +475,14 @@ void export_basic_graph(const char* name)
 
     // Properties
     export_property_maps<Graph>();
-    graph.def("vertex_property_map", &vertex_property_map<Graph>,
-              (arg("graph"), arg("type")),
-              vertex_property_map_doc);
-    graph.def("edge_property_map", &edge_property_map<Graph>,
-              (arg("graph"), arg("type")),
-              edge_property_map_doc);
-    export_property_map_conversions<Graph>(graph);
+    graph.def("add_vertex_property", &add_vertex_property<Graph>,
+              (arg("graph"), 
+               arg("name") = std::string(),
+               arg("type") = std::string("object")));
+    graph.def("add_edge_property", &add_edge_property<Graph>,
+              (arg("graph"), 
+               arg("name") = std::string(),
+               arg("type") = std::string("object")));
   }
 }
 
@@ -521,10 +493,5 @@ void export_graphs()
 }
 
 using boost::python::object;
-
-template void basic_graph<undirectedS>::renumber_vertices();
-template void basic_graph<undirectedS>::renumber_edges();
-template void basic_graph<bidirectionalS>::renumber_vertices();
-template void basic_graph<bidirectionalS>::renumber_edges();
 
 } } } // end namespace boost::graph::python

@@ -240,12 +240,7 @@ class basic_graph
 
     // Add edges
     for (; first != last; ++first)
-      g.add_edge(Vertex(vertex(first->first, g.base()), &g), 
-                 Vertex(vertex(first->second, g.base()), &g));
-
-    // Renumber vertices and edges
-    g.renumber_vertices();
-    g.renumber_edges();
+      g.add_edge(vertices[first->first], vertices[first->second]);
 
     return result;
   }
@@ -255,8 +250,6 @@ class basic_graph
 
 protected:
   void initialize();
-  void renumber_vertices();
-  void renumber_edges();
   
 private:
   // The Python object instance corresponding to this graph instance.

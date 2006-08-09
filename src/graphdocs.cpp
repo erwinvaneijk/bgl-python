@@ -51,34 +51,38 @@ const char* graph_init_doc =
 "will contain the name of vertex v as it appears in the edge list."
   ;
 
-const char* vertex_property_map_doc =
-"vertex_property_map(self, type) -> VertexPropertyMap\n\n"
+const char* add_vertex_property_doc =
+"add_vertex_property(self, name='', type='object') -> GRAPHVertexPropertyMap\n\n"
 "Creates a new property map that maps from vertices in the graph to\n"
-"values of the given type. The type parameter may be any one of:\n"
-"   integer\n"
-"   float\n"
-"   vertex\n"
-"   edge\n"
-"   string\n"
-"   point2d\n"
-"   point3d\n"
-"   object\n"
-"   color\n"
+"values of the given type. If a name is given, the new property will be\n"
+"added to self.vertex_properties. Otherwise, a new, unnamed property will be\n"
+"added to the vertices in the graph. The type parameter may be any string\n"
+"from the following table:\n\n"
+"   Name\tC++ type\n"
+"--------------------\n"
+#define VERTEX_PROPERTY(Name,Type,Kind)         \
+"   " #Name " \t" #Type "\n"
+#define EDGE_PROPERTY(Name,Type,Kind)
+#  include <boost/graph/python/properties.hpp>
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
   ;
 
-const char* edge_property_map_doc =
-"edge_property_map(self, type) -> EdgePropertyMap\n\n"
+const char* add_edge_property_doc =
+"add_edge_property(self, name='', type='object') -> GRAPHEdgePropertyMap\n\n"
 "Creates a new property map that maps from edges in the graph to\n"
-"values of the given type. The type parameter may be any one of:\n"
-"   integer\n"
-"   float\n"
-"   vertex\n"
-"   edge\n"
-"   string\n"
-"   point2d\n"
-"   point3d\n"
-"   object\n"
-"   color\n"
+"values of the given type. If a name is given, the new property will be\n"
+"added to self.edge_properties. Otherwise, a new, unnamed property will be\n"
+"added to the edges in the graph. The type parameter may be any string\n"
+"from the following table:\n\n"
+"   Name\tC++ type\n"
+"--------------------\n"
+#define VERTEX_PROPERTY(Name,Type,Kind)
+#define EDGE_PROPERTY(Name,Type,Kind)           \
+"   " #Name " \t" #Type "\n"
+#  include <boost/graph/python/properties.hpp>
+#undef EDGE_PROPERTY
+#undef VERTEX_PROPERTY
   ;
 
 } } } // end namespace boost::graph::python

@@ -494,8 +494,8 @@ struct graph_pickle_suite : boost::python::pickle_suite
 };
 
 extern const char* graph_init_doc;
-extern const char* vertex_property_map_doc;
-extern const char* edge_property_map_doc;
+extern const char* add_vertex_property_doc;
+extern const char* add_edge_property_doc;
 
 } } } // end namespace boost::graph::python
 

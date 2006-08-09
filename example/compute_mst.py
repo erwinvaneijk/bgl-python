@@ -19,10 +19,8 @@ print 'MST weight =',sum([e.weight for e in mst_edges])
 
 # Put the weights into the label. Make MST edges solid while all other
 # edges remain dashed.
-graph.add_edge_property('label', 'string')
-graph.add_edge_property('style', 'string')
 for e in graph.edges:
-    e.label = str(e.weight)
+    e.label = e.weight
     if e in mst_edges:
         e.style = 'solid'
     else:

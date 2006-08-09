@@ -41,6 +41,8 @@ namespace boost { namespace graph { namespace python {
 template<typename T, typename DirectedS>
 struct basic_descriptor
 {
+  typedef basic_graph<DirectedS> graph_type;
+
   basic_descriptor() : graph(0) {}
   basic_descriptor(T base, const basic_graph<DirectedS>* graph) 
     : base(base), graph(graph) { }

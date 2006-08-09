@@ -349,6 +349,12 @@ struct cached_edge_object {
 template<typename Vertex>
 boost::python::object vertex_get_attr(Vertex v, const char* name)
 {
+  typedef typename Vertex::graph_type graph_type;
+
+  using boost::python::extract;
+  if (!extract<bool>(v.graph->vertex_properties().attr("has_key")(name))())
+    add_vertex_property(const_cast<graph_type&>(*v.graph), name, "object");
+
   return v.graph->vertex_properties()[name][v];
 }
 
@@ -357,6 +363,12 @@ template<typename Vertex>
 void
 vertex_set_attr(Vertex v, const char* name, boost::python::object value)
 {
+  typedef typename Vertex::graph_type graph_type;
+
+  using boost::python::extract;
+  if (!extract<bool>(v.graph->vertex_properties().attr("has_key")(name))())
+    add_vertex_property(const_cast<graph_type&>(*v.graph), name, "object");
+
   v.graph->vertex_properties()[name][v] = value;
 }
 
@@ -364,6 +376,12 @@ vertex_set_attr(Vertex v, const char* name, boost::python::object value)
 template<typename Edge>
 boost::python::object edge_get_attr(Edge e, const char* name)
 {
+  typedef typename Edge::graph_type graph_type;
+
+  using boost::python::extract;
+  if (!extract<bool>(e.graph->edge_properties().attr("has_key")(name))())
+    add_edge_property(const_cast<graph_type&>(*e.graph), name, "object");
+
   return e.graph->edge_properties()[name][e];
 }
 
@@ -372,6 +390,12 @@ template<typename Edge>
 void
 edge_set_attr(Edge e, const char* name, boost::python::object value)
 {
+  typedef typename Edge::graph_type graph_type;
+
+  using boost::python::extract;
+  if (!extract<bool>(e.graph->edge_properties().attr("has_key")(name))())
+    add_edge_property(const_cast<graph_type&>(*e.graph), name, "object");
+
   e.graph->edge_properties()[name][e] = value;
 }
 

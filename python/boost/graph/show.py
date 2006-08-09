@@ -9,8 +9,7 @@ from OpenGL.GLUT import *
 import Numeric
 
 import random
-
-#import boost.graph as bgl
+import boost.graph
 
 DEFAULT_RADIUS = 1.0
 DEFAULT_SLICES = 20
@@ -20,9 +19,12 @@ LINE_WIDTH = 1.0
 def show(g, position_map = None):
     # If we didn't receive a position map, layout the graph...
     if position_map == None:
-        import boost.graph
-        position_map = g.vertex_property_map('point2d')
-        boost.graph.fruchterman_reingold_force_directed_layout(g, position_map)
+        position_map = g.add_vertex_property(type='point2d')
+        if (not g.is_directed() and boost.graph.connected_components(g) == 1 and
+            g.num_vertices() < 100):
+            boost.graph.kamada_kawai_spring_layout(g, position_map)
+        else:
+            boost.graph.fruchterman_reingold_force_directed_layout(g, position_map)
         
     app = wx.PySimpleApp()
     frame = wx.Frame(None, title="")
@@ -119,19 +121,10 @@ class MiniOpenGLGraphCanvas(wx.Panel):
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-#        if model is not None:
-#            self.model = model
-#            self.position_map = model.GetProperty('vertex.position')
-#            if self.position_map is None:
-#                self.position_map = model.data.vertex_property_map('point2d')
-#                bgl.circle_graph_layout(model.data, self.position_map, 50)
-#                model.SetVertexProperty('position', self.position_map)
-#            self.set_graph(model.data, self.position_map)
-
         if self.graph is not None:
             if self.position_map is None:
-                self.position_map = self.graph.vertex_property_map('point2d')
-                bgl.circle_graph_layout(self.graph, self.position_map, 50)
+                self.position_map = self.graph.add_vertex_property(type='point2d')
+                boost.graph.circle_graph_layout(self.graph, self.position_map, 50)
                 model.SetVertexProperty('position', self.position_map)
             self.set_graph(self.graph, self.position_map)
                 
@@ -152,7 +145,7 @@ class MiniOpenGLGraphCanvas(wx.Panel):
     def set_graph(self, graph, position_map, property_maps={}):
         self.graph = graph
         self.position_map = position_map
-        self.ref_3d_map = self.graph.vertex_property_map("point3d") # using this to check if position map is point3d
+        self.ref_3d_map = self.graph.add_vertex_property(type="point3d") # using this to check if position map is point3d
         self.property_maps = property_maps
         self.vertex_position_rect = self.compute_rect()
 
@@ -220,49 +213,6 @@ class MiniOpenGLGraphCanvas(wx.Panel):
             index = index + 2
 
         self.Draw()
-
-#    def ModelPropertyChanged(self, model, name):
-#        if name == 'vertex.position':
-#            if self.model.GetProperty(name) == self.position_map:
-#                self.update_layout()
-#            else:
-#                self.set_graph(self.model.data, self.model.GetProperty(name))
-#        elif name == 'vertex.component':
-#            color_map = self.model.GetProperty("vertex.color")
-#            if color_map == None:
-#                self._set_colors_from_components(self.model.GetProperty(name))
-#                self.Draw()
-#        elif name == 'vertex.color':
-#            self._set_colors_from_components(self.model.GetProperty(name))
-#        
-#    def ModelDataChanged(self, model):
-#        model_pos_map = self.model.GetProperty('vertex.position')
-#        if model_pos_map == None:
-#            self.position_map = model.data.vertex_property_map('point2d')
-#            bgl.circle_graph_layout(model.data, self.position_map, 50)
-#            model.SetProperty('vertex.position', self.position_map)            
-#            model_pos_map = self.position_map
-#        self.set_graph(self.model.data, model_pos_map)
-
-#    def RespectsProperty(self, name):
-#      return name == 'vertex.position'
-
-#    def _set_colors_from_components(self, comp_map=None):
-#        if comp_map == None:
-#            comp_map = self.model.GetProperty('vertex.component')
-#        comps = Set()
-#        comps.add(comp_map[self.graph.vertices.next()])
-#        for v in self.graph.vertices:
-#            comps.add(comp_map[v])
-#        colors = self._generate_vertex_colors(len(comps))
-#        color_dic = {}
-#        for i, comp in enumerate(comps):
-#            color_dic[comp] = colors[i]
-#        vertex_color_data = [(0, 0, 0, 0) for v in self.graph.vertices]
-#        for i, v in enumerate(self.graph.vertices):
-#            vertex_color_data[i] = (color_dic[comp_map[v]])
-#        self.vertex_color_data = vertex_color_data
-#        self.Draw()
 
     def _generate_vertex_colors(self, n, type=GL_RGBA):
         colors = []
@@ -511,7 +461,7 @@ class MiniOpenGLGraphCanvas(wx.Panel):
             self.dragging = True
             j = self.active_vertex
             if j != None:
-                self.position_map[j] = bgl.Point2D(pos.x, pos.y)
+                self.position_map[j] = boost.graph.Point2D(pos.x, pos.y)
                 self.update_layout()
         if event.Dragging() and event.ShiftDown():
             delta = (pos.x - self.drag_pos_start.x, pos.y - self.drag_pos_start.y)
@@ -615,7 +565,7 @@ class MiniOpenGLGraphCanvas(wx.Panel):
 #    name = Callable(name)
 #
 #    def accepts(data):
-#        return type(data) == bgl.Graph or type(data) == bgl.Digraph
+#        return type(data) == boost.graph.Graph or type(data) == boost.graph.Digraph
 #    accepts = Callable(accepts)
 
     def GetImage(self):

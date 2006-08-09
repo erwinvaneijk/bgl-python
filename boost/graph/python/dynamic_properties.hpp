@@ -1,4 +1,4 @@
-// Copyright 2005 The Trustees of Indiana University.
+// Copyright (C) 2005, 2006 The Trustees of Indiana University.
 
 // Use, modification and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -18,87 +18,44 @@
 #include <string>
 #include <memory>
 #include <boost/graph/python/resizable_property_map.hpp>
+#include <boost/graph/python/python_property_map.hpp>
 
 namespace boost { namespace graph { namespace python {
 
-class python_dynamic_property_map
-{
- public:
-  virtual ~python_dynamic_property_map() {}
-
-  virtual void copy_value(const any& to, const any& from) = 0;
-  virtual boost::python::object get_python(const any& key) = 0;
-};
-
-template<typename PropertyMap,
-         typename ValueType = typename property_traits<PropertyMap>::value_type>
-class python_dynamic_adaptor
-  : public boost::detail::dynamic_property_map_adaptor<PropertyMap>, 
-    public python_dynamic_property_map
-{
-  typedef boost::detail::dynamic_property_map_adaptor<PropertyMap> inherited;
-
-public:
-  typedef typename property_traits<PropertyMap>::key_type key_type;
-
-  explicit python_dynamic_adaptor(const PropertyMap& property_map)
-    : inherited(property_map) { }
-
-  virtual void copy_value(const any& to, const any& from)
-  { 
-    boost::put(this->base(), any_cast<key_type>(to), 
-               boost::get(this->base(), any_cast<key_type>(from)));
-  }
-
-  virtual boost::python::object get_python(const any& key)
-  {
-#if defined(__GNUC__) && (__GNUC__ == 2) && (__GNUC_MINOR__ == 95)
-    return boost::get(this->base(), any_cast<key_type>(key));
-#else
-    using boost::get;
-
-    return boost::python::object(get(this->base(), any_cast<key_type>(key)));
-#endif    
-  }
-};
-
 template<typename PropertyMap>
-class python_dynamic_adaptor<PropertyMap, boost::python::object>
-  : public boost::detail::dynamic_property_map_adaptor<PropertyMap>, 
-    public python_dynamic_property_map
+class python_dynamic_adaptor
+  : public boost::detail::dynamic_property_map_adaptor<PropertyMap>
 {
   typedef boost::detail::dynamic_property_map_adaptor<PropertyMap> inherited;
 
 public:
   typedef typename property_traits<PropertyMap>::key_type key_type;
+  typedef typename property_traits<PropertyMap>::value_type value_type;
 
   explicit python_dynamic_adaptor(const PropertyMap& property_map)
     : inherited(property_map) { }
-
-  virtual void copy_value(const any& to, const any& from)
-  { 
-    boost::put(this->base(), any_cast<key_type>(to), 
-               boost::get(this->base(), any_cast<key_type>(from)));
-  }
 
   virtual std::string get_string(const any& key)
   {
     using boost::python::extract;
-    using boost::python::str;
-    return std::string(
-             extract<const char*>(str(boost::get(this->base(),
-                                                 any_cast<key_type>(key)))));
-  }
-
-  virtual boost::python::object get_python(const any& key)
-  {
-#if defined(__GNUC__) && (__GNUC__ == 2) && (__GNUC_MINOR__ == 95)
-    return boost::get(this->base(), any_cast<key_type>(key));
-#else
     using boost::get;
 
-    return get(this->base(), any_cast<key_type>(key));
-#endif    
+    return extract<const char*>(get(this->base(), any_cast<key_type>(key)))();
+  }
+
+  virtual void put(const any& key, const any& value)
+  {
+    using boost::put;
+    using boost::graph::python::put;
+    using boost::python::object;
+    using boost::python::str;
+
+    if (const str* str_ptr = any_cast<str>(&value))
+      put(this->base(), any_cast<key_type>(key), *str_ptr);
+    else {
+      std::string value_str = any_cast<std::string>(value);
+      put(this->base(), any_cast<key_type>(key), str(value_str.c_str()));
+    }
   }
 };
 
@@ -121,90 +78,30 @@ struct build_string_property_maps
     std::auto_ptr<boost::dynamic_property_map> result(0);
 
     if (key.type() == typeid(Vertex)) {
-      typedef vector_property_map<std::string, VertexIndexMap>
-        property_map_type;
+      // Create property map and place it in the graph
+      typedef python_property_map<vertex_index_t, Graph> property_map_type;
+      property_map_type pmap(g, "string");
+      g->vertex_properties()[name] = boost::python::object(pmap);
+
+      // Build an entry for dynamic_properties
       typedef python_dynamic_adaptor<property_map_type> adaptor_type;
-      result.reset
-        (new adaptor_type(property_map_type(num_vertices(*g),
-                                            get(vertex_index, *g))));
+      result.reset(new adaptor_type(pmap));
     } else if (key.type() == typeid(Edge)) {
-      typedef vector_property_map<std::string, EdgeIndexMap> property_map_type;
+      // Create property map and place it in the graph
+      typedef python_property_map<edge_index_t, Graph> property_map_type;
+      property_map_type pmap(g, "string");
+      g->edge_properties()[name] = boost::python::object(pmap);
+
+      // Build an entry for dynamic_properties
       typedef python_dynamic_adaptor<property_map_type> adaptor_type;
-      result.reset
-        (new adaptor_type(property_map_type(num_edges(*g),
-                                            get(edge_index, *g))));
-    } 
+      result.reset(new adaptor_type(pmap));
+    }
     return result;
   }
 
 private:
   Graph* g;
 };
-
-// Converts a dynamic_properties structure containing only
-// vertex->string and edge->string property maps into a Python
-// dictionary. This requires us to transform the C++ std::strings into
-// Python strings.
-//
-// DPG TBD: Figure out why we can't just use boost::python::str as our
-// string in read_graphviz. Then we could skip this silly translation
-// step.
-template<typename Graph>
-void 
-string_properties_to_dicts(Graph& g, const dynamic_properties& in)
-{
-  using boost::python::str;
-
-  typedef typename property_map<Graph, vertex_index_t>::const_type
-    VertexIndexMap;
-  typedef typename property_map<Graph, edge_index_t>::const_type
-    EdgeIndexMap;
-  
-  typedef vector_property_map<std::string, VertexIndexMap> InVertexStringMap;
-  typedef vector_property_map<std::string, EdgeIndexMap> InEdgeStringMap;
-  typedef vector_property_map<str, VertexIndexMap> OutVertexStringMap;
-  typedef vector_property_map<str, EdgeIndexMap> OutEdgeStringMap;
-  typedef boost::detail::dynamic_property_map_adaptor<InVertexStringMap>
-    VertexAdaptor;
-  typedef boost::detail::dynamic_property_map_adaptor<InEdgeStringMap>
-    EdgeAdaptor;
-
-  for (dynamic_properties::const_iterator i = in.begin(); i != in.end(); ++i) {
-    if (VertexAdaptor* adaptor = dynamic_cast<VertexAdaptor*>(i->second)) {
-      InVertexStringMap in_pmap = adaptor->base();
-
-      // Build the new property map
-      OutVertexStringMap out_pmap(num_vertices(g), get(vertex_index, g));
-      BGL_FORALL_VERTICES_T(v, g, Graph)
-        out_pmap[v] = str(in_pmap[v]);
-
-      // Register the new property map
-      typedef resizable_vector_property_map<str, VertexIndexMap>
-        resize_pmap_type;
-      std::auto_ptr<resizable_property_map> reg(new resize_pmap_type(out_pmap));
-      g.register_vertex_map(reg);
-
-      g.vertex_properties()[i->first] = out_pmap;
-    } else if (EdgeAdaptor* adaptor = dynamic_cast<EdgeAdaptor*>(i->second)) {
-      InEdgeStringMap in_pmap = adaptor->base();
-
-      // Build the new property map
-      OutEdgeStringMap out_pmap(num_edges(g), get(edge_index, g));
-      BGL_FORALL_EDGES_T(e, g, Graph)
-        out_pmap[e] = str(in_pmap[e]);
-
-      // Register the new property map
-      typedef resizable_vector_property_map<str, EdgeIndexMap>
-        resize_pmap_type;
-      std::auto_ptr<resizable_property_map> reg(new resize_pmap_type(out_pmap));
-      g.register_edge_map(reg);      
-
-      g.edge_properties()[i->first] = out_pmap;
-    } else {
-      // Skipping a property (!)
-    }
-  }
-}
 
 template<typename Key>
 struct object_as_string_property_map

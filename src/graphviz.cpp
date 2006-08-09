@@ -71,7 +71,7 @@ read_graphviz(const std::string& filename, const std::string& node_id)
   build_string_property_maps<Graph> builder(&g);
   dynamic_properties dp(builder);
   boost::read_graphviz(in, g, dp, node_id);
-  string_properties_to_dicts<Graph>(g, dp);
+  //  string_properties_to_dicts<Graph>(g, dp);
   return result;
 }
 

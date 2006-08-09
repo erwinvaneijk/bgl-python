@@ -78,7 +78,6 @@ extension _graph
         ../src/graphdocs.cpp
         ../src/properties.cpp
         ../src/directed_properties.cpp
-        ../src/convert_properties.cpp
         # Algorithms
         ../src/astar_search.cpp
         ../src/bellman_ford_shortest_paths.cpp

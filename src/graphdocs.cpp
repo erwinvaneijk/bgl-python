@@ -58,7 +58,7 @@ const char* add_vertex_property_doc =
 "added to self.vertex_properties. Otherwise, a new, unnamed property will be\n"
 "added to the vertices in the graph. The type parameter may be any string\n"
 "from the following table:\n\n"
-"   Name\tC++ type\n"
+"   Name  \tC++ type\n"
 "--------------------\n"
 #define VERTEX_PROPERTY(Name,Type,Kind)         \
 "   " #Name " \t" #Type "\n"
@@ -66,6 +66,7 @@ const char* add_vertex_property_doc =
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
+"   index \tint (contains index of each vertex)\n"
   ;
 
 const char* add_edge_property_doc =
@@ -75,7 +76,7 @@ const char* add_edge_property_doc =
 "added to self.edge_properties. Otherwise, a new, unnamed property will be\n"
 "added to the edges in the graph. The type parameter may be any string\n"
 "from the following table:\n\n"
-"   Name\tC++ type\n"
+"   Name  \tC++ type\n"
 "--------------------\n"
 #define VERTEX_PROPERTY(Name,Type,Kind)
 #define EDGE_PROPERTY(Name,Type,Kind)           \
@@ -83,6 +84,7 @@ const char* add_edge_property_doc =
 #  include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
+"   index \tint (contains index of each edge)\n"
   ;
 
 } } } // end namespace boost::graph::python

@@ -600,3 +600,25 @@ def read_graphviz(filename, node_id = 'node_id'):
     except undirected_graph_error:
         graph = Graph.read_graphviz(filename, node_id)
     return graph
+
+def read_graphml(filename):
+    """
+    Loads a graph (which may be either directed or undirected) written
+    in the GraphML format from the file filename. Once loaded,
+    all of the vertex and edge properties of the graph will be
+    available in the vertex_properties and edge_properties of the
+    graph. If you already know whether your graph will be undirected
+    or directed, use Graph.read_graphml or Digraph.read_graphml,
+    respectively.
+    
+    Parameters:
+      filename  The name of the file to load.
+
+    The GraphML format is described here:
+      http://graphml.graphdrawing.org/
+    """
+    try:
+        graph = Digraph.read_graphml(filename)
+    except undirected_graph_error:
+        graph = Graph.read_graphml(filename)
+    return graph

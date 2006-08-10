@@ -357,6 +357,22 @@ namespace boost { namespace graph { namespace python {
       g.register_edge_map(reg);
     }
 
+    // Retrieve either a value or a pointer from a reference into a
+    // property map. When the type is a class type (e.g., point2d and
+    // point3d), we need to return a pointer.
+    template<typename T>
+    inline const T& py_maybe_get_pointer(const T& value) { return value; }
+
+    template<typename T>
+    inline T& py_maybe_get_pointer(T& value) { return value; }
+
+    inline reference_wrapper<point2d> py_maybe_get_pointer(point2d& value) { 
+      return ref(value);
+    }
+    inline reference_wrapper<point3d> py_maybe_get_pointer(point3d& value) { 
+      return ref(value); 
+    }
+
     template<typename Value, typename PropertyTag, typename Graph>
     class python_vector_property_map 
       : public python_property_map_base<PropertyTag, Graph>
@@ -386,7 +402,7 @@ namespace boost { namespace graph { namespace python {
       virtual boost::python::object get(const key_type& key)
       {
         using boost::get;
-        return boost::python::object(get(pmap, key));
+        return boost::python::object(py_maybe_get_pointer(get(pmap, key)));
       }
 
       virtual void 

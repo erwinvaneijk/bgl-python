@@ -38,9 +38,10 @@ public:
   virtual std::string get_string(const any& key)
   {
     using boost::python::extract;
+    using boost::python::str;
     using boost::get;
 
-    return extract<const char*>(get(this->base(), any_cast<key_type>(key)))();
+    return extract<const char*>(str(get(this->base(), any_cast<key_type>(key))))();
   }
 
   virtual void put(const any& key, const any& value)
@@ -52,10 +53,20 @@ public:
 
     if (const str* str_ptr = any_cast<str>(&value))
       put(this->base(), any_cast<key_type>(key), *str_ptr);
-    else {
-      std::string value_str = any_cast<std::string>(value);
-      put(this->base(), any_cast<key_type>(key), str(value_str.c_str()));
-    }
+    else if (const std::string* str_ptr = any_cast<std::string>(&value))
+      put(this->base(), any_cast<key_type>(key), str(str_ptr->c_str()));
+    else if (const bool* bool_ptr = any_cast<bool>(&value))
+      put(this->base(), any_cast<key_type>(key), object(*bool_ptr));
+    else if (const int* int_ptr = any_cast<int>(&value))
+      put(this->base(), any_cast<key_type>(key), object(*int_ptr));
+    else if (const long* long_ptr = any_cast<long>(&value))
+      put(this->base(), any_cast<key_type>(key), object(*long_ptr));
+    else if (const float* float_ptr = any_cast<float>(&value))
+      put(this->base(), any_cast<key_type>(key), object(*float_ptr));
+    else if (const double* double_ptr = any_cast<double>(&value))
+      put(this->base(), any_cast<key_type>(key), object(*double_ptr));
+    else
+      assert(false);
   }
 };
 
@@ -97,6 +108,64 @@ struct build_string_property_maps
       result.reset(new adaptor_type(pmap));
     }
     return result;
+  }
+
+private:
+  Graph* g;
+};
+
+template<typename Graph>
+struct build_python_property_maps
+{
+  typedef typename property_map<Graph, vertex_index_t>::const_type
+    VertexIndexMap;
+  typedef typename property_map<Graph, edge_index_t>::const_type
+    EdgeIndexMap;
+  typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+  typedef typename graph_traits<Graph>::edge_descriptor   Edge;
+
+  build_python_property_maps(Graph* g) : g(g) { }
+
+  std::auto_ptr<boost::dynamic_property_map>
+  operator()(const std::string& name, const boost::any& key, 
+             const boost::any& value)
+  {
+    std::auto_ptr<boost::dynamic_property_map> result(0);
+
+    if (key.type() == typeid(Vertex)) {
+      // Create property map and place it in the graph
+      typedef python_property_map<vertex_index_t, Graph> property_map_type;
+      property_map_type pmap(g, type_from_value(value));
+      g->vertex_properties()[name] = boost::python::object(pmap);
+
+      // Build an entry for dynamic_properties
+      typedef python_dynamic_adaptor<property_map_type> adaptor_type;
+      result.reset(new adaptor_type(pmap));
+    } else if (key.type() == typeid(Edge)) {
+      // Create property map and place it in the graph
+      typedef python_property_map<edge_index_t, Graph> property_map_type;
+      property_map_type pmap(g, type_from_value(value));
+      g->edge_properties()[name] = boost::python::object(pmap);
+
+      // Build an entry for dynamic_properties
+      typedef python_dynamic_adaptor<property_map_type> adaptor_type;
+      result.reset(new adaptor_type(pmap));
+    }
+    return result;
+  }
+
+  static const char* type_from_value(const any& value)
+  {
+    if (value.type() == typeid(bool))
+      return "integer";
+    else if (value.type() == typeid(int) || value.type() == typeid(long))
+      return "integer";
+    else if (value.type() == typeid(float) || value.type() == typeid(double))
+      return "float";
+    else if (value.type() == typeid(std::string))
+      return "string";
+    else
+      return "string";
   }
 
 private:

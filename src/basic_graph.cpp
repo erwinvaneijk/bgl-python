@@ -492,10 +492,12 @@ void export_basic_graph(const char* name)
     to_python_converter<Vertex, cached_vertex_object<Graph> >();
     to_python_converter<Edge, cached_edge_object<Edge> >();
 
-    // Other miscellaneous routines
-
+    // Graph generators
     export_generators(graph, name);
+
+    // Graph I/O
     export_graphviz(graph, name);
+    export_graphml(graph, name);
 
     // Properties
     std::string my_add_vertex_property_doc(add_vertex_property_doc);

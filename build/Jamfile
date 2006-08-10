@@ -107,12 +107,16 @@ extension _graph
         ../src/generators.cpp
         # Graph I/O
         ../src/graphviz.cpp
+        ../src/graphml.cpp
         ../src/pickle.cpp
-	$(EXTRA_SRCS)
+        # Everything else
+        $(EXTRA_SRCS)
         # Depend on the Boost Python library
         <template>@boost/libs/python/build/extension
         # Depend on the bgl-viz library for GraphViz support
         <lib>@boost/libs/graph/build/bgl-viz
+        # Depend on Expat for XML support
+        <lib>../vendor/expat-2.0.0/expat
         : # Requirements
 	$(EXTRA_REQUIREMENTS)
         <include>$(BGL_PYTHON_ROOT)

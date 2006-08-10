@@ -51,6 +51,7 @@ extern void export_graphviz_exceptions();
 
 BOOST_PYTHON_MODULE(_graph)
 {
+  export_graphviz_exceptions();
   export_graphs();
   export_astar_search();
   export_bellman_ford_shortest_paths();
@@ -86,7 +87,6 @@ BOOST_PYTHON_MODULE(_graph)
   export_strong_components();
   export_topological_sort();
   export_transitive_closure();
-  export_graphviz_exceptions();
 }
 
 } } } // end namespace boost::graph::python

@@ -12,8 +12,8 @@
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, module="boost.graph");
 
-from _support import *
-from _graph import *
+from boost.graph._support import *
+from boost.graph._graph import *
 from astar_visitor import astar_visitor
 from bfs_visitor import bfs_visitor
 from bellman_ford_visitor import bellman_ford_visitor

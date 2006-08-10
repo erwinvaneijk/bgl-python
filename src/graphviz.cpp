@@ -16,6 +16,7 @@
 #include <iostream>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/graph/python/dynamic_properties.hpp>
+#include "exception.hpp"
 
 namespace boost { namespace python { 
 
@@ -101,37 +102,6 @@ write_graphviz(const Graph& g, const std::string& filename,
                           get(vertex_index, g));
   }
 }
-
-template<typename E>
-class translate_exception
-{
-  explicit translate_exception(boost::python::object type) : type(type) { }
-
-public:
-  template<typename Base>
-  static void declare(const char* name)
-  {
-    using boost::python::class_;
-    using boost::python::bases;
-
-    declare(class_<E, bases<Base> >(name));
-  }
-
-  static void declare(boost::python::object type)
-  {
-    using boost::python::register_exception_translator;
-    register_exception_translator<E>(translate_exception(type));
-  }
-
-  void operator()(const E& e) const
-  {
-    using boost::python::object;
-    PyErr_SetObject(type.ptr(), object(e).ptr());
-  }
-
-private:
-  boost::python::object type;
-};
 
 void export_graphviz_exceptions()
 {

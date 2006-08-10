@@ -22,4 +22,5 @@ lib expat
     lib/$(EXPAT_SOURCES)
   : # Requirements
     <define>HAVE_MEMMOVE
+    <cflags>-fexceptions
   ;

@@ -98,6 +98,13 @@ namespace boost { namespace graph { namespace python {
       return point3d(from[0], from[1], 0);
     }
 
+    // point3d -> point2d
+    inline point2d
+    py_convert(const point3d& from, type<point2d>)
+    {
+      return point2d(from[0], from[1]);
+    }
+
     // int -> string
     inline boost::python::str
     py_convert(const int& from, type<boost::python::str>)
@@ -508,6 +515,27 @@ namespace boost { namespace graph { namespace python {
     }
   } // end namespace detail
 
+  // Copy either the vertex or edge indices into a new property map
+  template<typename Graph, typename PropertyMap>
+  void
+  copy_vertex_or_edge_indices(vertex_index_t, const Graph& graph, 
+                              PropertyMap pmap)
+  {
+    typename graph_traits<Graph>::vertex_iterator v;
+    for (v = vertices(graph).first; v != vertices(graph).second; ++v)
+      put(pmap, *v, get(vertex_index, graph, *v));
+  }
+
+  template<typename Graph, typename PropertyMap>
+  void
+  copy_vertex_or_edge_indices(edge_index_t, const Graph& graph, 
+                              PropertyMap pmap)
+  {
+    typename graph_traits<Graph>::edge_iterator e;
+    for (e = edges(graph).first; e != edges(graph).second; ++e)
+      put(pmap, *e, get(edge_index, graph, *e));
+  }
+
   template<typename PropertyTag, typename Graph>
   class python_property_map
   {
@@ -537,6 +565,14 @@ namespace boost { namespace graph { namespace python {
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
 
+      if (std::strcmp(astype, "index") == 0) {
+        typedef detail::python_vector_property_map<int, PropertyTag, Graph>
+          stored_type;
+        stored.reset(new stored_type(graph));
+        copy_vertex_or_edge_indices(PropertyTag(), *graph, 
+                                    dynamic_cast<stored_type*>(&*stored)->pmap);
+        return;                              
+      }
       // DPG TBD: Throw!
     }
 

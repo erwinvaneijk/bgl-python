@@ -82,6 +82,10 @@ typedef char ICHAR;
 #include "xmltok.h"
 #include "xmlrole.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef const XML_Char *KEY;
 
 typedef struct {
@@ -1484,14 +1488,14 @@ XML_Parse(XML_Parser parser, const char *s, int len, int isFinal)
     else {
       switch (ps_parsing) {
       case XML_SUSPENDED:
-        result = XML_STATUS_SUSPENDED;
+        result = (XML_Error)XML_STATUS_SUSPENDED;
         break;
       case XML_INITIALIZED:
       case XML_PARSING:
-        result = XML_STATUS_OK;
+        result = (XML_Error)XML_STATUS_OK;
         if (isFinal) {
           ps_parsing = XML_FINISHED;
-          return result;
+          return (XML_Status)result;
         }
       }
     }
@@ -1526,7 +1530,7 @@ XML_Parse(XML_Parser parser, const char *s, int len, int isFinal)
     parseEndPtr = bufferEnd;
     eventPtr = bufferPtr;
     eventEndPtr = bufferPtr;
-    return result;
+    return (XML_Status)result;
   }
 #endif  /* not defined XML_CONTEXT_BYTES */
   else {
@@ -6262,3 +6266,7 @@ getElementType(XML_Parser parser,
   }
   return ret;
 }
+
+#ifdef __cplusplus
+}
+#endif

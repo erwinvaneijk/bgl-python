@@ -12,15 +12,14 @@
 subproject vendor/expat-2.0.0 ;
 
 EXPAT_SOURCES =
-  xmlparse.c
-  xmlrole.c
-  xmltok.c
+  xmlparse
+  xmlrole
+  xmltok
   ;
 
 lib expat
   : # Sources
-    lib/$(EXPAT_SOURCES)
+    lib/$(EXPAT_SOURCES).cpp
   : # Requirements
     <define>HAVE_MEMMOVE
-    <cflags>-fexceptions
   ;

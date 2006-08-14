@@ -21,6 +21,10 @@
 #include "xmlrole.h"
 #include "ascii.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Doesn't check:
 
  that ,| are not mixed in a model group
@@ -1328,3 +1332,7 @@ XmlPrologStateInitExternalEntity(PROLOG_STATE *state)
 }
 
 #endif /* XML_DTD */
+
+#ifdef __cplusplus
+}
+#endif

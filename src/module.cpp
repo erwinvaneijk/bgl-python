@@ -12,6 +12,7 @@
 
 namespace boost { namespace graph { namespace python {
 
+extern void export_exceptions();
 extern void export_graphs();
 extern void export_astar_search();
 extern void export_bellman_ford_shortest_paths();
@@ -51,6 +52,7 @@ extern void export_graphviz_exceptions();
 
 BOOST_PYTHON_MODULE(_graph)
 {
+  export_exceptions();
   export_graphviz_exceptions();
   export_graphs();
   export_astar_search();

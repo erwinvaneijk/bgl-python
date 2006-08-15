@@ -9,6 +9,7 @@
 #ifndef BOOST_GRAPH_PYTHON_PYTHON_PROPERTY_MAP_HPP
 #define BOOST_GRAPH_PYTHON_PYTHON_PROPERTY_MAP_HPP
 #include <boost/python.hpp>
+#include <boost/graph/python/resizable_property_map.hpp>
 #include <boost/property_map.hpp>
 #include <boost/vector_property_map.hpp>
 #include <boost/graph/python/iterator.hpp>
@@ -31,13 +32,65 @@ namespace boost { namespace graph { namespace python {
   typename basic_graph<DirectedS>::VertexIndexMap
   get(vertex_index_t, const basic_graph<DirectedS>& g);
  
-
   template<typename DirectedS>
   typename basic_graph<DirectedS>::EdgeIndexMap
   get(edge_index_t, const basic_graph<DirectedS>& g);
  
   template<typename PropertyTag, typename Graph>
   class python_property_map;
+
+  /**
+   * Exception thrown when an unsupported type name is provided to one
+   * of the routines in @c python_property_map.
+   */
+  struct bad_property_type : std::exception {
+    explicit bad_property_type(const char* name) {
+      msg = std::string("invalid property type name `") + name + "'";
+    }
+
+    virtual ~bad_property_type() throw() { }
+
+    const char* what() const throw() { return msg.c_str(); }
+
+  protected:
+    std::string msg;
+  };
+
+  /**
+   * Exception thrown when an invalid property conversion is
+   * requested.
+   */
+  struct invalid_property_conversion : std::exception {
+    explicit invalid_property_conversion(const char* from, const char* to) {
+      msg = std::string("cannot convert properties of type `") + from 
+        + "' to properties of type `" + to + "'";
+    }
+
+    virtual ~invalid_property_conversion() throw() { }
+
+    const char* what() const throw() { return msg.c_str(); }
+
+  protected:
+    std::string msg;
+  };
+
+  /**
+   * Exception thrown when we are unable to perform a property
+   * conversion because, e.g., we can't parse a string.
+   */
+  struct cannot_parse_property : std::exception {
+    explicit cannot_parse_property(const char* from, const char* type) {
+      msg = std::string("cannot convert string `") + from + 
+        "' to a value of type `" + type + "'";
+    }
+
+    virtual ~cannot_parse_property() throw() { }
+
+    const char* what() const throw() { return msg.c_str(); }
+
+  protected:
+    std::string msg;
+  };
 
   namespace detail {
 
@@ -180,7 +233,12 @@ namespace boost { namespace graph { namespace python {
     py_convert(const boost::python::str& from, type<int>)
     {
       using boost::python::extract;
-      return lexical_cast<int>(extract<const char*>(from)());
+      const char* value = extract<const char*>(from)();
+      try {
+        return lexical_cast<int>(value);
+      } catch (bad_lexical_cast) {
+        throw cannot_parse_property(value, "integer");
+      }
     }
 
     // string -> float
@@ -188,7 +246,12 @@ namespace boost { namespace graph { namespace python {
     py_convert(const boost::python::str& from, type<float>)
     {
       using boost::python::extract;
-      return lexical_cast<float>(extract<const char*>(from)());
+      const char* value = extract<const char*>(from)();
+      try {
+        return lexical_cast<float>(value);
+      } catch (bad_lexical_cast) {
+        throw cannot_parse_property(value, "float");
+      }
     }
 
     // string -> point2d
@@ -202,30 +265,34 @@ namespace boost { namespace graph { namespace python {
       std::istringstream in(text);
       using std::isspace;
 
-      // Skip over spaces
-      while (isspace(in.peek())) { in.read(&c, 1); }
-
-      // Recognize various starting characters: [ (, or nothing
-      if (in.peek() == '[' || in.peek() == '(')
-        in.read(&c, 1);
-
-      // Get the "x" coordinate
-      if (!(in >> result[0]))
-        throw bad_lexical_cast();
-
-      // Skip over spaces
-      while (isspace(in.peek())) { in.read(&c, 1); }
-
-      // Recognize a separator (',') if we see one
-      if (in.peek() == ',')
-        in.read(&c, 1);
-      
-      // Get the "y" coordinate
-      if (!(in >> result[1]))
-        throw bad_lexical_cast();
-
-      // Good enough: we're done.
-      return result;
+      try {
+        // Skip over spaces
+        while (isspace(in.peek())) { in.read(&c, 1); }
+        
+        // Recognize various starting characters: [ (, or nothing
+        if (in.peek() == '[' || in.peek() == '(')
+          in.read(&c, 1);
+        
+        // Get the "x" coordinate
+        if (!(in >> result[0]))
+          throw bad_lexical_cast();
+        
+        // Skip over spaces
+        while (isspace(in.peek())) { in.read(&c, 1); }
+        
+        // Recognize a separator (',') if we see one
+        if (in.peek() == ',')
+          in.read(&c, 1);
+        
+        // Get the "y" coordinate
+        if (!(in >> result[1]))
+          throw bad_lexical_cast();
+        
+        // Good enough: we're done.
+        return result;
+      } catch (bad_lexical_cast) {
+        throw cannot_parse_property(text, "point2d");
+      }
     }
 
     // string -> point3d
@@ -239,38 +306,42 @@ namespace boost { namespace graph { namespace python {
       std::istringstream in(text);
       using std::isspace;
 
-      // Skip over spaces
-      while (isspace(in.peek())) { in.read(&c, 1); }
+      try {
+        // Skip over spaces
+        while (isspace(in.peek())) { in.read(&c, 1); }
 
-      // Recognize various starting characters: [ (, or nothing
-      if (in.peek() == '[' || in.peek() == '(')
-        in.read(&c, 1);
+        // Recognize various starting characters: [ (, or nothing
+        if (in.peek() == '[' || in.peek() == '(')
+          in.read(&c, 1);
 
-      // Get the "x" coordinate
-      if (!(in >> result[0]))
-        throw bad_lexical_cast();
+        // Get the "x" coordinate
+        if (!(in >> result[0]))
+          throw bad_lexical_cast();
 
-      // Skip over spaces
-      while (isspace(in.peek())) { in.read(&c, 1); }
+        // Skip over spaces
+        while (isspace(in.peek())) { in.read(&c, 1); }
 
-      // Recognize a separator (',') if we see one
-      if (in.peek() == ',')
-        in.read(&c, 1);
+        // Recognize a separator (',') if we see one
+        if (in.peek() == ',')
+          in.read(&c, 1);
       
-      // Get the "y" coordinate
-      if (!(in >> result[1]))
-        throw bad_lexical_cast();
+        // Get the "y" coordinate
+        if (!(in >> result[1]))
+          throw bad_lexical_cast();
 
-      // Recognize a separator (',') if we see one
-      if (in.peek() == ',')
-        in.read(&c, 1);
+        // Recognize a separator (',') if we see one
+        if (in.peek() == ',')
+          in.read(&c, 1);
       
-      // Get the "z" coordinate
-      if (!(in >> result[2]))
-        throw bad_lexical_cast();
+        // Get the "z" coordinate
+        if (!(in >> result[2]))
+          throw bad_lexical_cast();
 
-      // Good enough: we're done.
-      return result;
+        // Good enough: we're done.
+        return result;
+      } catch (bad_lexical_cast) {
+        throw cannot_parse_property(text, "point3d");
+      }
     }
 
     // string -> color
@@ -281,17 +352,21 @@ namespace boost { namespace graph { namespace python {
       const char* raw_text = extract<const char*>(from)();
       std::istringstream in(raw_text);
       std::string text;
-      if (in >> text) {
-        if (text == "white") return white_color;
-        else if (text == "gray") return gray_color;
-        else if (text == "green") return green_color;
-        else if (text == "red") return red_color;
-        else if (text == "black") return black_color;
-        else {
+      try {
+        if (in >> text) {
+          if (text == "white") return white_color;
+          else if (text == "gray") return gray_color;
+          else if (text == "green") return green_color;
+          else if (text == "red") return red_color;
+          else if (text == "black") return black_color;
+          else {
+            throw bad_lexical_cast();
+          }
+        } else {
           throw bad_lexical_cast();
         }
-      } else {
-        throw bad_lexical_cast();
+      } catch (bad_lexical_cast) {
+        throw cannot_parse_property(raw_text, "color");
       }
     }
 
@@ -307,7 +382,7 @@ namespace boost { namespace graph { namespace python {
     inline ToT
     py_convert(const FromT&, type<ToT>)
     {
-      throw bad_lexical_cast();
+      throw invalid_property_conversion("", "");
     }
 
     template<typename FromT, typename PropertyTag, typename ToT>
@@ -480,26 +555,29 @@ namespace boost { namespace graph { namespace python {
 
       virtual shared_ptr<inherited> astype(const char* type)
       { 
+        try {
         // Then, convert it in place and return the result.
 #define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-        if (strcmp(type, #Name) == 0) {                                 \
-          typedef python_vector_property_map<Type, PropertyTag, Graph> \
-            python_map;                                                 \
+          if (strcmp(type, #Name) == 0) {                               \
+            typedef python_vector_property_map<Type, PropertyTag, Graph> \
+              python_map;                                               \
                                                                         \
-          shared_ptr<inherited> result(new python_map(graph));          \
+            shared_ptr<inherited> result(new python_map(graph));        \
                                                                         \
-          vector_property_map<Type, IndexMap>& new_pmap =               \
-            *(vector_property_map<Type, IndexMap>*)                     \
+            vector_property_map<Type, IndexMap>& new_pmap =             \
+              *(vector_property_map<Type, IndexMap>*)                   \
               result->extract_as(type, result);                         \
-          convert_property_map(pmap, new_pmap);                         \
-          return result;                                                \
-        }
+            convert_property_map(pmap, new_pmap);                       \
+            return result;                                              \
+          }
 #define EDGE_PROPERTY(Name,Type,Kind)
 #include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
-        
-        throw bad_lexical_cast();
+        } catch (invalid_property_conversion) {
+          throw invalid_property_conversion(this->type(), type);
+        }
+        throw bad_property_type(type);
       }
 
       Graph* graph;
@@ -590,7 +668,8 @@ namespace boost { namespace graph { namespace python {
                                     dynamic_cast<stored_type*>(&*stored)->pmap);
         return;                              
       }
-      // DPG TBD: Throw!
+      
+      throw bad_property_type(astype);
     }
 
     template<typename Value>

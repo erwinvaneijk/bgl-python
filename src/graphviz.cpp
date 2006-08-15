@@ -119,19 +119,19 @@ void export_graphviz_exceptions()
   using boost::python::object;
 
   object ge_type = 
-    class_<graph_exception, noncopyable >("graph_exception", no_init);
+    class_<graph_exception, noncopyable >("GraphException", no_init);
   translate_exception<graph_exception>::declare(ge_type);
 
   object bpe_type = 
-    class_<bad_parallel_edge, bases<graph_exception> >("bad_parallel_edge", 
+    class_<bad_parallel_edge, bases<graph_exception> >("BadParallelEdge", 
                                                        no_init)
       .def(init<std::string, std::string>());
   translate_exception<bad_parallel_edge>::declare(bpe_type);
 
   translate_exception<directed_graph_error>
-    ::declare<graph_exception>("directed_graph_error");
+    ::declare<graph_exception>("DirectedGraphError");
   translate_exception<undirected_graph_error>
-    ::declare<graph_exception>("undirected_graph_error");
+    ::declare<graph_exception>("UndirectedGraphError");
 }
 
 template<typename Graph>

@@ -49,6 +49,12 @@
 #include "exports.hpp"
 #include <boost/algorithm/string/replace.hpp>
 
+// Workaround for GCC 3.3.x
+namespace boost {
+  using boost::graph::python::get;
+  using boost::graph::python::put;
+}
+
 namespace boost 
 {
 

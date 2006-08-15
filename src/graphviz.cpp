@@ -28,7 +28,14 @@ inline std::ostream& operator<<(std::ostringstream& out, boost::python::str s)
 
 } } // end namespace boost::python
 
+// Workaround for GCC 3.3.x
+namespace boost {
+  using boost::graph::python::get;
+  using boost::graph::python::put;
+}
+
 namespace boost { namespace graph { namespace python {
+
 
 const char* read_graphviz_doc = 
 "read_graphviz(filename, node_id = 'node_id') -> GRAPH\n\n"

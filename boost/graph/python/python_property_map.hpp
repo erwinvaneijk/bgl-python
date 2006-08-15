@@ -8,12 +8,12 @@
 //           Andrew Lumsdaine
 #ifndef BOOST_GRAPH_PYTHON_PYTHON_PROPERTY_MAP_HPP
 #define BOOST_GRAPH_PYTHON_PYTHON_PROPERTY_MAP_HPP
+#include <boost/python.hpp>
 #include <boost/property_map.hpp>
 #include <boost/vector_property_map.hpp>
 #include <boost/graph/python/iterator.hpp>
 #include <boost/graph/properties.hpp>
 #include <cstring>
-#include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/python/point2d.hpp>
 #include <boost/graph/python/point3d.hpp>
@@ -24,24 +24,41 @@
 
 namespace boost { namespace graph { namespace python {
 
+  // Forward declarations to help GCC 3.3.x
+  template<typename DirectedS> class basic_graph;
+ 
+  template<typename DirectedS>
+  typename basic_graph<DirectedS>::VertexIndexMap
+  get(vertex_index_t, const basic_graph<DirectedS>& g);
+ 
+
+  template<typename DirectedS>
+  typename basic_graph<DirectedS>::EdgeIndexMap
+  get(edge_index_t, const basic_graph<DirectedS>& g);
+ 
   template<typename PropertyTag, typename Graph>
   class python_property_map;
 
   namespace detail {
-    template<typename T, typename vertex_descriptor, typename edge_descriptor>
-    struct property_value_type_name;
 
-#define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-    template<typename vertex_descriptor, typename edge_descriptor>      \
-    struct property_value_type_name<Type, vertex_descriptor, edge_descriptor> { \
-      static const char* name;                                          \
-    };                                                                  \
-    template<typename vertex_descriptor, typename edge_descriptor>      \
-    const char* property_value_type_name<Type, vertex_descriptor, edge_descriptor>::name = #Name;
+    template<typename vertex_descriptor, typename edge_descriptor>
+    struct property_value_type_name_impl {
+#define VERTEX_PROPERTY(Name,Type,Kind)                 \
+      static const char* name(Type) { return #Name; }
 #define EDGE_PROPERTY(Name,Type,Kind)
 #include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
-#undef VERTEX_PROPERTY
+#undef VERTEX_PROPERTY      
+    };
+
+    template<typename T, typename vertex_descriptor, typename edge_descriptor>
+    class property_value_type_name { 
+      typedef property_value_type_name_impl<vertex_descriptor, edge_descriptor>
+        impl;
+
+    public:
+      static const char* name() { return impl::name(T()); }
+    };
 
     // The identity conversion
     template<typename T>
@@ -393,7 +410,7 @@ namespace boost { namespace graph { namespace python {
     public:
       python_vector_property_map(Graph* graph) : graph(graph)
       { 
-        using boost::get;
+        using boost::graph::python::get;
 
         // Create the property map
         pmap = 
@@ -440,14 +457,14 @@ namespace boost { namespace graph { namespace python {
         typedef property_value_type_name<Value, 
                                          vertex_descriptor,
                                          edge_descriptor> Name;
-        return Name::name;
+        return Name::name();
       }
 
       virtual void* extract_as(const char* type, shared_ptr<inherited>& ptr)
       {
         const char* my_type = 
           property_value_type_name<Value, vertex_descriptor, edge_descriptor>
-            ::name;
+            ::name();
 
         // Trying to extract with a different type. Convert to that
         // type, then replace ptr with the converted property map,
@@ -583,7 +600,7 @@ namespace boost { namespace graph { namespace python {
       const char* type_name = 
         detail::property_value_type_name<Value, 
                                          vertex_descriptor, 
-                                         edge_descriptor>::name;
+                                         edge_descriptor>::name();
       return *static_cast<result_type*>(stored->extract_as(type_name, stored));
     }
 

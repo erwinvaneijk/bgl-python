@@ -131,7 +131,8 @@ typename basic_graph<DirectedS>::Vertex basic_graph<DirectedS>::add_vertex()
     Converter;
 
   Vertex result(v, this);
-  boost::python::object vertex_object(handle<>(Converter::convert(result)));
+  boost::python::object vertex_object
+    = boost::python::object(handle<>(Converter::convert(result)));
   put(vertex_objects, result, vertex_object);
 
   return result;
@@ -202,7 +203,8 @@ basic_graph<DirectedS>::add_edge(Vertex u, Vertex v)
     Converter;
 
   Edge result(e, this);
-  boost::python::object edge_object(handle<>(Converter::convert(result)));
+  boost::python::object edge_object = 
+    boost::python::object(handle<>(Converter::convert(result)));
   put(edge_objects, result, edge_object);
 
   return result;

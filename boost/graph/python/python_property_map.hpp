@@ -39,6 +39,10 @@ namespace boost { namespace graph { namespace python {
   template<typename PropertyTag, typename Graph>
   class python_property_map;
 
+  /// The integer type that will be used for addresses
+  typedef mpl::if_c<(sizeof(void*) == sizeof(int)), int, long>::type
+    integer_type_for_addresses;
+
   /**
    * Exception thrown when an unsupported type name is provided to one
    * of the routines in @c python_property_map.
@@ -414,6 +418,7 @@ namespace boost { namespace graph { namespace python {
       virtual int len() = 0;
       virtual boost::python::object iter() = 0;
       virtual const char* type() const = 0;
+      virtual integer_type_for_addresses address() const = 0;
       virtual void* extract_as(const char*, shared_ptr<self_type>&) = 0;
       virtual shared_ptr<python_property_map_base> astype(const char*) = 0;
     };
@@ -533,6 +538,12 @@ namespace boost { namespace graph { namespace python {
                                          vertex_descriptor,
                                          edge_descriptor> Name;
         return Name::name();
+      }
+
+      virtual integer_type_for_addresses address() const
+      {
+        const void* addr = &*pmap.storage_begin();
+        return reinterpret_cast<integer_type_for_addresses>(addr);
       }
 
       virtual void* extract_as(const char* type, shared_ptr<inherited>& ptr)
@@ -693,6 +704,11 @@ namespace boost { namespace graph { namespace python {
     const char* type() const
     {
       return stored->type();
+    }
+
+    integer_type_for_addresses address() const
+    {
+      return stored->address();
     }
 
     // Return a new property map containing the same values as this

@@ -108,6 +108,15 @@ static const char* property_map_astype_doc =
   "Returns a new property map that contains the same values as the\n"
   "property map self, but converted to the given type.\n";
 
+static const char* property_map_address_doc = 
+  "address(self) -> integer\n\n"
+  "Returns the address of the raw data stored in the property map.\n"
+  "To determine the type of this data, query the type method of\n"
+  "the property map, then look up the corresponding C++ type in\n"
+  "add_vertex_property and add_edge_property. The address points to\n"
+  "the beginning of a contiguous array of property values, which can\n"
+  "be indexed with the values in the `index' property map.\n";
+
 template<typename Graph> 
 void export_property_maps(const char* graph_name)
 {
@@ -140,6 +149,9 @@ void export_property_maps(const char* graph_name)
   vertex_property_map.def("type", &VertexPropertyMap::type, 
                           arg("property_map"),
                           property_map_type_doc);
+  vertex_property_map.def("address", &VertexPropertyMap::address,
+                          arg("property_map"),
+                          property_map_address_doc);
 
   // Make edge property map available in Python
   typedef python_property_map<edge_index_t, Graph> EdgePropertyMap;
@@ -153,6 +165,9 @@ void export_property_maps(const char* graph_name)
   edge_property_map.def("type", &EdgePropertyMap::type, 
                         arg("property_map"),
                         property_map_type_doc);
+  edge_property_map.def("address", &EdgePropertyMap::address,
+                        arg("property_map"),
+                        property_map_address_doc);
 
   // Make implicit conversions from the vertex and edge property maps
   // to the associated vector_property_maps.

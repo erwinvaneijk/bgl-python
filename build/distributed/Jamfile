@@ -18,13 +18,6 @@ import ./mpi.jam ;
 
 if ! $(PBGL_ROOT) {
   if ! $(gPBGL_INITIALIZED) {
-    ECHO "WARNING: Not building the Python bindings for the Parallel BGL." ;
-    ECHO "To build these buildings, set PBGL_ROOT to the directory containing" ;
-    ECHO "the Parallel BGL, e.g., " ;
-    ECHO "" ;
-    ECHO "    bjam -sPBGL_ROOT=/path/to/pbgl" ;
-    ECHO "" ;
-    ECHO "The Parallel BGL is available at http://www.osl.iu.edu/research/pbgl" ;
     gPBGL_INITIALIZED = yes ; 
   }
 } else {

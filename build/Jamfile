@@ -73,6 +73,7 @@ else if $(LAPACK_PATH) {
 extension _graph
         : # Sources
         ../src/module.cpp
+        ../src/exception.cpp
         # Graph types
         ../src/basic_graph.cpp
         ../src/graphdocs.cpp

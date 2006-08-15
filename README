@@ -1,7 +1,7 @@
 Boost Graph Library Python Bindings - Version 0.9
 =================================================
 
-Copyright (C) 2005 Trustees of Indiana University
+Copyright (C) 2005, 2006 Trustees of Indiana University
 
 Authors: Douglas Gregor <dgregor -at- cs.indiana.edu>
          Andrew Lumsdaine <lums -at- osl.iu.edu>
@@ -25,7 +25,7 @@ This file contains:
 Build & Install
 ---------------
 
-The section describes how to build, install, and test the BGL-Python
+The section describes how to build and install the BGL-Python
 bindings.
 
 
@@ -44,16 +44,20 @@ Prerequisites
   - A very modern C++ compiler. We have tested with GNU C++ versions
     3.3 and newer and Microsoft Visual C++ 7.1 and newer. 
 
-  - Boost 1.33.1 (beta) or newer: Get the source from 
+  - Boost 1.33.1 or newer: Get the source from 
 
       http://sourceforge.net/projects/boost
+
+    You will need a complete Boost tree, extracted from an official
+    Boost distribution archive. The BGL-Python bindings will not
+    compile properly with already-installed Boost trees. We are
+    working on a fix.
 
   - Python 2.2 or newer. Be sure that the Python headers are
     installed!
 
 Once we have met the prerequisites, extract the Boost distribution
 into some directory that we will refer to as BOOST_ROOT.
-
 
 Boost.Jam
 ~~~~~~~~~
@@ -88,47 +92,38 @@ Python version. However, the page explains all of the configuration
 options that might be needed.
 
 
-Build
-~~~~~
+Build & Install
+~~~~~~~~~~~~~~~
 
 Once you have determined which Boost.Jam options you will need, change
-to the top-level BGL-Python directory (bgl-python-0.9) and run bjam:
+to the top-level BGL-Python directory (bgl-python-1.0) and run bjam:
 
-   bjam <options>
+   bjam <options> install
 
-Once the build has completed, the "python" subdirectory contains the
-BGL-Python package. You will need to add this path to your PYTHONPATH
-environment variant, so that Python will find the extension module.
+By default, the BGL-Python bindings will be installed into the
+appropriate Python site-packages directory (e.g.,
+/usr/lib/python2.3/site-packages). However, there are several other
+installation options:
 
-In the "python" subdirectory there will be a file "libboostpython.EXT"
-(EXT is the extension used for shared libraries on your platform). You
-should copy that file some place where your dynamic linker can find
-it, so set your LD_LIBRARY_PATH equivalent to include the python
-subdirectory.
+  --home=DIR          This option will install the BGL-Python module
+                      into the home directory DIR, with the Python
+                      module stored in DIR/lib/python and supporting
+                      shared libraries stored in DIR/lib. Be sure that
+                      DIR/lib/python is in your PYTHONPATH and DIR/lib
+                      is in your dynamic linker's path (e.g.,
+                      LD_LIBRARY_PATH or DYLD_LIBRARY_PATH).
 
+  --exec-prefix=DIR   This option will change the executable prefix used
+                      to install BGL-Python as a site-wide
+                      package. The BGL-Python module will be placed in
+                      DIR/lib/pythonVERSION/site-packages and the
+                      supporting libraries will be placed in DIR/lib.
 
-Testing
-~~~~~~~
+  --pythonlibdir=DIR  This option will force the installer to place
+                      the BGL-Python module in DIR.
 
-To test the BGL-Python package, enter the "python" subdirectory and
-start a Python interpreter. In the interpreter, enter:
-
-      import boost.graph
-
-If the command executes properly, you're all set! See the example
-subdirectory for some usage examples, and have fun!
-
-
-Installation
-~~~~~~~~~~~~
-
-Although we do not have an automated installation procedure at this
-time, once the build has succeeded the "python" subdirectory is a
-standalone Python package for the BGL-Python bindings. You may copy
-the contents of the "python" subdirectory anywhere within your
-PYTHONPATH. Be sure that the directory is also in your LD_LIBRARY_PATH
-(or equivalent), so that your dynamic linker can find the
-libboost_python shared library/DLL.
+  --libdir=DIR        This option will force the installer to place
+                      the BGL-Python supporting libraries in DIR.
 
 ------------
 Getting Help
@@ -177,12 +172,17 @@ DEALINGS IN THE SOFTWARE.
 History
 -------
   
-  - DATE - Version XXX of BGL-Python bindings. Improvements include:
-      - breadth_first_visit is now available from within Python.
-      - Added type() member function to property maps to determine the type
-        stored in the property map.
-      - Fixed pickling/unpickling of BGL graphs
-
+  - August 15 - Version 1.0 of BGL-Python bindings. Improvements include:
+      - Vertex/edge properties are available as attributes in vertex
+        and edge objects
+      - Vertex/edge objects now have stable addresses, so they can be
+        used as keys in Python dicts.
+      - Property maps now perform automatic conversions to the
+        appropriate underlying type.
+      - More BGL algorithms are available in Python
+      - Added GraphML input/output
+      - Pickling/unpickling of BGL graphs now works properly
+ 
   - November 23, 2005 - Version 0.9 of BGL-Python bindings.  The
     initial release as a separate package.
 

@@ -597,7 +597,7 @@ def read_graphviz(filename, node_id = 'node_id'):
     """
     try:
         graph = Digraph.read_graphviz(filename, node_id)
-    except undirected_graph_error:
+    except UndirectedGraphError:
         graph = Graph.read_graphviz(filename, node_id)
     return graph
 
@@ -619,6 +619,6 @@ def read_graphml(filename):
     """
     try:
         graph = Digraph.read_graphml(filename)
-    except undirected_graph_error:
+    except UndirectedGraphError:
         graph = Graph.read_graphml(filename)
     return graph

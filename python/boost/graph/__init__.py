@@ -181,6 +181,9 @@ biconnected_components.__doc__ = _documentor.function('biconnected_components') 
     .parameter('component_map',
                'an edge -> int map that stores the component number for each edge in the graph. Edges with the same component number are in the same biconnected component.',
                'None') \
+    .parameter('edge_hidden_map',
+               'an edge -> int map that can be used to hide certain edges from the algorithm. When provided, each edge with a non-zero value will be filtered out and ignored.',
+               'None') \
     .result('list') \
     .paragraph('Computes the biconnected components and articulation points in an undirected graph, assigning component numbers in the range [0, n) (where n is the number of biconnected components) to the edges in the graph. The set of articulation points, i.e., those vertices that separate biconnected components, will be returned.') \
     .see_also('connected_components') \

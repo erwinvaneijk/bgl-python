@@ -473,9 +473,19 @@ get(vertex_index_t, const basic_graph<DirectedS>& g)
 { return get(vertex_index, g.base()); }
 
 template<typename DirectedS>
+typename basic_graph<DirectedS>::VertexIndexMap
+get(vertex_index_t, basic_graph<DirectedS>& g)
+{ return get(vertex_index, const_cast<const basic_graph<DirectedS>&>(g).base()); }
+
+template<typename DirectedS>
 typename basic_graph<DirectedS>::EdgeIndexMap
 get(edge_index_t, const basic_graph<DirectedS>& g)
 { return get(edge_index, g.base()); }
+
+template<typename DirectedS>
+typename basic_graph<DirectedS>::EdgeIndexMap
+get(edge_index_t, basic_graph<DirectedS>& g)
+{ return get(edge_index, const_cast<const basic_graph<DirectedS>&>(g).base()); }
 
 template<typename DirectedS>
 struct graph_pickle_suite : boost::python::pickle_suite
@@ -523,6 +533,29 @@ namespace boost {
 
     typedef type const_type;
   };
+
+  template<typename DirectedS, typename Tag>
+  struct property_map<const graph::python::basic_graph<DirectedS>, Tag>
+  {
+  private:
+    typedef typename graph::python::basic_graph<DirectedS>::VertexIndexMap
+      vertex_index_type;
+    typedef typename graph::python::basic_graph<DirectedS>::EdgeIndexMap
+      edge_index_type;
+
+    typedef typename mpl::if_<is_same<Tag, edge_index_t>,
+                              edge_index_type,
+                              detail::error_property_not_found>::type
+      edge_or_none;
+
+  public:
+    typedef typename mpl::if_<is_same<Tag, vertex_index_t>,
+                              vertex_index_type,
+                              edge_or_none>::type type;
+
+    typedef type const_type;
+  };
+
 }
 
 #endif // BOOST_GRAPH_BASIC_GRAPH_HPP

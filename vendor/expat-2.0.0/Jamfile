@@ -22,4 +22,5 @@ lib expat
     lib/$(EXPAT_SOURCES).cpp
   : # Requirements
     <define>HAVE_MEMMOVE
+    <define>XML_STATIC
   ;

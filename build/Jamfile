@@ -36,7 +36,7 @@ extension _support
     ;
 
 EXTRA_SRCS = ;
-EXTRA_REQUIREMENTS = ;
+EXTRA_REQUIREMENTS = <define>XML_STATIC ;
 
 if $(IETL_INCLUDE) {
        EXTRA_SRCS = ../src/sparse_spectrum.cpp ;

@@ -20,7 +20,10 @@ from bellman_ford_visitor import bellman_ford_visitor
 from dfs_visitor import dfs_visitor
 from dijkstra_visitor import dijkstra_visitor
 
-from show import show
+try:
+  from show import show
+except:
+  pass
 
 # Documentation that is not part of the compiled extension modules.
 

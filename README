@@ -172,7 +172,8 @@ DEALINGS IN THE SOFTWARE.
 History
 -------
   
-  - August 15 - Version 1.0 of BGL-Python bindings. Improvements include:
+  - August 15 - Version 1.0 beta 1 of BGL-Python bindings. 
+    Improvements include:
       - Vertex/edge properties are available as attributes in vertex
         and edge objects
       - Vertex/edge objects now have stable addresses, so they can be

@@ -1,0 +1,270 @@
+# Copyright (C) 2005, 2006 The Trustees of Indiana University.
+
+# Use, modification and distribution is subject to the Boost Software
+# License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+#  Authors: Douglas Gregor
+#           Andrew Lumsdaine
+
+# This file builds the Python bindings for the Boost Graph Library.
+
+import modules ; 
+import package ;
+import path ;
+import python ;
+import stage ;
+
+if [ python.configured ]
+{
+
+BOOST_ROOT = [ modules.peek : BOOST_ROOT ] ;
+
+project bgl-python 
+  : requirements <include>. <include>$(BOOST_ROOT) 
+  : usage-requirements <include>. <include>$(BOOST_ROOT)
+  : build-dir bin.v2
+  : default-build release
+  : source-location src
+  ;
+
+# Pull in the Boost.Python library
+use-project /boost/python : $(BOOST_ROOT)/libs/python/build ;
+
+# Pull in the Boost.Graph library
+use-project /boost/graph : $(BOOST_ROOT)/libs/graph/build ;
+
+# Pull in the expat library
+use-project /bgl-python/expat : ./vendor/expat-2.0.0 ;
+
+# Python source files that are part of the BGL-Python package.
+BOOST_GRAPH_PYTHON_SOURCES =
+  astar_visitor
+  bfs_visitor
+  dijkstra_visitor
+  dfs_visitor
+  docstring
+  __init__
+  show
+  bellman_ford_visitor
+  ;
+
+# Small support utilities.
+python-extension _support 
+  : # Sources 
+    support.cpp
+  : # Requirements
+    <library>/boost/python//boost_python
+    ;
+
+EXTRA_SRCS = ;
+EXTRA_REQUIREMENTS = <define>XML_STATIC ;
+
+if $(IETL_INCLUDE) {
+   # Use the Iterative Eigensolver Template Library
+   EXTRA_SRCS = sparse_spectrum.cpp ;
+   EXTRA_REQUIREMENTS = <include>$(IETL_INCLUDE) 
+                        <define>INCLUDE_SPARSE_SPECTRUM ;
+}
+else {
+       EXTRA_SRCS = ;
+       EXTRA_REQUIREMENTS = ;
+}
+
+if $(OS) = MACOSX {
+   # Use vecLib on Mac OS X for the spectral embedding layouts
+   EXTRA_SRCS += spectrum.cpp
+                 spectral_embedding_3d_layout.cpp 
+                 spectral_embedding_layout.cpp ;
+   EXTRA_REQUIREMENTS += 
+     <framework>/System/Library/Frameworks/vecLib.framework/vecLib
+     <define>INCLUDE_SPECTRUM ;
+}
+else if $(LAPACK_PATH) {
+   # If a path to LAPACK is provided, use it to build the spectral 
+   # embedding layout code. 
+   EXTRA_SRCS += spectrum.cpp
+                 spectral_embedding_3d_layout.cpp
+                 spectral_embedding_layout.cpp ;
+
+   EXTRA_REQUIREMENTS += <find-library>libclapack 
+                         <library-path>$(LAPACK_PATH)
+			 <define>INCLUDE_SPECTRUM ;
+}
+
+# The actual Python extension module
+python-extension _graph
+  : # Sources
+  module.cpp
+  exception.cpp
+  # Graph types
+  basic_graph.cpp
+  graphdocs.cpp
+  properties.cpp
+  directed_properties.cpp
+  # Algorithms
+  astar_search.cpp
+  bellman_ford_shortest_paths.cpp
+  betweenness_centrality.cpp
+  biconnected_components.cpp
+  breadth_first_search.cpp
+  circle_layout.cpp
+  connected_components.cpp
+  cuthill_mckee_ordering.cpp
+  dag_shortest_paths.cpp
+  depth_first_search.cpp
+  dijkstra_shortest_paths.cpp
+  fruchterman_reingold.cpp
+  isomorphism.cpp
+  kamada_kawai_spring_layout.cpp
+  king_ordering.cpp
+  kruskal_min_spanning_tree.cpp
+  minimum_degree_ordering.cpp
+  page_rank.cpp
+  prim_minimum_spanning_tree.cpp
+  sequential_vertex_coloring.cpp
+  sloan_ordering.cpp
+  strong_components.cpp
+  topological_sort.cpp
+  transitive_closure.cpp
+  # Graph generators
+  generators.cpp
+  # Graph I/O
+  graphviz.cpp
+  graphml.cpp
+  pickle.cpp
+  # Everything else
+  $(EXTRA_SRCS)
+  : # Requirements
+  <library>/boost/python//boost_python
+  <library>/boost/graph//boost_graph
+  <library>/bgl-python/expat//expat
+  $(EXTRA_REQUIREMENTS)
+  ;
+
+if install in [ modules.peek : ARGV ]
+{
+    exec-prefix = [ MATCH "^--exec-prefix=(.*)" : [ modules.peek : ARGV ] ] ;
+    home = [ MATCH "^--home=(.*)" : [ modules.peek : ARGV ] ] ;
+    libdir = [ MATCH "^--libdir=(.*)" : [ modules.peek : ARGV ] ] ;
+    pythonlibdir = [ MATCH "^--pythonlibdir=(.*)" : [ modules.peek : ARGV ] ] ;
+
+    if $(home) 
+    {
+      # Only one of --home or --exec-prefix can be provided
+      if $(exec-prefix)
+      {
+        ECHO "ERROR: Cannot specify both --home and --exec-prefix" ;
+        ECHO "  --home is for home-directory installations" ;
+        ECHO "  --exec-prefix is for system-wide installations" ;
+        EXIT -1 ;
+      }
+
+      # Install libraries in $(home)/lib
+      if ! $(libdir)
+      {
+        libdir = $(home)/lib ;
+      }
+
+      # Install Python module in $(home)/lib/python
+      if ! $(pythonlibdir)
+      {
+        pythonlibdir = $(home)/lib/python ;
+      }
+    }
+    else
+    {
+      # If no --home or --exec-prefix given. Ask Python 
+      if ! $(exec-prefix) 
+      {
+        exec-prefix = [ SHELL "$(PYTHON:G=) -c \"import sys; print sys.exec_prefix\"" ] ;
+      }
+
+      # Libraries go into $(exec-prefix)/lib
+      if ! $(libdir)
+      {
+        libdir = $(exec-prefix)/lib ;
+      }
+
+      # Non-pure Python modules go into the exec-prefix's site-packages
+      if ! $(pythonlibdir)
+      {
+        pythonlibdir = $(exec-prefix)/lib/python$(PYTHON_VERSION)/site-packages ;
+      }
+    }
+
+    HOME = [ modules.peek : HOME ] ;
+    # Replace any occurrences of "~" in libdir with $(HOME)
+    local tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
+    while $(tilde)
+    {
+      libdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+      tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
+    }
+
+    # Replace any occurrences of "~" in pythonlibdir with $(HOME)
+    tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
+    while $(tilde)
+    {
+      pythonlibdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+      tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
+    }
+
+    # Tell the user what we're planning to do
+    if ! $(gBGL_PYTHON_INSTALL_MSG)
+    {
+      gBGL_PYTHON_INSTALL_MSG = yes ;
+      ECHO "Installing BGL support libraries in $(libdir)..." ;
+    }
+
+    # Tell the user what we're planning to do
+    if ! $(gBGL_PYTHON_PYTHON_INSTALL_MSG)
+    {
+      gBGL_PYTHON_PYTHON_INSTALL_MSG = yes ;
+      ECHO "Installing BGL Python module in $(pythonlibdir)..." ;
+    }
+
+    local BGL_PYTHON_ROOT = [ PWD ] ;
+
+    # Add a stage target that copies the __init.py__ for the boost module. 
+    stages += [ 
+                install install-init
+                  : $(BGL_PYTHON_ROOT)/python/boost/__init__.py 
+                  : <location>$(pythonlibdir)/boost
+              ] ;
+
+    # Add a stage target that copies the Python extension module
+    stages += [  
+                install install-bgl-python
+                  : /bgl-python//_support
+                    /bgl-python//_graph
+                  : <location>$(pythonlibdir)/boost/graph 
+                    <install-type>PYTHON_EXTENSION
+              ] ;
+
+    # Add a stage target that copies the Python sources
+    stages += [
+                install install-python-sources
+                  : $(BGL_PYTHON_ROOT)/python/boost/graph/$(BOOST_GRAPH_PYTHON_SOURCES).py
+                  : <location>$(pythonlibdir)/boost/graph 
+              ] ;
+
+    # Add a stage target to copy the Boost.Python library, 
+    # Boost.Graph library, and expat library
+     stages += [
+                 install install-boost-python
+                   : /boost/python//boost_python
+		     /boost/graph//boost_graph
+		     /bgl-python/expat//expat
+                   : <location>$(libdir)
+                     <install-type>LIB
+               ] ;
+
+    alias install : $(stages) ;
+}
+
+}
+else
+{
+  ECHO" Python not configured: cannot build BGL-Python bindings" ;
+}

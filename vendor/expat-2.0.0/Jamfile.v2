@@ -1,0 +1,25 @@
+# Copyright (C) 2006 The Trustees of Indiana University.
+
+# Use, modification and distribution is subject to the Boost Software
+# License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+#  Authors: Douglas Gregor
+#           Andrew Lumsdaine
+
+# This file builds Expat, for use in BGL-Python
+
+project bgl-python/vendor/expat-2.0.0 
+  : source-location lib 
+  : build-dir bin.v2
+  ;
+
+lib expat
+  : # Sources
+    xmlparse.cpp
+    xmlrole.cpp
+    xmltok.cpp
+  : # Requirements
+    <define>HAVE_MEMMOVE
+    <define>XML_STATIC
+  ;

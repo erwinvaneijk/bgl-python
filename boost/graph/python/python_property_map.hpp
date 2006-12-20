@@ -444,7 +444,7 @@ namespace boost { namespace graph { namespace python {
                          const vector_property_map<T, IndexMap>& pmap, 
                          Graph& g)
     {
-      typedef resizable_vector_property_map<T, IndexMap> resize_map_type;
+      typedef resizable_weak_vector_property_map<T, IndexMap> resize_map_type;
       std::auto_ptr<resizable_property_map> reg(new resize_map_type(pmap));
       g.register_vertex_map(reg);
     }
@@ -456,7 +456,7 @@ namespace boost { namespace graph { namespace python {
                          const vector_property_map<T, IndexMap>& pmap, 
                          Graph& g)
     {
-      typedef resizable_vector_property_map<T, IndexMap> resize_map_type;
+      typedef resizable_weak_vector_property_map<T, IndexMap> resize_map_type;
       std::auto_ptr<resizable_property_map> reg(new resize_map_type(pmap));
       g.register_edge_map(reg);
     }
@@ -501,7 +501,6 @@ namespace boost { namespace graph { namespace python {
         // Register property map with graph
         register_pmap_by_tag(PropertyTag(), pmap, *graph);
       }
-
 
       virtual boost::python::object get(const key_type& key)
       {

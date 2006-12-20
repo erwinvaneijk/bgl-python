@@ -12,6 +12,7 @@
 
 #include <boost/property_map.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 #include <vector>
 
 namespace boost {
@@ -36,6 +37,11 @@ namespace boost {
         vector_property_map(unsigned initial_size, 
                             const IndexMap& index = IndexMap())
         : store(new std::vector<T>(initial_size)), index(index)
+        {}
+
+        vector_property_map(const shared_ptr<std::vector<T> >& store,
+                            const IndexMap& index)
+          : store(store), index(index) 
         {}
 
         typename std::vector<T>::iterator storage_begin()
@@ -95,6 +101,34 @@ namespace boost {
     {
         return vector_property_map<T, IndexMap>(index);
     }
+
+    /*
+     * A weak reference to a vector_property_map. The
+     * vector_property_map keeps a shared_ptr to its underlying
+     * storage. To keep track of this shared_ptr without incrementing
+     * its reference count, store a weak_vector_property_map (which
+     * itself contains a weak_ptr), which can be converted to a normal
+     * vector_property_map. Note that weak_vector_property_map is not
+     * actually a property map (just like weak_ptr is not actually a
+     * pointer).
+     */
+    template<typename T, typename IndexMap = identity_property_map>
+    class weak_vector_property_map
+    {
+    public:
+      explicit 
+      weak_vector_property_map(const vector_property_map<T, IndexMap>& pmap)
+        : store(pmap.get_store()), index(pmap.get_index_map()) { }
+
+      operator vector_property_map<T, IndexMap>() const
+      {
+        return vector_property_map<T, IndexMap>(store, index);
+      }
+
+    private:
+      weak_ptr<std::vector<T> > store;
+      IndexMap index;
+    };
 }
 
 #endif

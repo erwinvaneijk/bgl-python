@@ -266,5 +266,5 @@ if install in [ modules.peek : ARGV ]
 }
 else
 {
-  ECHO" Python not configured: cannot build BGL-Python bindings" ;
+  ECHO "ERROR: Python not configured: cannot build BGL-Python bindings" ;
 }

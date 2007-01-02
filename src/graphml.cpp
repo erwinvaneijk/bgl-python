@@ -28,6 +28,13 @@
 //           Andrew Lumsdaine
 //           Tiago de Paula Peixoto
 
+// BGL-Python-specific
+#include <boost/python.hpp>
+#include <boost/graph/python/dynamic_properties.hpp>
+#include "graph_types.hpp"
+#include "exports.hpp"
+#include <boost/algorithm/string/replace.hpp>
+
 #include <vendor/expat-2.0.0/lib/expat.h>
 #include <boost/config.hpp>
 #include <boost/lexical_cast.hpp>
@@ -41,13 +48,6 @@
 #include <boost/mpl/for_each.hpp>
 #include <exception>
 #include <sstream>
-
-// BGL-Python-specific
-#include <boost/python.hpp>
-#include <boost/graph/python/dynamic_properties.hpp>
-#include "graph_types.hpp"
-#include "exports.hpp"
-#include <boost/algorithm/string/replace.hpp>
 
 // Workaround for GCC 3.3.x
 namespace boost {

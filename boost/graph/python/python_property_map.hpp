@@ -392,16 +392,21 @@ namespace boost { namespace graph { namespace python {
     template<typename FromT, typename PropertyTag, typename ToT>
     void 
     convert_property_map(const vector_property_map<FromT, PropertyTag>& from,
-                         vector_property_map<ToT, PropertyTag>& to)
+                         const char* from_type,
+                         vector_property_map<ToT, PropertyTag>& to,
+                         const char* to_type)
     {
       typedef typename std::vector<FromT>::const_iterator from_iterator;
       typedef typename std::vector<ToT>::iterator         to_iterator;
       
-      from_iterator first = from.storage_begin(), last = from.storage_end();
-      for (to_iterator out = to.storage_begin(); first != last; ++first, ++out)
-      {
-        *out = py_convert(*first, type<ToT>());
-      } 
+      try {
+        from_iterator first = from.storage_begin(), last = from.storage_end();
+        for (to_iterator out = to.storage_begin(); first != last; 
+             ++first, ++out)
+          *out = py_convert(*first, type<ToT>());
+        } catch (...) {
+          throw invalid_property_conversion(from_type, to_type);
+        }
     }
 
     template<typename PropertyTag, typename Graph>
@@ -565,28 +570,24 @@ namespace boost { namespace graph { namespace python {
 
       virtual shared_ptr<inherited> astype(const char* type)
       { 
-        try {
         // Then, convert it in place and return the result.
 #define VERTEX_PROPERTY(Name,Type,Kind)                                 \
-          if (strcmp(type, #Name) == 0) {                               \
-            typedef python_vector_property_map<Type, PropertyTag, Graph> \
-              python_map;                                               \
-                                                                        \
-            shared_ptr<inherited> result(new python_map(graph));        \
-                                                                        \
-            vector_property_map<Type, IndexMap>& new_pmap =             \
-              *(vector_property_map<Type, IndexMap>*)                   \
-              result->extract_as(type, result);                         \
-            convert_property_map(pmap, new_pmap);                       \
-            return result;                                              \
-          }
+        if (strcmp(type, #Name) == 0) {                               \
+          typedef python_vector_property_map<Type, PropertyTag, Graph> \
+            python_map;                                               \
+                                                                      \
+          shared_ptr<inherited> result(new python_map(graph));        \
+                                                                      \
+          vector_property_map<Type, IndexMap>& new_pmap =             \
+            *(vector_property_map<Type, IndexMap>*)                   \
+            result->extract_as(type, result);                         \
+          convert_property_map(pmap, this->type(), new_pmap, type);   \
+          return result;                                              \
+        }
 #define EDGE_PROPERTY(Name,Type,Kind)
 #include <boost/graph/python/properties.hpp>
 #undef EDGE_PROPERTY
 #undef VERTEX_PROPERTY
-        } catch (invalid_property_conversion) {
-          throw invalid_property_conversion(this->type(), type);
-        }
         throw bad_property_type(type);
       }
 

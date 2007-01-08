@@ -28,6 +28,8 @@ sparse_spectrum
     evecs[i] = *(new Vector(N));
   std::vector<double> evals(num_eigenvectors);
 
+  using namespace boost::detail;
+
   boost::sparse_spectrum<Graph, std::vector<Vector> >(g, first_eigenvector_index, num_eigenvectors, evecs, evals, rel_tol, abs_tol);
 
   boost::python::list *evec;

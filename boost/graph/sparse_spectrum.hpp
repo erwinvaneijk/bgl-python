@@ -91,8 +91,7 @@ namespace boost {
     
     integer N = num_vertices(g);
 
-    using namespace boost::numeric::ublas;
-    typedef compressed_matrix<double> Matrix;
+    typedef boost::numeric::ublas::compressed_matrix<double> Matrix;
     Matrix A(N, N);
     
     int i;

@@ -14,6 +14,7 @@ import package ;
 import path ;
 import python ;
 import stage ;
+import os ;
 
 if [ python.configured ]
 {
@@ -142,6 +143,23 @@ python-extension _graph
   $(EXTRA_REQUIREMENTS)
   ;
 
+# Strip any end-of-line characters off the given string and return the
+# result.
+local rule strip-eol ( string )
+{
+  local match = [ MATCH "^(([A-Za-z0-9~`\.!@#$%^&*()_+={};:'\",.<>/?\\| -]|[|])*
+).*$" : $(string) ] ;
+
+  if $(match)
+  {
+    return $(match[1]) ;
+  }
+  else
+  {
+    return $(string) ;
+  }
+}
+
 if install in [ modules.peek : ARGV ]
 {
     exec-prefix = [ MATCH "^--exec-prefix=(.*)" : [ modules.peek : ARGV ] ] ;
@@ -177,37 +195,53 @@ if install in [ modules.peek : ARGV ]
       # If no --home or --exec-prefix given. Ask Python 
       if ! $(exec-prefix) 
       {
-        exec-prefix = [ SHELL "$(PYTHON:G=) -c \"import sys; print sys.exec_prefix\"" ] ;
-      }
-
-      # Libraries go into $(exec-prefix)/lib
-      if ! $(libdir)
-      {
-        libdir = $(exec-prefix)/lib ;
+        local PYTHON = [ python.get-python-interpreter ] ;
+        exec-prefix 
+          = [ strip-eol [ SHELL "$(PYTHON:G=) -c \"import sys; print sys.exec_prefix\"" ] ] ;
       }
 
       # Non-pure Python modules go into the exec-prefix's site-packages
       if ! $(pythonlibdir)
       {
+        local PYTHON_VERSION = [ python.get-python-version ] ;
         pythonlibdir = $(exec-prefix)/lib/python$(PYTHON_VERSION)/site-packages ;
+      }
+
+      # Libraries go into $(exec-prefix)/lib on Unix
+      #                   /usr/local/lib on Mac. 
+      if ! $(libdir)
+      {
+        if [ os.name ] = MACOSX
+        {
+          # We do this because we need the libraries to be found in 
+          # DYLB_FALLBACK_LIBRARY_PATH, which includes /usr/local/lib. Ugh.
+          libdir = /usr/local/lib ;
+        }
+        else
+        {
+          libdir = $(exec-prefix)/lib ;
+        }
       }
     }
 
     HOME = [ modules.peek : HOME ] ;
-    # Replace any occurrences of "~" in libdir with $(HOME)
-    local tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
-    while $(tilde)
+    if $(HOME)
     {
-      libdir = $(tilde[1])$(HOME)$(tilde[2]) ;
-      tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
-    }
+      # Replace any occurrences of "~" in libdir with $(HOME)
+      local tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
+      while $(tilde)
+      {
+        libdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+        tilde = [ MATCH "^(.*)~(.*)$" : $(libdir) ] ;
+      }
 
-    # Replace any occurrences of "~" in pythonlibdir with $(HOME)
-    tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
-    while $(tilde)
-    {
-      pythonlibdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+      # Replace any occurrences of "~" in pythonlibdir with $(HOME)
       tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
+      while $(tilde)
+      {
+        pythonlibdir = $(tilde[1])$(HOME)$(tilde[2]) ;
+        tilde = [ MATCH "^(.*)~(.*)$" : $(pythonlibdir) ] ;
+      }
     }
 
     # Tell the user what we're planning to do

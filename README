@@ -1,9 +1,10 @@
-Boost Graph Library Python Bindings - Version 0.9
-=================================================
+Boost Graph Library Python Bindings - Version 0.9.5
+===================================================
 
-Copyright (C) 2005, 2006 Trustees of Indiana University
+Copyright (C) 2005-2007 Trustees of Indiana University
 
-Authors: Douglas Gregor <dgregor -at- cs.indiana.edu>
+Authors: Douglas Gregor <dgregor -at- osl.iu.edu>
+         Ben Martin <benjmart -at- indiana.edu>
          Andrew Lumsdaine <lums -at- osl.iu.edu>
 
 
@@ -96,7 +97,7 @@ Build & Install
 ~~~~~~~~~~~~~~~
 
 Once you have determined which Boost.Jam options you will need, change
-to the top-level BGL-Python directory (bgl-python-1.0) and run bjam:
+to the top-level BGL-Python directory and run bjam:
 
    bjam <options> install
 
@@ -136,8 +137,6 @@ feel free to contact us via the Boost-Users or Boost mailing lists at:
 
   http://www.boost.org/more/mailing_lists.htm
 
-Or, you may e-mail one of the authors directly for more assistance.
-
 
 -------
 License
@@ -172,7 +171,7 @@ DEALINGS IN THE SOFTWARE.
 History
 -------
   
-  - August 15 - Version 1.0 beta 1 of BGL-Python bindings. 
+  - February 1, 2007 - Version 0.9.5 of BGL-Python bindings. 
     Improvements include:
       - Vertex/edge properties are available as attributes in vertex
         and edge objects

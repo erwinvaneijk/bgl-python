@@ -30,13 +30,43 @@ The section describes how to build and install the BGL-Python
 bindings.
 
 
-Prebuilt binaries
-~~~~~~~~~~~~~~~~~
+Installing Prebuilt binaries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Prebuild binaries might already be available for your
 platform on the BGL-Python web site at:
 
   http://www.osl.iu.edu/~dgregor/bgl-python/
+
+To install pre-built binaries, use:
+
+  python setup.py install
+
+By default, the BGL-Python bindings will be installed into the
+appropriate Python site-packages directory (e.g.,
+/usr/lib/python2.3/site-packages). However, there are several
+alternative installation options that one can pass on the command
+line:
+
+  --home=DIR          This option will install the BGL-Python module
+                      into the home directory DIR, with the Python
+                      module stored in DIR/lib/python and supporting
+                      shared libraries stored in DIR/lib. Be sure that
+                      DIR/lib/python is in your PYTHONPATH and DIR/lib
+                      is in your dynamic linker's path (e.g.,
+                      LD_LIBRARY_PATH or DYLD_LIBRARY_PATH).
+
+  --exec-prefix=DIR   This option will change the executable prefix used
+                      to install BGL-Python as a site-wide
+                      package. The BGL-Python module will be placed in
+                      DIR/lib/pythonVERSION/site-packages and the
+                      supporting libraries will be placed in DIR/lib.
+
+  --pythonlibdir=DIR  This option will force the installer to place
+                      the BGL-Python module in DIR.
+
+  --libdir=DIR        This option will force the installer to place
+                      the BGL-Python supporting libraries in DIR.
 
 
 Prerequisites
@@ -45,20 +75,19 @@ Prerequisites
   - A very modern C++ compiler. We have tested with GNU C++ versions
     3.3 and newer and Microsoft Visual C++ 7.1 and newer. 
 
-  - Boost 1.33.1 or newer: Get the source from 
-
-      http://sourceforge.net/projects/boost
-
-    You will need a complete Boost tree, extracted from an official
-    Boost distribution archive. The BGL-Python bindings will not
-    compile properly with already-installed Boost trees. We are
-    working on a fix.
+  - Boost 1.34.0 or newer: At present, Boost 1.34.0 is only available
+    via Boost CVS. See http://www.boost.org for information about
+    retrieving Boost from CVS. Note: You must have a complete Boost
+    distribution available (e.g., retrieved via CVS or as part of a
+    Boost tarball) to compile the BGL-Python: the BGL-Python bindings
+    will not compile properly with already-installed Boost trees.
 
   - Python 2.2 or newer. Be sure that the Python headers are
     installed!
 
-Once we have met the prerequisites, extract the Boost distribution
-into some directory that we will refer to as BOOST_ROOT.
+We will assume that the Boost distribution is in a directory we refer
+to a BOOST_ROOT. 
+
 
 Boost.Jam
 ~~~~~~~~~
@@ -71,7 +100,7 @@ how to build Boost.Jam, which is the core of the build system:
 
 However, most users can just enter the directory 
 
-  $BOOST_ROOT/tools/build/jam_src
+  $BOOST_ROOT/tools/jam/src
 
 and run either build.sh (for Unix-like systems) or build.bat (for
 Windows). Copy the "bjam" executable from this step some place
@@ -88,9 +117,13 @@ to follow the configuration advice here:
 
   http://www.boost.org/libs/python/doc/building.html
 
-Most likely, you will only need to set the PYTHON_VERSION to your
-Python version. However, the page explains all of the configuration
-options that might be needed.
+Most likely, you will only need to add the following to your
+user-config.jam:
+
+  using python : 2.3 ;
+
+Replace "2.3" with the major and minor version of Python you have,
+e.g., 2.2., 2.3, 2.4, or 2.5.
 
 
 Build & Install
@@ -103,8 +136,9 @@ to the top-level BGL-Python directory and run bjam:
 
 By default, the BGL-Python bindings will be installed into the
 appropriate Python site-packages directory (e.g.,
-/usr/lib/python2.3/site-packages). However, there are several other
-installation options:
+/usr/lib/python2.3/site-packages). However, the same installation
+options are available here as for the setup.py script in the pre-built
+binaries:
 
   --home=DIR          This option will install the BGL-Python module
                       into the home directory DIR, with the Python

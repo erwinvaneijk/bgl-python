@@ -39,10 +39,9 @@ web pages:
 
   The Boost Library Collection - http://www.boost.org
   The Boost Graph Library - http://www.boost.org/libs/graph/doc
-  The Parallel Boost Graph Library - http://www.osl.iu.edu/research/pbgl
   The BGL-Python Package - http://www.osl.iu.edu/~dgregor/bgl-python
 
-Copyright (C) 2005, 2006 The Trustees of Indiana University.
+Copyright (C) 2005-2007 The Trustees of Indiana University.
 
 Use, modification and distribution is subject to the Boost Software
 License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -54,8 +53,8 @@ Authors: Douglas Gregor
 """
 
 __license__ = 'Boost Software License, Version 1.0'
-__version__ = '1.0'
-__copyright__ = "Copyright (C) 2005, 2006 The Trustees of Indiana University"
+__version__ = '0.9.5'
+__copyright__ = "Copyright (C) 2005-2007 The Trustees of Indiana University"
 __author__ = "Douglas Gregor, Ben Martin, and Andrew Lumsdaine"
 
 # Introduce documentation for all of the algorithms in the module.

@@ -72,7 +72,7 @@ else {
        EXTRA_REQUIREMENTS = ;
 }
 
-if $(OS) = MACOSX {
+if [ os.name ] = MACOSX {
    # Use vecLib on Mac OS X for the spectral embedding layouts
    EXTRA_SRCS += spectrum.cpp
                  spectral_embedding_3d_layout.cpp 

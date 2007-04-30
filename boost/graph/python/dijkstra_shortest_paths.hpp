@@ -7,6 +7,7 @@
 //  Authors: Douglas Gregor
 //           Andrew Lumsdaine
 #include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/graph/iteration_macros.hpp>
 #include <boost/python.hpp>
 
 namespace boost { namespace graph { namespace python {
@@ -32,7 +33,7 @@ dijkstra_shortest_paths
      typename property_map<Graph, vertex_index_t>::const_type>* in_distance,
    vector_property_map<
      float,
-     typename property_map<Graph, edge_index_t>::const_type>& weight,
+     typename property_map<Graph, edge_index_t>::const_type>* in_weight,
    boost::python::object in_visitor,
    vector_property_map<
      default_color_type, 
@@ -40,10 +41,13 @@ dijkstra_shortest_paths
 {
   typedef typename property_map<Graph, vertex_index_t>::const_type
     VertexIndexMap;
+  typedef typename property_map<Graph, edge_index_t>::const_type
+    EdgeIndexMap;
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
   typedef vector_property_map<Vertex, VertexIndexMap> PredecessorMap;
   typedef vector_property_map<float, VertexIndexMap> DistanceMap;
   typedef vector_property_map<default_color_type, VertexIndexMap> ColorMap;
+  typedef vector_property_map<float, EdgeIndexMap> WeightMap;
 
   PredecessorMap predecessor = 
     in_predecessor? *in_predecessor
@@ -56,6 +60,13 @@ dijkstra_shortest_paths
   ColorMap color = 
     in_color? *in_color
     : ColorMap(num_vertices(g), get(vertex_index, g));
+
+  WeightMap weight =
+    in_weight? *in_weight
+    : WeightMap(num_edges(g), get(edge_index, g));
+
+  if (!in_weight)
+    BGL_FORALL_EDGES_T(e, g, Graph) put(weight, e, 1.0f);
 
   if (in_visitor != object()) {
     boost::dijkstra_shortest_paths

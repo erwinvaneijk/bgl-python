@@ -56,10 +56,11 @@ const char* small_world_doc =
 "vertcices were arranged in a circle). With probability\n"
 "rewire_probability, an edge will be rewired randomly.\n\n"
 "Parameters:\n"
-"  num_vertices        The number of vertices in the graph.\n"
-"  num_neighbors       The number of neighbors each vertex starts with.\n"
-"  rewire_probability  Probability of rewiring any given edge.\n"
-"  allow_self_loops    Whether self-loops (u, u) will be generated.\n"
+"  num_vertices          The number of vertices in the graph.\n"
+"  num_neighbors         The number of neighbors each vertex starts with.\n"
+"  rewire_probability    Probability of rewiring any given edge.\n"
+"  allow_self_loops      Whether self-loops (u, u) will be generated.\n"
+"  allow_multiple_edges  Whether multiple edges between vertices are generated.\n"
 "  random_seed         Nonzero seed for the random number generator.\n\n"
 "Complete C++ documentation is available at:\n"
 "  http://www.boost.org/libs/graph/doc/small_world_generator.html\n"
@@ -99,7 +100,8 @@ void export_generators(BGL_GRAPH_CLASS_(Graph)& graph, const char* name)
     .def("small_world_graph",
          &boost::graph::python::small_world_graph<Graph>,
          (arg("num_vertices"), arg("num_neighbors"), arg("rewire_probability"),
-          arg("allow_self_loops") = false, arg("random_seed") = 1),
+          arg("allow_self_loops") = false, arg("allow_multiple_edges") = true, 
+	  arg("random_seed") = 1),
          my_small_world_doc.c_str())
     .staticmethod("small_world_graph");
 }

@@ -47,11 +47,13 @@ template<typename Graph>
 boost::python::object
 small_world_graph(typename graph_traits<Graph>::vertices_size_type n,
                   typename graph_traits<Graph>::vertices_size_type k,
-                  double prob, bool allow_self_loops = false, int seed = 1)
+                  double prob, bool allow_self_loops = false, 
+		  bool beta_model = false, int seed = 1)
 {
   typedef small_world_iterator<minstd_rand, Graph> iterator;
   minstd_rand gen(seed);
-  return Graph::pyconstruct(iterator(gen, n, k, prob, allow_self_loops), 
+  return Graph::pyconstruct(iterator(gen, n, k, prob, 
+				     allow_self_loops, allow_multiple_edges), 
                             iterator(), n);
 }
 

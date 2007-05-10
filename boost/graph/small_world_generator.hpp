@@ -59,9 +59,9 @@ namespace boost {
         allow_multiple_edges(allow_multiple_edges), 
         current(0, allow_self_loops? 0 : 1),
 #if !defined BOOST_NO_HASH
-	edges(allow_multiple_edges? (SET<edges_size_type>)0 : edges_set((k + k%2)*n/2))
+	edges(allow_multiple_edges? 0 : (k + k%2)*n/2)
 #else
-	edges(edges_set())
+	edges()
 #endif 
     {}
 

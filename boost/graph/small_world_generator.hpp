@@ -61,7 +61,7 @@ namespace boost {
 #if !defined BOOST_NO_HASH
 	edges(allow_multiple_edges? (SET<edges_size_type>)0 : edges_set((k + k%2)*n/2))
 #else
-	edges(allow_multiple_edges? (SET<edges_size_type>)0 : edges_set())
+	edges(edges_set())
 #endif 
     {}
 

@@ -610,14 +610,14 @@ namespace boost { namespace graph { namespace python {
     {
       return pm.iter();
     }
-    
+
     template<typename Class, typename PropertyTag, typename Graph>
     void 
     property_map_extras(Class& pm, 
-                        type<python_property_map<PropertyTag, Graph> >)
+                        type<python_property_map<PropertyTag, Graph> >, int)
     {
-      pm.def("__len__", &python_property_map_length<PropertyTag, Graph>);
-      pm.def("__iter__", &python_property_map_values<PropertyTag, Graph>);
+      pm.def("__len__", &detail::python_property_map_length<PropertyTag, Graph>);
+      pm.def("__iter__", &detail::python_property_map_values<PropertyTag, Graph>);
     }
   } // end namespace detail
 

@@ -131,7 +131,7 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   while (vertex_map_names != list()) {
     object name_obj = vertex_map_names.pop(0);
     tuple values = extract<tuple>(vertex_properties[name_obj]);
-    object pmap = g_obj.attr("vertex_property_map")(object(values[0]));
+    object pmap = g_obj.attr("add_vertex_property")(object(values[0]));
     for (vertices_size_type i = 0; i < num_vertices(g); ++i)
       pmap.attr("__setitem__")(vertices[i], object(values[i+1]));
 
@@ -145,7 +145,7 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   while (edge_map_names != list()) {
     object name_obj = edge_map_names.pop(0);
     tuple values = extract<tuple>(edge_properties[name_obj]);
-    object pmap = g_obj.attr("edge_property_map")(object(values[0]));
+    object pmap = g_obj.attr("add_edge_property")(object(values[0]));
     for (edges_size_type i = 0; i < num_edges(g); ++i)
       pmap.attr("__setitem__")(the_edges[i], object(values[i+1]));
 

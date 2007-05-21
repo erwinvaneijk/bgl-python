@@ -8,13 +8,13 @@
 //           Andrew Lumsdaine
 #include "graph_types.hpp"
 #include <boost/python.hpp>
+#include <boost/graph/python/python_property_map.hpp>
+#include <boost/graph/python/resizable_property_map.hpp>
 #include <boost/graph/python/property_map.hpp>
 #include <boost/graph/python/point2d.hpp>
 #include <boost/graph/python/point3d.hpp>
 #include <boost/graph/python/iterator.hpp> // for type_already_registered
 #include <string>
-#include <boost/graph/python/resizable_property_map.hpp>
-#include <boost/graph/python/python_property_map.hpp>
 
 namespace boost { namespace python {
 

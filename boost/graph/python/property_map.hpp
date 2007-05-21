@@ -19,7 +19,7 @@ namespace boost { namespace graph { namespace python {
 
 namespace detail {
   template<typename Class, typename PropertyMap>
-  inline void property_map_extras(Class&, type<PropertyMap>) { }
+  inline void property_map_extras(Class&, type<PropertyMap>, long) { }
 
   template<typename T, typename IndexMap>
   int py_vector_property_map_length(const vector_property_map<T, IndexMap>& pm)
@@ -37,7 +37,8 @@ namespace detail {
   }
 
   template<typename Class, typename T, typename IndexMap>
-  void property_map_extras(Class& pm, type<vector_property_map<T, IndexMap> >)
+  void 
+  property_map_extras(Class& pm, type<vector_property_map<T, IndexMap> >, int)
   {
     pm.def("__len__", &py_vector_property_map_length<T, IndexMap>);
     
@@ -85,7 +86,9 @@ class read_write_property_map
     pm.def("__getitem__", &getitem)
       .def("__setitem__", &setitem)
       ;
-    detail::property_map_extras(pm, type<PropertyMap>());
+    
+    using detail::property_map_extras;
+    property_map_extras(pm, type<PropertyMap>(), 0);
   }
 };
 
@@ -116,7 +119,7 @@ public:
       .def("__setitem__", &setitem)
       ;
 
-    detail::property_map_extras(pm, type<PropertyMap>());
+    detail::property_map_extras(pm, type<PropertyMap>(), 0);
   }
 };
 

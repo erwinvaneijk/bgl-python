@@ -11,6 +11,14 @@
 
 namespace boost { namespace graph { namespace python {
 
+template<typename Graph>
+boost::python::object
+add_vertex_property(Graph& g, const std::string& name, const std::string& type);
+
+template<typename Graph>
+boost::python::object
+add_edge_property(Graph& g, const std::string& name, const std::string& type);
+
 template<typename DirectedS>
 boost::python::tuple 
 graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
@@ -21,6 +29,8 @@ graph_pickle_suite<DirectedS>::getstate(boost::python::object g_obj)
   using boost::python::extract;
   using boost::python::dict;
   using boost::python::object;
+
+  typedef basic_graph<DirectedS> Graph;
 
   const Graph& g = extract<const Graph&>(g_obj)();
   typename property_map<Graph, vertex_index_t>::const_type 
@@ -97,6 +107,8 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   using boost::python::dict;
   using boost::python::object;
 
+  typedef basic_graph<DirectedS> Graph;
+
   Graph& g = extract<Graph&>(g_obj)();
 
   // restore the graph's __dict__
@@ -126,17 +138,18 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   // Get the vertex properties
   typedef typename property_map<Graph, vertex_index_t>::const_type
     VertexIndexMap;
-  dict vertex_properties = extract<dict>(state[3]);
+  dict vertex_properties = vertex_properties = extract<dict>(state[3]);
   list vertex_map_names = vertex_properties.keys();
   while (vertex_map_names != list()) {
     object name_obj = vertex_map_names.pop(0);
     tuple values = extract<tuple>(vertex_properties[name_obj]);
-    object pmap = g_obj.attr("add_vertex_property")(object(values[0]));
+    object pmap = add_vertex_property(g, 
+                                      extract<const char *>(name_obj)(),
+                                      extract<const char *>(values[0])());
     for (vertices_size_type i = 0; i < num_vertices(g); ++i)
       pmap.attr("__setitem__")(vertices[i], object(values[i+1]));
-
-    g.vertex_properties()[name_obj] = pmap;
   }
+
 
   // Get the edge properties
   typedef typename property_map<Graph, edge_index_t>::const_type EdgeIndexMap;
@@ -144,12 +157,14 @@ graph_pickle_suite<DirectedS>::setstate(boost::python::object g_obj,
   list edge_map_names = edge_properties.keys();
   while (edge_map_names != list()) {
     object name_obj = edge_map_names.pop(0);
+    std::cerr << "Edge property name: " << extract<const char*>(name_obj)
+              << std::endl;
     tuple values = extract<tuple>(edge_properties[name_obj]);
-    object pmap = g_obj.attr("add_edge_property")(object(values[0]));
+    object pmap = add_edge_property(g, 
+                                    extract<const char *>(name_obj)(),
+                                    extract<const char *>(values[0])());
     for (edges_size_type i = 0; i < num_edges(g); ++i)
       pmap.attr("__setitem__")(the_edges[i], object(values[i+1]));
-
-    g.edge_properties()[name_obj] = pmap;
   }
 }
 

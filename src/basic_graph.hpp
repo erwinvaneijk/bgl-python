@@ -13,7 +13,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/graph/python/point2d.hpp>
 #include <boost/graph/python/iterator.hpp>

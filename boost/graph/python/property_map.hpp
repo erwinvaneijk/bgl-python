@@ -12,8 +12,8 @@
 #include <memory>
 #include <boost/python.hpp>
 #include <boost/graph/python/iterator.hpp>
-#include <boost/property_map.hpp>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 
 namespace boost { namespace graph { namespace python {
 

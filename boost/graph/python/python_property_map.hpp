@@ -10,8 +10,8 @@
 #define BOOST_GRAPH_PYTHON_PYTHON_PROPERTY_MAP_HPP
 #include <boost/python.hpp>
 #include <boost/graph/python/resizable_property_map.hpp>
-#include <boost/property_map.hpp>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 #include <boost/graph/python/iterator.hpp>
 #include <boost/graph/properties.hpp>
 #include <cstring>
@@ -522,7 +522,7 @@ namespace boost { namespace graph { namespace python {
         
       virtual int len() 
       { 
-        return pmap.get_store()->size(); 
+        return pmap.size(); 
       }
 
       virtual boost::python::object iter() 

@@ -17,7 +17,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/named_function_params.hpp>
 #include <boost/graph/properties.hpp>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 #include <utility> // for pair
 
 //#include <iostream.h>

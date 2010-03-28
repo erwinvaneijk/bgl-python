@@ -10,11 +10,11 @@
 #ifndef BOOST_GRAPH_PYTHOH_DYNAMIC_PROPERTIES_HPP
 #define BOOST_GRAPH_PYTHOH_DYNAMIC_PROPERTIES_HPP
 
-#include <boost/dynamic_property_map.hpp>
+#include <boost/property_map/dynamic_property_map.hpp>
 #include <boost/python.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/iteration_macros.hpp>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 #include <string>
 #include <memory>
 #include <boost/graph/python/resizable_property_map.hpp>

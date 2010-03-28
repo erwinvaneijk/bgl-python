@@ -11,7 +11,7 @@
 #define BOOST_GRAPH_PYTHON_RESIZABLE_PROPERTY_MAP_HPP
 
 #include <vector>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 
 namespace boost { namespace graph { namespace python {
 

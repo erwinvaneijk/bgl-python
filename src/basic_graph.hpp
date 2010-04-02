@@ -177,7 +177,19 @@ class basic_graph
               boost::python::object, 
               const std::string& name_map = std::string());
 
-  ~basic_graph();
+  ~basic_graph()
+  {
+    for (std::list<resizable_property_map*>::iterator v = vertex_maps.begin();
+         v != vertex_maps.end(); 
+ 	 ++v) {
+      delete *v;
+    }
+    for (std::list<resizable_property_map*>::iterator e = edge_maps.begin();
+         e != edge_maps.end(); 
+         ++e) {
+      delete *e;
+    }
+  }
 
   bool is_directed() const
   { return is_convertible<directed_category, directed_tag>::value; }

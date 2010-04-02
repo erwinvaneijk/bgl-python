@@ -86,17 +86,6 @@ basic_graph<DirectedS>::basic_graph(PyObject* self, boost::python::object l,
 #  pragma warning (pop)
 #endif
 
-template<typename DirectedS>
-basic_graph<DirectedS>::~basic_graph() 
-{
-  for (std::list<resizable_property_map*>::iterator v = vertex_maps.begin();
-       v != vertex_maps.end(); ++v)
-    delete *v;
-  for (std::list<resizable_property_map*>::iterator e = edge_maps.begin();
-       e != edge_maps.end(); ++e)
-    delete *e;
-}
-
 // ----------------------------------------------------------
 // Mutable graph
 // ----------------------------------------------------------

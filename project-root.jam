@@ -6,3 +6,6 @@
 #
 
 using python : 2.6 ;
+
+# toolset.flags gcc.compile OPTIONS <deprecated>on  : -Wdeprecated ;
+# toolset.flags gcc.compile OPTIONS <deprecated>off  : -Wno-deprecated ;

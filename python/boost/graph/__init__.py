@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning, module="boost.graph")
 
 from boost.graph._support import *
 from boost.graph._graph import *
-from astar_visitor import astar_visitor
+# from astar_visitor import astar_visitor
 from bfs_visitor import bfs_visitor
 from bellman_ford_visitor import bellman_ford_visitor
 from dfs_visitor import dfs_visitor
@@ -116,31 +116,31 @@ Complete C++ documentation for the adjacency list representation:
 """
 
 # Algorithm documentation
-astar_search.__doc__ = _documentor.function('astar_search') \
-    .parameter('graph', 
-               'the graph to search. It may be either a directed or undirected graph.') \
-    .parameter('root_vertex', 'the starting vertex for the search.') \
-    .parameter('heuristic', 'an heuristic function that maps a vertex to a floating-point value that estimates the distance from the source to that vertex.') \
-     .parameter('visitor', 'a visitor that will receive events as the search progresses. Typically this visitor should be derived from boost.graph.astar_visitor.', 'None') \
-    .parameter('predecessor_map',
-               'a vertex -> vertex map that stores the predecessor of each vertex in the search tree. From a given vertex, one can follow the predecessor_map back to the root_vertex to reconstruct the path taken.',
-               'None') \
-    .parameter('cost_map',
-               'a vertex -> float map that stores the distance from the root_vertex to each vertex in the tree plus the estimated cost to reach the goal.',
-               'None') \
-    .parameter('distance_map',
-               'a vertex -> float map that stores the distance from the root_vertex to each vertex in the tree.',
-               'None') \
-    .parameter('weight_map',
-               'an edge -> float map that stores the weight of each edge in the graph. Negative edge weights are not permitted. If no weight map is provided, each edge will be assumed to have a weight of 1.0.',
-               'None') \
-    .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
-    .paragraph('Searches a weight, directed or undirected graph using an heuristic function as guidance.') \
-    .see_also('astar_visitor') \
-    .see_also('bellman_ford_shortest_paths') \
-    .see_also('dag_shortest_paths') \
-    .see_also('dijkstra_shortest_paths') \
-    .__str__()
+#astar_search.__doc__ = _documentor.function('astar_search') \
+#    .parameter('graph', 
+#               'the graph to search. It may be either a directed or undirected graph.') \
+#    .parameter('root_vertex', 'the starting vertex for the search.') \
+#    .parameter('heuristic', 'an heuristic function that maps a vertex to a floating-point value that estimates the distance from the source to that vertex.') \
+#     .parameter('visitor', 'a visitor that will receive events as the search progresses. Typically this visitor should be derived from boost.graph.astar_visitor.', 'None') \
+#    .parameter('predecessor_map',
+#               'a vertex -> vertex map that stores the predecessor of each vertex in the search tree. From a given vertex, one can follow the predecessor_map back to the root_vertex to reconstruct the path taken.',
+#               'None') \
+#    .parameter('cost_map',
+#               'a vertex -> float map that stores the distance from the root_vertex to each vertex in the tree plus the estimated cost to reach the goal.',
+#               'None') \
+#    .parameter('distance_map',
+#               'a vertex -> float map that stores the distance from the root_vertex to each vertex in the tree.',
+#              'None') \
+#   .parameter('weight_map',
+#               'an edge -> float map that stores the weight of each edge in the graph. Negative edge weights are not permitted. If no weight map is provided, each edge will be assumed to have a weight of 1.0.',
+#               'None') \
+#    .parameter('color_map', 'a vertex property map that stores the "color" of each vertex, which indicates whether is has not been seen (white), has been seen but not visited (grey), or has been visited (black).', 'None') \
+#    .paragraph('Searches a weight, directed or undirected graph using an heuristic function as guidance.') \
+#   .see_also('astar_visitor') \
+#   .see_also('bellman_ford_shortest_paths') \
+#   .see_also('dag_shortest_paths') \
+#   .see_also('dijkstra_shortest_paths') \
+#   .__str__()
 
 bellman_ford_shortest_paths.__doc__ = _documentor.function('bellman_ford_shortest_paths') \
     .parameter('graph', 

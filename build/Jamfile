@@ -16,7 +16,7 @@ subproject build ;
 import python ;
 
 BOOST_GRAPH_PYTHON_SOURCES =
-  astar_visitor
+  # astar_visitor
   bfs_visitor
   dijkstra_visitor
   dfs_visitor
@@ -80,7 +80,7 @@ extension _graph
         ../src/properties.cpp
         ../src/directed_properties.cpp
         # Algorithms
-        ../src/astar_search.cpp
+        # ../src/astar_search.cpp
         ../src/bellman_ford_shortest_paths.cpp
         ../src/betweenness_centrality.cpp
         ../src/biconnected_components.cpp

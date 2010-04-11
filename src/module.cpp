@@ -14,9 +14,7 @@ namespace boost { namespace graph { namespace python {
 
 extern void export_exceptions();
 extern void export_graphs();
-// FIXME: 20100402
-// Astar search does not compile with BOOST_1_42_0
-// extern void export_astar_search();
+extern void export_astar_search();
 extern void export_bellman_ford_shortest_paths();
 extern void export_breadth_first_search();
 extern void export_connected_components();
@@ -57,9 +55,7 @@ BOOST_PYTHON_MODULE(_graph)
   export_exceptions();
   export_graphviz_exceptions();
   export_graphs();
-  // FIXME: 20100402
-  // Astar search does not compile with BOOST_1_42_0
-  // export_astar_search();
+  export_astar_search();
   export_bellman_ford_shortest_paths();
   export_betweenness_centrality();
   export_biconnected_components();

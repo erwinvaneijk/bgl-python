@@ -10,7 +10,7 @@
 
 namespace boost {
   // Work around an annoying qualified "boost::get" call.
-  using boost::graph::python::get;
+  // using boost::graph::python::get;
 }
 
 #include <boost/graph/astar_search.hpp>
@@ -34,8 +34,8 @@ struct astar_heuristic_adaptor
 
   astar_heuristic_adaptor(object h) : h(h) { }
 
-  float operator()(Vertex v) 
-  { 
+  float operator()(Vertex v)
+  {
     return boost::python::extract<float>(h(v));
   }
 
@@ -44,7 +44,7 @@ struct astar_heuristic_adaptor
 };
 
 template<typename Graph>
-void 
+void
 astar_search
   (const Graph& g,
    typename graph_traits<Graph>::vertex_descriptor s,
@@ -63,8 +63,8 @@ astar_search
       float,
       typename property_map<Graph, edge_index_t>::const_type>* in_weight,
    vector_property_map<
-     default_color_type, 
-     typename property_map<Graph, vertex_index_t>::const_type>* in_color)
+      default_color_type,
+      typename property_map<Graph, vertex_index_t>::const_type>* in_color)
 {
   typedef typename graph_traits<Graph>::vertex_descriptor vertex_descriptor;
   typedef typename property_map<Graph, vertex_index_t>::const_type
@@ -78,16 +78,16 @@ astar_search
   typedef vector_property_map<default_color_type, VertexIndexMap> ColorMap;
 
   PredecessorMap predecessor(in_predecessor? *in_predecessor
-                             /*default*/: PredecessorMap(num_vertices(g), 
+                             /*default*/: PredecessorMap(num_vertices(g),
                                                          get(vertex_index, g)));
   CostMap cost(in_cost? *in_cost
                /*default*/: CostMap(num_vertices(g), get(vertex_index, g)));
   DistanceMap distance(in_distance? *in_distance
-                       /*default*/: DistanceMap(num_vertices(g), 
+                       /*default*/: DistanceMap(num_vertices(g),
                                                 get(vertex_index, g)));
   WeightMap weight(in_weight? *in_weight
                    /*default*/: WeightMap(num_edges(g), get(edge_index, g)));
-  ColorMap color(in_color? *in_color 
+  ColorMap color(in_color? *in_color
                  /*default*/: ColorMap(num_vertices(g), get(vertex_index, g)));
 
   if (!in_weight)
@@ -140,7 +140,7 @@ void export_astar_search()
         (arg("graph"),                                                  \
          arg("root_vertex"),                                            \
          arg("heuristic"),                                              \
-         arg("visitor") = object(),                                     \
+         arg("visitor"),                                     \
          arg("predecessor_map") = static_cast<PredecessorMap*>(0),      \
          arg("cost_map") = static_cast<CostMap*>(0),                    \
          arg("distance_map") = static_cast<DistanceMap*>(0),            \

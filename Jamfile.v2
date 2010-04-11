@@ -40,7 +40,7 @@ use-project /bgl-python/expat : ./vendor/expat-2.0.0 ;
 
 # Python source files that are part of the BGL-Python package.
 BOOST_GRAPH_PYTHON_SOURCES =
-  # astar_visitor
+  astar_visitor
   bfs_visitor
   dijkstra_visitor
   dfs_visitor
@@ -104,7 +104,7 @@ python-extension _graph
   properties.cpp
   directed_properties.cpp
   # Algorithms
-  # astar_search.cpp
+  astar_search.cpp
   bellman_ford_shortest_paths.cpp
   betweenness_centrality.cpp
   biconnected_components.cpp

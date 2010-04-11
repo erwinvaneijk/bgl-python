@@ -119,7 +119,7 @@ namespace boost {
 
     template <typename Tp, typename Sequence = std::deque<Tp> >
     class sparse_ordering_queue : public boost::queue<Tp, Sequence>{
-    public:      
+    public:
       typedef typename Sequence::iterator iterator;
       typedef typename Sequence::reverse_iterator reverse_iterator;
       typedef boost::queue<Tp,Sequence> queue;
@@ -134,12 +134,12 @@ namespace boost {
     protected:
       //nothing
     };
-    
-  } // namespace sparse 
+
+  } // namespace sparse
 
   // Compute Pseudo peripheral
   //
-  // To compute an approximated peripheral for a given vertex. 
+  // To compute an approximated peripheral for a given vertex.
   // Used in <tt>king_ordering</tt> algorithm.
   //
   template <class Graph, class Vertex, class ColorMap, class Compare>
